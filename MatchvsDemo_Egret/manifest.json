@@ -1,0 +1,33 @@
+{
+	"initial": [
+		"libs/modules/egret/egret.js",
+		"libs/modules/egret/egret.web.js",
+		"libs/modules/eui/eui.js",
+		"libs/modules/assetsmanager/assetsmanager.js",
+		"libs/modules/tween/tween.js",
+		"libs/modules/game/game.js",
+		"libs/modules/promise/promise.js",
+		"libs/modules/socket/socket.js",
+		"libs/modules/matchvs/matchvs.js"
+	],
+	"game": [
+		"bin-debug/LoginView.js",
+		"bin-debug/AssetAdapter.js",
+		"bin-debug/ErrorView.js",
+		"bin-debug/GameData.js",
+		"bin-debug/GamePlayView.js",
+		"bin-debug/GameSceneView.js",
+		"bin-debug/JoinRoomSpecialView.js",
+		"bin-debug/LoadingUI.js",
+		"bin-debug/LobbyView.js",
+		"bin-debug/CreateRoomView.js",
+		"bin-debug/Main.js",
+		"bin-debug/MatchView.js",
+		"bin-debug/Platform.js",
+		"bin-debug/ResultView.js",
+		"bin-debug/RoomList.js",
+		"bin-debug/RoomView.js",
+		"bin-debug/TagsMatch.js",
+		"bin-debug/ThemeAdapter.js"
+	]
+}
