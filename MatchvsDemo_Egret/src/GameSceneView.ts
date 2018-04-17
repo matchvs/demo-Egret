@@ -101,6 +101,7 @@ class GameSceneView extends egret.Sprite
         this.removeAll();
         let errorView = new ErrorView(this);
         errorView.SetErrorMsg(msg);
+        
         if(pageNo === 0){
             errorView.ReturnCallback = ()=>{
                this.login();

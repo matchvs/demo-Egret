@@ -65,6 +65,7 @@ class MatchView extends eui.UILayer{
 
         GameData.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
         GameData.response.leaveRoomNotify =  this.leaveRoomNotify.bind(this);
+        GameData.response.joinOverNotify = this.joinOverNotify.bind(this);
 
 		if (GameData.matchType == GameData.randomMatch) {
 			GameData.response.joinRoomResponse = this.joinRoomResponse.bind(this);
@@ -214,5 +215,8 @@ class MatchView extends eui.UILayer{
             });
             GameSceneView._gameScene.play();
         }
+    }
+    private joinOverNotify(notifyInfo:MsJoinOverNotifyInfo){
+        console.log("userID:"+notifyInfo.srcUserID+" 关闭房间："+notifyInfo.roomID+" cpProto:"+notifyInfo.cpProto);
     }
 }

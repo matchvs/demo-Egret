@@ -82,9 +82,9 @@ class LoginView extends eui.UILayer{
         this.addChild(cbx);
         cbx.addEventListener(eui.UIEvent.CHANGE,(evt:eui.UIEvent)=>{
             if(evt.target.selected){
-                this._environment = GameData.ENVIRONMENT.dev;
+                this._environment = GameData.ENVIRONMENT.dev;//alpha开发环境
             }else{
-                this._environment = GameData.ENVIRONMENT.pro;
+                this._environment = GameData.ENVIRONMENT.pro;//release正式环境
             }
         },this
         );

@@ -40,4 +40,5 @@ class GameData {
     public static width:number;
     public static height:number;
     public static playerTime:number = 180;
+    public static createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret",3,0,0,1,"roomProperty");
 }
