@@ -2,4 +2,5 @@
 *.map
 MatchvsDemo_Egret/.wing/*
 MatchvsDemo_Egret/bin-debug/*.js
+MatchvsDemo_Egret/libs/*
 
