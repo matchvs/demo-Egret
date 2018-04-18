@@ -18591,7 +18591,6 @@ function MatchvsNetWork(host, callback) {
     });
     socket.onClose(function (res) {
         socketOpen = false;
-        console.log('[wx.WebSocket] [disconnect]！ errCode:' + res.code + " errMsg:" + res.reason);
         mCallBack.onDisConnect && mCallBack.onDisConnect(mHost);
     });
     socket.onMessage(function (res) {
@@ -19454,6 +19453,7 @@ function MatchvsEngine() {
                     engine.mRsp.heartBeatResponse && engine.mRsp.heartBeatResponse(new MsHeartBeatResponse(gameid, gsExist));
                     break;
                 case MATCHVS_USER_LOGOUT_RSP:
+                    engine.mNetWork.close();
                     engine.mRsp.logoutResponse && engine.mRsp.logoutResponse(packet.payload.getStatus());
                     break;
                 case MATCHVS_NETWORK_STATE_NOTIFY:
@@ -19528,7 +19528,7 @@ function MatchvsEngine() {
                         var userinfo = new MsRoomUserInfo(player.getUserid(), utf8ByteArrayToString(player.getUserprofile()));
                         userInfos.push(userinfo);
                     });
-                    var roomDetailRsp = new MsGetRoomDetailRsp(packet.payload.getStatus(), roomDetail.getState(), roomDetail.getMaxplayer(), roomDetail.getMode(), roomDetail.getCanwatch(), roomDetail.getRoomproperty(), roomDetail.getOwner(), roomDetail.getCreateflag(), userInfos);
+                    var roomDetailRsp = new MsGetRoomDetailRsp(packet.payload.getStatus(), roomDetail.getState(), roomDetail.getMaxplayer(), roomDetail.getMode(), roomDetail.getCanwatch(), utf8ByteArrayToString(roomDetail.getRoomproperty()), roomDetail.getOwner(), roomDetail.getCreateflag(), userInfos);
                     engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(roomDetailRsp);
                     break;
                 case MATCHVS_ROOM_JOIN_OVER_NOTIFY:
@@ -20085,9 +20085,6 @@ function MatchvsResponse() {
     this.reconnectResponse = function (status, roomUserInfoList, roomInfo) {
     };
 }
-// function MsLogoutRsp(status) {
-//     this.status = status;
-// }
 function MsHeartBeatResponse(gameid, gsExist) {
     this.gameID = gameid;
     this.gsExist = gsExist;
@@ -20109,9 +20106,6 @@ MatchvsEngine.prototype.logout = function (cpProto) {
         this.mHotelNetWork && this.mHotelNetWork.close();
     }
     var buf = this.mProtocol.logout(cpProto);
-    this.mEngineState = ENGE_STATE.NONE;
-    this.mEngineState |= ENGE_STATE.HAVE_INIT;
-    this.mEngineState |= ENGE_STATE.HAVE_LOGIN;
     this.mEngineState |= ENGE_STATE.LOGOUTING;
     this.mNetWork.send(buf);
     return 0;

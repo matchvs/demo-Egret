@@ -116,10 +116,14 @@ class LoginView extends eui.UILayer{
 		var gatewayId = 0;
 		console.log("开始登陆,用户Id:" + userInfo.id);
 		GameData.response.loginResponse = this.loginResponse.bind(this);
-		var result = GameData.engine.login(userInfo.id, userInfo.token,
-            200757, 1,
-            "6783e7d174ef41b98a91957c561cf305", "da47754579fa47e4affab5785451622c",
-            deviceId, gatewayId);
+		// var result = GameData.engine.login(userInfo.id, userInfo.token,
+        //     200757, 1,
+        //     "6783e7d174ef41b98a91957c561cf305", "da47754579fa47e4affab5785451622c",
+        //     deviceId, gatewayId);
+        var result = GameData.engine.login(userInfo.id, userInfo.token,
+        200922, 1,
+        "42471a8aaf0a41ba86f0506552838644", "09acfcab27ad49b9ac960345cf40b293",
+        deviceId, gatewayId);
 		if (result !== 0) {
 			console.log("登陆失败,result:" + result);
 		}

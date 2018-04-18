@@ -18,6 +18,9 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private _userHeard2:egret.Sprite;
     private _userHeard3:egret.Sprite;
 
+    private _gameMapA:eui.RadioButton;
+    private _gameMapB:eui.RadioButton;
+
     private _imgHead1:egret.ImageLoader;
     
     private _userID_ptext = "待加入";
@@ -32,6 +35,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private _allgameReady:Array<boolean> = [false];
     private _roomRealUserNum:number = 0;  //房间玩家数量
     public  _userIds = [];
+    public _roomID:string = "";
 
     constructor( pr?: egret.DisplayObjectContainer){
         super();
@@ -160,7 +164,38 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         exitRoom.height = 80;
         this.addChild(exitRoom);
 
+        let gamemapfull:egret.Sprite = new egret.Sprite;
+        gamemapfull.graphics.lineStyle(3,0x00ff00);
+        gamemapfull.graphics.beginFill(0x000000,1);
+        gamemapfull.graphics.drawRect(this._SizeWith+(this._UserHeadradius*7.5)-20, 40, 140, 80);
+        gamemapfull.graphics.endFill();
+        this.addChild(gamemapfull);
 
+        let rdb: eui.RadioButton = new eui.RadioButton();
+        rdb.label = "彩色地图A";
+        rdb.value = 0;
+        rdb.groupName = "p1";
+        rdb.selected = true;//默认选项
+        rdb.x = this._SizeWith+(this._UserHeadradius*7.5)-10;
+        rdb.y = 50;
+        rdb.enabled = false;
+        rdb.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
+        this._gameMapA = rdb;
+        this.addChild(this._gameMapA);
+
+        let rdb2: eui.RadioButton = new eui.RadioButton();
+        
+        rdb2.label = "灰色地图B";
+        rdb2.value = 1;
+        rdb2.groupName = "p1";
+        rdb2.x = this._SizeWith+(this._UserHeadradius*7.5)-10;
+        rdb2.enabled = false;
+        rdb2.y = 90;
+        rdb2.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
+        this._gameMapB = rdb2;
+        this.addChild(this._gameMapB);
+
+        
         exitRoom.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
         startGameBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonStartGameBtn, this);
         this._kickUserButton3.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonKickUserButton3, this);
@@ -248,7 +283,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      * 房主创建房间
      */
     public doCreateRoom(){
-        //this._createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret",3,0,0,0,"roomProperty");
+        this._createRoomInfo = GameData.createRoomInfo;
+        GameData.roomPropertyValue = GameData.createRoomInfo.roomProperty;
         GameData.engine.createRoom(GameData.createRoomInfo, "myroom");
     }
 
@@ -278,12 +314,15 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             return;
         }else{
             this._isInRoom = true;
+            this._roomID = rsp.roomID;
             this._roomidText.text = ("房间号：\n"+rsp.roomID);
             console.log("创建房间成功 roomID="+rsp.roomID);
             this._userID_1.text = rsp.owner.toString();
             this._roomRealUserNum = 1;
             this._startGameButton.visible = true;
             this._isOwner = true;
+            this._gameMapA.enabled = true;
+            this._gameMapB.enabled = true;
         }
     }
 
@@ -308,11 +347,16 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
             this._isInRoom = true;
             this._roomidText.text = ("房间号：\n"+roomInfo.roomID);
+            if(roomInfo.roomProperty === GameData.roomPropertyType.mapB){
+                GameData.roomPropertyValue = GameData.roomPropertyType.mapB
+                this._gameMapB.selected = true;
+            }else{
+                GameData.roomPropertyValue = GameData.roomPropertyType.mapA
+                this._gameMapA.selected = true;
+            }
             //真实人数
             this._roomRealUserNum = roomuserInfoList.length+1;
             //显示我自己的
-
-            
             for(let i = 0; i < roomuserInfoList.length; i++){
                 console.log("userProfile:"+roomuserInfoList[i].userProfile);
                 /**
@@ -540,11 +584,35 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         console.log("userID:"+notifyInfo.srcUserID+" 关闭房间："+notifyInfo.roomID+" cpProto:"+notifyInfo.cpProto);
     }
 
+    private radioChangeHandler(evt:eui.UIEvent):void {
+        if(evt.target.value === 0){
+            //地图A
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
+            GameData.engine.setRoomProperty(this._roomID,GameData.roomPropertyType.mapA);
+        }else {
+            //地图B
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapB;
+            GameData.engine.setRoomProperty(this._roomID,GameData.roomPropertyType.mapB);
+        }
+    }
+
     private setRoomPropertynotify(notify:MsRoomPropertyNotifyInfo):void{
-        console.log("");
+        console.log("roomProperty = "+notify.roomProperty);
+        if(notify.roomProperty === GameData.roomPropertyType.mapB){
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapB;
+            this._gameMapB.selected = true;
+        }else{
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
+            this._gameMapA.selected = true;
+        }
     }
 
     private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo):void{
-
+        console.log("roomProperty = "+rsp.roomProperty);
+        // if(rsp.roomProperty === GameData.roomPropertyType.mapB){
+        //     this._gameMapB.selected = true;
+        // }else{
+        //     this._gameMapA.selected = true;
+        // }
     }
 }
