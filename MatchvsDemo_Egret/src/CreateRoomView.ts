@@ -547,5 +547,4 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo):void{
 
     }
-    private 
 }
