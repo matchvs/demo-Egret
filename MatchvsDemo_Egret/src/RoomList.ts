@@ -58,7 +58,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
 
         this.getRoomListEx();
 
-        this._timer = new egret.Timer(300, 0);
+        this._timer = new egret.Timer(3000, 0);
         this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
         this._timer.start();
         
