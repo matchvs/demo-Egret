@@ -541,6 +541,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     }
 
     private setRoomPropertynotify(notify:MsRoomPropertyNotifyInfo):void{
+        console.log("");
     }
 
     private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo):void{
