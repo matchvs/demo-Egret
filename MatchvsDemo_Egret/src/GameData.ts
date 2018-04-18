@@ -5,7 +5,7 @@ declare class UserScore{
 }
 
 class GameData {
-    public static CHANNEL = "Matchvs";
+    public static CHANNEL = "MatchVS-Test";
     public static DEFAULT_ENV = "alpha";
     public static ENVIRONMENT = {"dev":"alpha","pro":"release"}
     public static gameID:number = 200757;
@@ -40,5 +40,7 @@ class GameData {
     public static width:number;
     public static height:number;
     public static playerTime:number = 180;
-    public static createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret",3,0,0,1,"roomProperty");
+    public static roomPropertyType = {"mapA":"mapA","mapB":"mapB"};
+    public static roomPropertyValue = "mapA";
+    public static createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret",3,0,0,1,"mapA");
 }

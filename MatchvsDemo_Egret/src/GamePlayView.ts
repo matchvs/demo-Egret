@@ -46,6 +46,16 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		image.width = GameData.width;
 		this.addChild(image);
 
+		if(GameData.roomPropertyValue === GameData.roomPropertyType.mapB){
+			var colorMatrix = [
+			0.3,0.6,0,0,0,
+			0.3,0.6,0,0,0,
+			0.3,0.6,0,0,0,
+			0,0,0,1,0
+			];
+			var colorFlilter = new egret.ColorMatrixFilter(colorMatrix);
+			image.filters = [colorFlilter];
+		}
         let userIdLabel = new eui.Label();
         userIdLabel.textColor = 0xffffff;
         userIdLabel.fontFamily = "Tahoma";  //设置字体

@@ -10,6 +10,8 @@ class MatchView extends eui.UILayer{
         this._isInRoom = false;	
 	}
 	private initView(tags ? :any):void{
+        //使用地图A
+        GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
         let roomIdLabel = new egret.TextField();
         roomIdLabel.textColor = 0xffffff;
         roomIdLabel.width = 400;
@@ -197,7 +199,7 @@ class MatchView extends eui.UILayer{
         var event = GameData.events[rsp.sequence]
 
         if (event && event.action === GameData.gameStartEvent) {
-            delete GameData.events[rsp.sequence]
+            delete GameData.events[rsp.sequence];
             GameSceneView._gameScene.play();
         }
     }
@@ -207,11 +209,11 @@ class MatchView extends eui.UILayer{
             && sdnotify.cpProto
             && sdnotify.cpProto.indexOf(GameData.gameStartEvent) >= 0) {
 
-            GameData.playerUserIds = [GameData.userInfo.id]
+            GameData.playerUserIds = [GameData.userInfo.id];
             // 通过游戏开始的玩家会把userIds传过来，这里找出所有除本玩家之外的用户ID，
             // 添加到全局变量playerUserIds中
             JSON.parse(sdnotify.cpProto).userIds.forEach(function(userId) {
-                if (userId !== GameData.userInfo.id) GameData.playerUserIds.push(userId)
+                if (userId !== GameData.userInfo.id) GameData.playerUserIds.push(userId);
             });
             GameSceneView._gameScene.play();
         }

@@ -6,8 +6,9 @@ class RoomListView  extends egret.DisplayObjectContainer{
     private _parent:egret.DisplayObjectContainer;
     private _getRoomListFlter:MsRoomFilter;
     private _messageText:egret.TextField;
+    private _timer: egret.Timer
 
-
+    private _roomList = new Array<RoomView>();
 
     constructor(pr:egret.DisplayObjectContainer){
          super();
@@ -19,7 +20,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
     }
 
     private initView(){
-
+        
         let colorLabel = new egret.TextField();
         colorLabel.textColor = 0xffffff;
         colorLabel.width = 400;
@@ -56,8 +57,15 @@ class RoomListView  extends egret.DisplayObjectContainer{
         // GameData.engine.getRoomList(this._getRoomListFlter);
 
         this.getRoomListEx();
+
+        this._timer = new egret.Timer(300, 0);
+        this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
+        this._timer.start();
         
-        
+    }
+
+    private timerFunc(event: egret.Event) {
+        this.getRoomListEx();
     }
 
     /**
@@ -121,18 +129,27 @@ class RoomListView  extends egret.DisplayObjectContainer{
             this._messageText.text = "暂时没有房间";
             this._messageText.visible = true;
             return;
+        }else{
+            this._messageText.visible = false;
         }
-
-        for(let i = 0; i < rsp.roomAttrs.length; i++){
+        for(let j = 0; j < this._roomList.length; j++){
+            if(this.contains(this._roomList[j])){
+                this.removeChild(this._roomList[j]);
+            }
+        }
+        this._roomList = [];
+        for(let i = 0; i < rsp.roomAttrs.length && i < 3; i++){
             let stateStr:string = rsp.roomAttrs[i].state === 1 ? "开放":"关闭";
-            var room1 = new RoomView();
-            room1.name = "room"+i;
+            let mapValue:string = rsp.roomAttrs[i].roomProperty === GameData.roomPropertyType.mapA ? "[地图：彩图]":"[地图：灰图]";
+            let room1 = new RoomView();
+            room1.name = "room";
             room1.layContents(this._parent.width*0.3,
             i*(room1.height+5)+120,
             rsp.roomAttrs[i].roomID,
-            "[状态:"+ stateStr + "] [房间人数："+ rsp.roomAttrs[i].gamePlayer +"/"+ rsp.roomAttrs[i].maxPlayer+"]"
+            "[状态:"+ stateStr + "] [房间人数："+ rsp.roomAttrs[i].gamePlayer +"/"+ rsp.roomAttrs[i].maxPlayer+"] "+ mapValue
             );
             this.addChild(room1);
+            this._roomList.push(room1);
         }
     }
 }
