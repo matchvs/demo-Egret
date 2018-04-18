@@ -324,7 +324,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			}
 			var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0)
-				return console.log('星星位置变更事件发送失败:' + JSON.stringify(result));			
+				return console.log('足球位置变更事件发送失败:' + JSON.stringify(result));			
 		}
 	}
     private onButtonClickLeft(e: egret.TouchEvent) {
@@ -388,9 +388,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			}
 			var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0) {
-				return console.log('创建星星事件发送失败');
+				return console.log('创建足球事件发送失败');
 			}
-			console.log('创建星星事件发送成功');
+			console.log('创建足球事件发送成功');
 		}
 	}	
 	private onLoadStar(event:egret.Event):void {
@@ -414,7 +414,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			}
 			var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0)
-				return console.log('创建星星事件发送失败');
+				return console.log('创建足球事件发送失败');
 		}
 	}
 	private deleteStar() {
@@ -438,7 +438,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					this.createStar();
 				}
 
-                // 收到创建星星的消息通知，根据消息给的坐标创建星星
+                // 收到创建足球的消息通知，根据消息给的坐标创建足球
                 // this.createStarNode(JSON.parse(sdnotify.cpProto).position)
 
             } else if (sdnotify.cpProto.indexOf(GameData.playerPositionEvent) >= 0) {
@@ -472,7 +472,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
                 // var label = GLB.playerUserIds[playerIndex - 1] + ': ' + JSON.parse(info.cpProto).score;
                 // this.scoreDisplays[playerIndex - 1].string = label;
                 // GLB.scoreMap.set(info.srcUserId, JSON.parse(info.cpProto).score);
-                // // 有玩家得分之后，创建新的星星
+                // // 有玩家得分之后，创建新的足球
                 // this.spawnNewStar();
 			} else if (sdnotify.cpProto.indexOf(GameData.changeStarEvent) >= 0) {
 				if(sdnotify.srcUserId != GameData.userInfo.id) {

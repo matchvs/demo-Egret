@@ -167,19 +167,25 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this._kickUserButton2.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonKickUserButton2, this);
 
         GameData.response.errorResponse = this.errorResponse;
-
+        //加入房间回调
         GameData.response.joinRoomResponse = this.joinRoomResponse.bind(this);
         GameData.response.joinRoomNotify = this.joinRoomNotify.bind(this);
         GameData.response.createRoomResponse = this.createRoomResponse.bind(this);
-
+        //离开房间回调
         GameData.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
         GameData.response.leaveRoomNotify =  this.leaveRoomNotify.bind(this);
-
+        //踢人相关的回调
         GameData.response.kickPlayerNotify = this.kickPlayerNotify.bind(this);
         GameData.response.kickPlayerResponse = this.kickPlayerResponse.bind(this);
-
+        //发送消息相关回调
         GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
         GameData.response.sendEventResponse = this.sendEventResponse.bind(this); // 设置事件发射之后的回调
+
+        GameData.response.joinOverNotify = this.joinOverNotify.bind(this);
+
+        GameData.response.setRoomPropertyNotify = this.setRoomPropertynotify.bind(this);
+        GameData.response.setRoomPropertyResponse = this.setRoomPropertyResponse.bind(this);
+
 
     }
 
@@ -242,8 +248,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      * 房主创建房间
      */
     public doCreateRoom(){
-        this._createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret",3,0,0,0,"roomProperty");
-        GameData.engine.createRoom(this._createRoomInfo, "myroom");
+        //this._createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret",3,0,0,0,"roomProperty");
+        GameData.engine.createRoom(GameData.createRoomInfo, "myroom");
     }
 
     /**
@@ -308,6 +314,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
             
             for(let i = 0; i < roomuserInfoList.length; i++){
+                console.log("userProfile:"+roomuserInfoList[i].userProfile);
                 /**
                  * 如果是房主就现在最左边
                  */
@@ -376,7 +383,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      */
     private kickPlayerResponse(rsp:MsKickPlayerRsp){
 
-        this.changeUserIDs(Number(this._kickUserID), -1);
+        this.changeUserIDs(rsp.userID, -1);
     }
 
     private joinOverResponse(rsp:MsJoinOverRsp){
@@ -528,4 +535,16 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         GameSceneView._gameScene.errorView(2, "加入房间错误错误回调：errCode=" + errCode + " errMsg="+errMsg);
         return
     }
+
+    private joinOverNotify(notifyInfo:MsJoinOverNotifyInfo){
+        console.log("userID:"+notifyInfo.srcUserID+" 关闭房间："+notifyInfo.roomID+" cpProto:"+notifyInfo.cpProto);
+    }
+
+    private setRoomPropertynotify(notify:MsRoomPropertyNotifyInfo):void{
+    }
+
+    private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo):void{
+
+    }
+    private 
 }

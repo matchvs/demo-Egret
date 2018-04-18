@@ -52,11 +52,25 @@ class RoomListView  extends egret.DisplayObjectContainer{
         exitBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
         this.addChild(exitBtn);
 
-        GameData.response.getRoomListResponse = this.getRoomListResponse.bind(this);
-        GameData.engine.getRoomList(this._getRoomListFlter);
+        // GameData.response.getRoomListResponse = this.getRoomListResponse.bind(this);
+        // GameData.engine.getRoomList(this._getRoomListFlter);
+
+        this.getRoomListEx();
+        
         
     }
 
+    /**
+     * 获取房间列表 扩展接口，附带更多的返回信息
+     */
+    private getRoomListEx():void{
+        let filter = new MsRoomFilterEx(GameData.createRoomInfo.maxPlayer,
+        GameData.createRoomInfo.mode,
+        GameData.createRoomInfo.canWatch,
+        GameData.createRoomInfo.roomProperty, 0, 1, 0, 0, 0, 3);
+        GameData.response.getRoomListExResponse = this.getRoomListExResponse.bind(this);
+        GameData.engine.getRoomListEx(filter);
+    }
 
     private mbuttonExitRoom(event:egret.TouchEvent){
         //退出房间成功进入游戏大厅
@@ -67,7 +81,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         for(let i = 0; i < roomCnt; i++){
             let room1 = new RoomView();
             room1.name = "room"+i;
-            room1.layContents(0,i*(room1.height+10),roomIDList[i]);
+            room1.layContents(0,i*(room1.height+10),roomIDList[i], "");
             this.addChild(room1);
         }
     }
@@ -88,7 +102,36 @@ class RoomListView  extends egret.DisplayObjectContainer{
         for(let i = 0; i < roomInfos.length; i++){
             var room1 = new RoomView();
             room1.name = "room"+i;
-            room1.layContents(this._parent.width*0.3,i*(room1.height+5)+120,roomInfos[i].roomID);
+            room1.layContents(this._parent.width*0.3,i*(room1.height+5)+120,roomInfos[i].roomID,"");
+            this.addChild(room1);
+        }
+    }
+
+    /**
+     * 获取房间信息列表扩展接口，跟getRoomList接口相比 此接口提供更多的房间信息
+     */
+    private getRoomListExResponse(rsp:MsGetRoomListExRsp){
+        if(rsp.status !== 200){
+            this._messageText.text = "获取房间列表错误："+status;
+            this._messageText.visible = false;
+            return
+        }
+
+        if(rsp.roomAttrs.length === 0){
+            this._messageText.text = "暂时没有房间";
+            this._messageText.visible = true;
+            return;
+        }
+
+        for(let i = 0; i < rsp.roomAttrs.length; i++){
+            let stateStr:string = rsp.roomAttrs[i].state === 1 ? "开放":"关闭";
+            var room1 = new RoomView();
+            room1.name = "room"+i;
+            room1.layContents(this._parent.width*0.3,
+            i*(room1.height+5)+120,
+            rsp.roomAttrs[i].roomID,
+            "[状态:"+ stateStr + "] [房间人数："+ rsp.roomAttrs[i].gamePlayer +"/"+ rsp.roomAttrs[i].maxPlayer+"]"
+            );
             this.addChild(room1);
         }
     }
