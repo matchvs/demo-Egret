@@ -135,7 +135,12 @@ class LoginView extends eui.UILayer{
 			console.log("登陆失败");
 		} else {
 			console.log("登陆成功");
-			GameSceneView._gameScene.lobby();
+            if(login.roomID !== "0"){
+                //重新连接
+                GameSceneView._gameScene.reconnectView();
+            }else{
+                GameSceneView._gameScene.lobby();
+            }
 		}
 	}
 }
