@@ -16,6 +16,10 @@ class ErrorView extends egret.DisplayObjectContainer{
         this.initView();
     }
     private initView(){
+        //清理定时器
+        while(GameData.intervalList.length > 0){
+            clearTimeout(GameData.intervalList.pop());
+        }
 
         let spt = new egret.Sprite();
         spt.graphics.beginFill(0x555555, 2);

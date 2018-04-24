@@ -21,10 +21,11 @@ class GameData {
     public static isRoomOwner:boolean = false;
     public static gameStartEvent:string = "gameStart";
     public static playerPositionEvent:string = "playerPosition";
-    public static gainScoreEvent:string = "gainScore";
+    public static reconnectStartEvent:string = "gameReconnectStart";
     public static newStarEvent:string = "newStar";
     public static changeStarEvent:string = "changeStar";
     public static gameReadyEvent:string = "gameReady";
+    public static reconnectReadyEvent:string = "gameReconnectReady";
     public static events = {};
     public static syncFrame:boolean = false;
     public static isGameOver:boolean = false;
@@ -34,6 +35,7 @@ class GameData {
     public static defaultHeight:number = 400;
     public static roomID:string = "";
     public static userScoreAll:Array<UserScore>;
+    public static intervalList:Array<number> = [];
     public static number1:string = "";
     public static number2:string = "";
     public static number3:string = "";

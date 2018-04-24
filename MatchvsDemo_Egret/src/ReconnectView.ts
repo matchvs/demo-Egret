@@ -19,6 +19,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
 
     public initView(){
 
+        GameData.response.errorResponse = this.errorResponse.bind(this);
         let spt = new egret.Sprite();
         spt.graphics.beginFill(0x555555, 0);
         spt.graphics.drawRect( 0, 0, this._parent.width, this._parent.height );
@@ -38,6 +39,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
         cancleBtn.y = this._parent.height*0.8;
         cancleBtn.width = this._parent.width*0.2;
         cancleBtn.height = 40;
+        cancleBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonCancleBtn, this);
         spt.addChild(cancleBtn);
 
         this._timer = new egret.Timer(1000, 5);
@@ -48,41 +50,80 @@ class ReconnectView extends egret.DisplayObjectContainer{
 
     private timerFunc(event: egret.Event){
         this._msglabel.text = "正在重新连接......"+this._reconnctTimes+"/"+this._totalTimes;
+        console.log(this._msglabel.text)
         GameData.response.reconnectResponse = this.reconnectResponse.bind(this);
         GameData.engine.reconnect();
-        this._reconnctTimes = this._reconnctTimes > this._totalTimes ? this._totalTimes: this._reconnctTimes++;
+        this._reconnctTimes++;
+        if(this._reconnctTimes > this._totalTimes){
+            this._timer.stop();
+            GameData.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
+            GameData.engine.leaveRoom("");
+        }
     }
 
     private reconnectResponse(status:number, roomUserInfoList:Array<MsRoomUserInfo>, roomInfo:MsRoomInfo){
+        this._timer.stop();
         if(status !== 200){
             console.log("重连失败"+this._reconnctTimes);
             this._msglabel.text = "重连失败......"+this._reconnctTimes+"/"+this._totalTimes;
-            if(this._reconnctTimes > this._totalTimes){
-
-            }
+            //GameData.engine.leaveRoom("");
+            GameSceneView._gameScene.lobby();
         }else{
+            console.log("重连成功status:"+status+" 重连次数："+this._reconnctTimes);
             //房主判断
             let userIds = [GameData.userInfo.id];
             roomUserInfoList.forEach(function(value){
-                if (GameData.userInfo.id !== value.userId) userIds.push(value.userId)
+                 console.log("用户ID："+value.userId);
+                if (GameData.userInfo.id !== value.userId) userIds.push(value.userId);
             });
             GameData.playerUserIds = userIds;
             GameData.roomPropertyValue = roomInfo.roomProperty;
             GameData.roomID = roomInfo.roomID;
+            GameData.isRoomOwner = false;
             if(userIds.length === GameData.maxPlayerNum){
-                //GameSceneView._gameScene.play();
-                GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
+                GameData.response.sendEventResponse = this.sendEventResponse.bind(this);
+                let eventTemp = {
+					action: GameData.reconnectReadyEvent,
+                    userID: GameData.userInfo.id
+				}
+                let result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+                
+				if (!result || result.result !== 0) {
+					return console.log('重连发送信息失败');
+				}
+                GameData.events[result.sequence] = eventTemp;
+				console.log('重连发送信息成功');
             }else{
                 //还没有开始游戏
+                console.log("还没有开始游戏或者游戏结束, 退出到大厅");
+                GameData.engine.leaveRoom("leaveRoom");
+                GameSceneView._gameScene.lobby();
             }
         }
     }
 
-    private sendEventNotify(eventInfo:MsSendEventNotify){
-        if (eventInfo
-            && eventInfo.cpProto
-            && eventInfo.cpProto.indexOf(GameData.gameStartEvent) >= 0) {
-            GameSceneView._gameScene.play();
+    private sendEventResponse(rsp:MsSendEventRsp){
+        if(rsp.status === 200){
+            var event = GameData.events[rsp.sequence]
+            if (event && event.action === GameData.reconnectReadyEvent) {
+                delete GameData.events[rsp.sequence];
+                GameSceneView._gameScene.play();
+            }
         }
+    }
+
+    private errorResponse(errCode:number, errMsg:string){
+        this._timer.stop();
+    }
+
+    private mbuttonCancleBtn(event:egret.TouchEvent){
+        this._timer.stop();
+        GameData.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
+        GameData.engine.leaveRoom("");
+    }
+
+    private leaveRoomResponse(rsp:MsLeaveRoomRsp){
+        console.log("取消重新连接，离开房间:"+rsp.status)
+        GameSceneView._gameScene.lobby();
     }
 }

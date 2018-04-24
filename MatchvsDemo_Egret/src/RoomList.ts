@@ -52,12 +52,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         exitBtn.y = this._parent.height*0.85;
         exitBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
         this.addChild(exitBtn);
-
-        // GameData.response.getRoomListResponse = this.getRoomListResponse.bind(this);
-        // GameData.engine.getRoomList(this._getRoomListFlter);
-
         this.getRoomListEx();
-
         this._timer = new egret.Timer(3000, 0);
         this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
         this._timer.start();

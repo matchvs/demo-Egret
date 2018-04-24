@@ -12,6 +12,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	private _receiveCountValue:number;
 	private _receiveMsgCountLabel:eui.Label;
 	private _countDownLabel:eui.Label;
+	private _netWorkNoticeLabel:eui.Label;
 
 	private _fontSize = 22;
 	constructor() {
@@ -24,12 +25,13 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this.startLoad();
 	}
 	private startLoad():void {
+		GameData.starPositionX = 0;
 		GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
+		GameData.response.networkStateNotify = this.networkStateNotify.bind(this);
 
         if (GameData.syncFrame === true && GameData.isRoomOwner === true) {
             GameData.response.setFrameSyncResponse = this.setFrameSyncResponse.bind(this);
             var result = GameData.engine.setFrameSync(GameData.frameRate);
-			
             if (result !== 0){
 				console.log('设置帧同步率失败,错误码:' + result);
 			}
@@ -109,7 +111,17 @@ class GamePlayView extends egret.DisplayObjectContainer{
         countDownLabel.y = 20;
 		countDownLabel.text = GameData.playerTime.toString();
 		this._countDownLabel = countDownLabel;
-        this.addChild(this._countDownLabel);	
+        this.addChild(this._countDownLabel);
+
+		let netWorkNoticeLabel = new eui.Label();
+        netWorkNoticeLabel.textColor = 0xff0000;
+        netWorkNoticeLabel.fontFamily = "Tahoma";  //设置字体
+		netWorkNoticeLabel.size = this._fontSize;
+        netWorkNoticeLabel.x = GameData.width/2;
+        netWorkNoticeLabel.y = 50;
+		netWorkNoticeLabel.text = "";
+		this._netWorkNoticeLabel = netWorkNoticeLabel;
+        this.addChild(this._netWorkNoticeLabel);	
 
 		if(GameData.syncFrame === true){
 			let fs = new eui.Label();
@@ -244,6 +256,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this.addChild(buttonLeave);
 		buttonLeave.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonLeaveRoom, this);
 
+		//计时
 		var idCountDown = setInterval(() => {
 			this._countDownLabel.text = (Number(this._countDownLabel.text) - 1).toString();
 			if(this._countDownLabel.text == "0") {
@@ -255,6 +268,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			}
 		}, 1000);
 
+		GameData.intervalList.push(idCountDown);
+
+		//发送位置信息
         if (GameData.syncFrame === false) {
 			GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
             var id = setInterval(() => {
@@ -269,6 +285,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
                     clearInterval(id);
                 }
             }, 200);
+			GameData.intervalList.push(id);
         } else {
 			GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
 			GameData.response.frameUpdate = this.frameUpdate.bind(this);
@@ -284,6 +301,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
                     clearInterval(id);
                 }
             }, 200);
+			GameData.intervalList.push(id);
 		}
 	}
 	private leaveRoomNotify(roomId:string, roomuserinfo:MsRoomUserInfo) {
@@ -403,9 +421,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			console.log('创建足球事件发送成功');
 		}
 	}	
-	private onLoadStar(event:egret.Event):void {
-		GameData.starPositionX = GameData.starPositionX;
-		GameData.starPositionY = GameData.starPositionY;		
+	private onLoadStar(event:egret.Event):void {	
 		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
 		var bitmapData:egret.BitmapData = loader.data;
 		var texture = new egret.Texture();
@@ -416,20 +432,21 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._star.x = GameData.starPositionX;
         this._star.y = GameData.starPositionY;
         this._starObject = this.addChild(this._star);
-		if (GameData.isRoomOwner === true) {
-			var eventTemp = {
-				action: GameData.newStarEvent,
-				x: this._star.x,
-				y: GameData.defaultHeight
-			}
-			var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
-			if (!result || result.result !== 0)
-				return console.log('创建足球事件发送失败');
-		}
+		// if (GameData.isRoomOwner === true) {
+		// 	var eventTemp = {
+		// 		action: GameData.newStarEvent,
+		// 		x: this._star.x,
+		// 		y: GameData.defaultHeight
+		// 	}
+		// 	var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+		// 	if (!result || result.result !== 0)
+		// 		return console.log('创建足球事件发送失败');
+		// }
 	}
 	private deleteStar() {
-		this.removeChild(this._starObject);
-		this._starObject = null;
+		if(this.contains(this._star)){
+			this.removeChild(this._star);
+		}
 	}
 	private changeStarPosition(x:number, y:number) {
 		this._star.x = x;
@@ -445,12 +462,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					var info = JSON.parse(sdnotify.cpProto);
 					GameData.starPositionX = info.x;
 					GameData.starPositionY = info.y;
+					this.deleteStar();
 					this.createStar();
 				}
-
-                // 收到创建足球的消息通知，根据消息给的坐标创建足球
-                // this.createStarNode(JSON.parse(sdnotify.cpProto).position)
-
             } else if (sdnotify.cpProto.indexOf(GameData.playerPositionEvent) >= 0) {
                 // 收到其他玩家的位置速度加速度信息，根据消息中的值更新状态
                 this._receiveCountValue++;
@@ -476,21 +490,44 @@ class GamePlayView extends egret.DisplayObjectContainer{
 						this._egretBird2.y = cpProto.y;
 					}
                 }
-            } else if (sdnotify.cpProto.indexOf(GameData.gainScoreEvent) >= 0) {
-                // 收到其他玩家的得分信息，更新页面上的得分数据
-                // var playerIndex = this.getPlayerIndexByUserId(info.srcUserId);
-                // var label = GLB.playerUserIds[playerIndex - 1] + ': ' + JSON.parse(info.cpProto).score;
-                // this.scoreDisplays[playerIndex - 1].string = label;
-                // GLB.scoreMap.set(info.srcUserId, JSON.parse(info.cpProto).score);
-                // // 有玩家得分之后，创建新的足球
-                // this.spawnNewStar();
+            } else if (sdnotify.cpProto.indexOf(GameData.reconnectStartEvent) >= 0) {
+				var info = JSON.parse(sdnotify.cpProto);
+				if(info.userID === GameData.userInfo.id && GameData.starPositionX === 0) {
+					GameData.starPositionX = info.x;
+					GameData.starPositionY = info.y;
+					GameData.userScoreAll = info.PlayerScoreInfos;
+					let self = this;
+					GameData.userScoreAll.forEach(function(value){
+						if(value.userID === info.userID){
+							self._score = value.score;
+						}
+					});
+					this._countDownLabel.text = info.timeCount;
+					this.deleteStar();
+					this.createStar();
+					this.setScoreLabel();
+				}
 			} else if (sdnotify.cpProto.indexOf(GameData.changeStarEvent) >= 0) {
 				if(sdnotify.srcUserId != GameData.userInfo.id) {
-					//console.log("change star event");
 					var info = JSON.parse(sdnotify.cpProto);
 					this.changeStarPosition(info.x, info.y);
 					this.setUserScore(sdnotify.srcUserId, info.score);
 				}
+			}else if(sdnotify.cpProto.indexOf(GameData.reconnectReadyEvent) >= 0){
+				console.log("重新连接收到消息");
+				var eventTemp = {
+					action: GameData.reconnectStartEvent,
+					userID: sdnotify.srcUserId,
+					PlayerScoreInfos:GameData.userScoreAll,
+					timeCount:Number(this._countDownLabel.text),
+					x: this._star.x,
+					y: GameData.defaultHeight
+				}
+				var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+				if (!result || result.result !== 0) {
+					return console.log('重连创建足球事件发送失败');
+				}
+				console.log('重连创建足球事件发送成功');
 			}
         }
 	}
@@ -525,5 +562,26 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					}
 			}
 		}
+	}
+
+
+	private networkStateNotify(netnotify:MsNetworkStateNotify){
+		
+		console.log("玩家："+netnotify.userID+" state:"+netnotify.state);
+		if(netnotify.state === 1){
+			this._netWorkNoticeLabel.text = "玩家掉线:"+netnotify.userID;
+			console.log("玩家掉线:"+netnotify.userID);
+		}else if(netnotify.state === 2 ){
+			console.log("玩家已经重连进来");
+			this._netWorkNoticeLabel.text = "";
+		}else{
+			console.log("玩家："+ netnotify.userID+" 重新连接失败！离开房间，游戏结束");
+			GameData.engine.leaveRoom('');
+			GameSceneView._gameScene.lobby();
+			GameData.isGameOver = true;
+			GameData.isRoomOwner = false;
+			GameData.syncFrame = false;
+		}
+
 	}
 }

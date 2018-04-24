@@ -513,6 +513,10 @@ function commEngineStateCheck(engineState, roomLoock, type) {
         if ((engineState & ENGE_STATE.LEAVE_ROOMING) === ENGE_STATE.LEAVE_ROOMING)
             return -10; //正在离开房间
     }
+    else if (type === 3) {
+        if ((engineState & ENGE_STATE.LEAVE_ROOMING) === ENGE_STATE.LEAVE_ROOMING)
+            return -10; //正在离开房间
+    }
     return 0;
 } /* ================ mspb.js ================= */
 (function e(t, n, r) {
@@ -19421,6 +19425,8 @@ function MatchvsEngine() {
                     engine.joinRoomNotifyInfo = null;
                     break;
                 case MATCHVS_ROOM_LEAVE_RSP:
+                    //退出房间状态取消
+                    engine.mEngineState &= ~ENGE_STATE.LEAVE_ROOMING;
                     if (packet.payload.getStatus() !== 200) {
                         engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
                     }
@@ -19428,6 +19434,7 @@ function MatchvsEngine() {
                     engine.mRoomInfo = roomInfo;
                     var leaveRoomRsp = new MsLeaveRoomRsp(packet.payload.getStatus(), packet.payload.getRoomid(), packet.payload.getUserid(), packet.payload.getCpproto());
                     engine.mRsp.leaveRoomResponse && engine.mRsp.leaveRoomResponse(leaveRoomRsp);
+                    engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
                     break;
                 case MATCHVS_ROOM_JOIN_OVER_RSP:
                     if (packet.payload.getStatus() !== 200) {
@@ -19639,6 +19646,7 @@ function MatchvsEngine() {
             var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, this.mMsPubArgs.userID, this.mRecntRoomID, this.mMsPubArgs.gameID, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
             var buf = this.mProtocol.joinRoomSpecial(roomJoin);
             this.mNetWork.send(buf);
+            this.mRecntRoomID = "0";
             return 0;
         }
         if (undefined === this.mMsPubArgs.gameID || undefined === this.mMsPubArgs.secretKey || undefined === this.mMsPubArgs.appKey) {
@@ -19848,10 +19856,14 @@ function MatchvsEngine() {
      * @returns {number}
      */
     this.leaveRoom = function (cpProto) {
-        var ret = commEngineStateCheck(this.mEngineState, this.mEngineState, 1);
+        var ret = commEngineStateCheck(this.mEngineState, this.mEngineState, 3);
         if (ret !== 0)
             return ret;
-        var buf = this.mProtocol.leaveRoom(this.mGameID, this.mUserID, this.mRoomInfo.getRoomid(), cpProto);
+        var roomid = this.mRecntRoomID;
+        if (this.mRoomInfo && this.mRoomInfo.getRoomid) {
+            roomid = this.mRoomInfo.getRoomid();
+        }
+        var buf = this.mProtocol.leaveRoom(this.mGameID, this.mUserID, roomid, cpProto);
         this.mNetWork.send(buf);
         //设置为正在退出房间
         this.mEngineState |= ENGE_STATE.LEAVE_ROOMING;
