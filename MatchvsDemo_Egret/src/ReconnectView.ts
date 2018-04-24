@@ -81,18 +81,8 @@ class ReconnectView extends egret.DisplayObjectContainer{
             GameData.roomID = roomInfo.roomID;
             GameData.isRoomOwner = false;
             if(userIds.length === GameData.maxPlayerNum){
-                GameData.response.sendEventResponse = this.sendEventResponse.bind(this);
-                let eventTemp = {
-					action: GameData.reconnectReadyEvent,
-                    userID: GameData.userInfo.id
-				}
-                let result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
-                
-				if (!result || result.result !== 0) {
-					return console.log('重连发送信息失败');
-				}
-                GameData.events[result.sequence] = eventTemp;
-				console.log('重连发送信息成功');
+                GameData.response.getRoomDetailResponse = this.getRoomDetailResponse.bind(this);
+                GameData.engine.getRoomDetail(GameData.roomID);
             }else{
                 //还没有开始游戏
                 console.log("还没有开始游戏或者游戏结束, 退出到大厅");
@@ -125,5 +115,26 @@ class ReconnectView extends egret.DisplayObjectContainer{
     private leaveRoomResponse(rsp:MsLeaveRoomRsp){
         console.log("取消重新连接，离开房间:"+rsp.status)
         GameSceneView._gameScene.lobby();
+    }
+    private getRoomDetailResponse(rsp:MsGetRoomDetailRsp){
+        console.log("status:"+rsp.status+" 还没有开始游戏或者游戏结束, 退出到大厅：state="+rsp.state);
+        if(rsp.status === 200 && rsp.state === 2){
+            GameData.response.sendEventResponse = this.sendEventResponse.bind(this);
+            let eventTemp = {
+                action: GameData.reconnectReadyEvent,
+                userID: GameData.userInfo.id
+            }
+            let result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+            
+            if (!result || result.result !== 0) {
+                return console.log('重连发送信息失败');
+            }
+            GameData.events[result.sequence] = eventTemp;
+            console.log('重连发送信息成功');
+        }else{
+            
+            GameData.engine.leaveRoom("leaveRoom");
+            GameSceneView._gameScene.lobby();
+        }
     }
 }

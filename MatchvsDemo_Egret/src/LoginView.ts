@@ -92,7 +92,7 @@ class LoginView extends eui.UILayer{
 
     private onButtonClick(e: egret.TouchEvent) {
 		GameData.response.initResponse = this.initResponse.bind(this);
-        GameData.gameID = Number(this._gameidInput.text);
+        //GameData.gameID = Number(this._gameidInput.text);
         console.log(" environment="+ this._environment + " gameid="+ GameData.gameID);
         let result = GameData.engine.init(GameData.response, GameData.CHANNEL, this._environment, GameData.gameID);
         console.log("mvs.init result:" + result);
@@ -116,14 +116,7 @@ class LoginView extends eui.UILayer{
 		var gatewayId = 0;
 		console.log("开始登陆,用户Id:" + userInfo.id);
 		GameData.response.loginResponse = this.loginResponse.bind(this);
-		// var result = GameData.engine.login(userInfo.id, userInfo.token,
-        //     200757, 1,
-        //     "6783e7d174ef41b98a91957c561cf305", "da47754579fa47e4affab5785451622c",
-        //     deviceId, gatewayId);
-        var result = GameData.engine.login(userInfo.id, userInfo.token,
-        200922, 1,
-        "42471a8aaf0a41ba86f0506552838644", "09acfcab27ad49b9ac960345cf40b293",
-        deviceId, gatewayId);
+        var result = GameData.engine.login(userInfo.id, userInfo.token, GameData.gameID, 1, GameData.appkey,  GameData.secretKey, deviceId, gatewayId);
 		if (result !== 0) {
 			console.log("登陆失败,result:" + result);
 		}
@@ -136,6 +129,7 @@ class LoginView extends eui.UILayer{
 		} else {
 			console.log("登陆成功 roomID="+login.roomID);
             if(login.roomID !== "0"){
+                GameData.roomID = login.roomID;
                 //重新连接
                 GameSceneView._gameScene.reconnectView();
             }else{

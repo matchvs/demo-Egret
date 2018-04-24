@@ -85,7 +85,6 @@ class GameSceneView extends egret.Sprite
             containt.doJoinRoomSpecial(roomID,userPropery);
         }
         this.thisContainer.addChild(containt);
-        
     }
 
     /**

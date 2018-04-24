@@ -62,7 +62,6 @@ class ErrorView extends egret.DisplayObjectContainer{
         recBtn.y = this._parent.height*0.8;
         recBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonReconnRoom, this);
         this.addChild(recBtn);
-        
     }
 
     private mbuttonReconnRoom(event:egret.TouchEvent){
