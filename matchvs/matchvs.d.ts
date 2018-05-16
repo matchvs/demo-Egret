@@ -1,9 +1,9 @@
 /************************************************************************************************************
  *
  * Describe :   Matchvs skd .d.ts define files for typescrip
- * Version  :   Develop 1.4.000
+ * Version  :   Develop 1.6.000
  *
- * CHANGE   :   2018.03.30
+ * CHANGE   :   2018.05.1
  *
  *
  ************************************************************************************************************/
@@ -21,6 +21,14 @@ declare function LocalStore_Clear();
  * @constructor
  */
 declare function LocalStore_Save(key:string,value:string);
+/**
+ * openLog 打开日志
+ * closeLog 关闭日志
+ */
+declare class MatchvsLog{
+    static openLog();
+    static closeLog();
+}
 /**
  * 创建房间请求参数类型
  */
@@ -399,6 +407,18 @@ declare class MsRoomPropertyNotifyInfo{
     constructor(roomID:string, userID:number, roomProperty:string)
 }
 
+declare class MsReopenRoomResponse {
+    public status  : number;
+    public cpProto : string;
+	constructor(status:number, cpProto:string)
+}
+declare class MsReopenRoomNotify{
+    public roomID  : string;
+    public userID  : number;
+    public cpProto : string;
+	constructor(roomID:string,userID:number, cpProto:string)
+}
+
 declare class MatchvsResponse {
     constructor();//构造函数
 
@@ -626,7 +646,20 @@ declare class MatchvsResponse {
      * @param {MsRoomInfo} roomInfo
      */
     reconnectResponse(status:number, roomUserInfoList:Array<MsRoomUserInfo>, roomInfo:MsRoomInfo);
+	
+	 /**
+     * 允许房间加人的通知
+     * @param {MsReopenRoomNotify} data
+     */
+	joinOpenNotify(data:MsReopenRoomNotify);
+	
+	 /**
+     * 设置允许房间加人的结果
+     * @param {MsReopenRoomResponse} data
+     */
+	joinOpenResponse(data:MsReopenRoomResponse);
 }
+
 
 
 /**
@@ -829,5 +862,12 @@ declare class MatchvsEngine {
      * @returns {number}
      */
     logout(cpProto:string):number
+	
+	/**
+     * 设置允许房间加人
+     * @param {number} cpProto
+     * @returns {number}
+     */
+    joinOpen(cpProto:string):number
 }
 
