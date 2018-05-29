@@ -85,6 +85,8 @@ class MatchView extends eui.UILayer {
 
         var checkbox = new eui.CheckBox();
         checkbox.label = "允许加入";
+        checkbox.selected = true;
+        
         checkbox.addEventListener(egret.Event.CHANGE, e => {
             checkbox.label = checkbox.selected ? "允许加入" : "不允许加入";
             checkbox.selected ? GameData.engine.joinOpen("x") : GameData.engine.joinOver("x");

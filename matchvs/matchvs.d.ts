@@ -869,5 +869,42 @@ declare class MatchvsEngine {
      * @returns {number}
      */
     joinOpen(cpProto:string):number
+	
+	/**
+	* 存储数据
+	* @param {number} gameID
+	* @param {number} userID
+	* @param {string} key
+	* @param {any} value
+	*/
+	hashSet (gameID, userID, key, value) :void
+	
+	/**
+	* 存储数据
+	* @param {number} gameID
+	* @param {number} userID
+	* @param {string} key
+	*/
+	hashGet (gameID, userID, key) :void
+	
+
+	
+}
+declare class md5 {
+	 constructor();//构造函数
+	 
+	/**
+	*
+	*/
+	hex_md5 (s:string) :string
+
 }
 
+declare class MatchvsHttp {
+	constructor(callBack);//构造函数
+	
+	
+	get(url);
+	
+ 
+}
