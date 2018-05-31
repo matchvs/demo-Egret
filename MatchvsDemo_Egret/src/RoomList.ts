@@ -53,7 +53,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         exitBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
         this.addChild(exitBtn);
         this.getRoomListEx();
-        this._timer = new egret.Timer(3000, 0);
+        this._timer = new egret.Timer(600, 0);
         this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
         this._timer.start();
         
@@ -76,8 +76,9 @@ class RoomListView  extends egret.DisplayObjectContainer{
     }
 
     private mbuttonExitRoom(event:egret.TouchEvent){
+        this._timer.stop();
         //退出房间成功进入游戏大厅
-            GameSceneView._gameScene.lobby();
+        GameSceneView._gameScene.lobby();
     }
 
     private addRoomViews(roomCnt:number, roomIDList:Array<string>){
@@ -136,7 +137,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         for(let i = 0; i < rsp.roomAttrs.length && i < 3; i++){
             let stateStr:string = rsp.roomAttrs[i].state === 1 ? "开放":"关闭";
             let mapValue:string = rsp.roomAttrs[i].roomProperty === GameData.roomPropertyType.mapA ? "[地图：彩图]":"[地图：灰图]";
-            let room1 = new RoomView();
+            let room1 = new RoomView(this);
             room1.name = "room";
             room1.layContents(this._parent.width*0.3,
             i*(room1.height+5)+120,
@@ -146,5 +147,8 @@ class RoomListView  extends egret.DisplayObjectContainer{
             this.addChild(room1);
             this._roomList.push(room1);
         }
+    }
+    public Release(){
+        this._timer.stop();
     }
 }

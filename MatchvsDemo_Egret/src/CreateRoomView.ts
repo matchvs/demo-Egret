@@ -285,6 +285,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     public doCreateRoom(){
         this._createRoomInfo = GameData.createRoomInfo;
         GameData.roomPropertyValue = GameData.createRoomInfo.roomProperty;
+        console.info(this._createRoomInfo);
         GameData.engine.createRoom(GameData.createRoomInfo, "myroom");
     }
 

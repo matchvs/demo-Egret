@@ -11,8 +11,8 @@
 		"libs/modules/matchvs/matchvs.js"
 	],
 	"game": [
-		"bin-debug/AssetAdapter.js",
 		"bin-debug/CreateRoomView.js",
+		"bin-debug/Main.js",
 		"bin-debug/ErrorView.js",
 		"bin-debug/GameData.js",
 		"bin-debug/GamePlayView.js",
@@ -21,7 +21,7 @@
 		"bin-debug/LoadingUI.js",
 		"bin-debug/LobbyView.js",
 		"bin-debug/LoginView.js",
-		"bin-debug/Main.js",
+		"bin-debug/AssetAdapter.js",
 		"bin-debug/MatchView.js",
 		"bin-debug/Platform.js",
 		"bin-debug/ReconnectView.js",

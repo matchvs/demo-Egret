@@ -4,16 +4,16 @@ class RoomView extends eui.Group {
     private _roomView_W = 450;
     private _roomButton_H = 40;
     private _roomButton_W = this._roomView_W - 50;
-
+    private _parent:RoomListView = null;
     private _roomID:string;
 
     private _roomIDLabel:eui.Label;
     
-    constructor(){
+    constructor(pt ?:RoomListView){
         super();
         this.width = this._roomView_W;
         this.height = this._roomView_H;
-        
+        this._parent = pt;
     }
 
     protected createChildren():void {
@@ -85,6 +85,7 @@ class RoomView extends eui.Group {
         
         if(rsp.state === 1){
             console.log("检查房间状态为：开放状态可以进入");
+            this.Release();
             GameSceneView._gameScene.createRoom(this._roomID,GameData.userInfo.avatar);
         }else{
             console.log("检查房间状态为：关闭状态不可以进入，请刷新房间列表");
@@ -95,4 +96,7 @@ class RoomView extends eui.Group {
         this.getRoomDetail(this._roomID);
     }
 
+    public Release(){
+        this._parent.Release();
+    }
 }

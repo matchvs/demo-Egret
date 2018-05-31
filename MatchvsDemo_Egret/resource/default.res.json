@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "checkbox_select_disabled_png,checkbox_select_down_png,checkbox_select_up_png,checkbox_unselect_png,selected_png,border_png,header_png,radiobutton_select_disabled_png,radiobutton_select_down_png,radiobutton_select_up_png,radiobutton_unselect_png,roundthumb_png,thumb_png,track_png,tracklight_png,handle_png,off_png,on_png,button_down_png,button_up_png,thumb_pb_png,track_pb_png,track_sb_png,description_json,cartoon-egret_01_png,cartoon-egret_02_png,cartoon-egret_03_png,star1_png,gamebackground_jpg,loading2_png,toast-bg_png",
+			"keys": "checkbox_select_disabled_png,checkbox_select_down_png,checkbox_select_up_png,checkbox_unselect_png,selected_png,border_png,header_png,radiobutton_select_disabled_png,radiobutton_select_down_png,radiobutton_select_up_png,radiobutton_unselect_png,roundthumb_png,thumb_png,track_png,tracklight_png,handle_png,off_png,on_png,button_down_png,button_up_png,thumb_pb_png,track_pb_png,track_sb_png,description_json,cartoon-egret_01_png,cartoon-egret_02_png,cartoon-egret_03_png,star1_png,gamebackground_jpg,loading2_png,toast-bg_png,loading22_png,toast-bg2_png",
 			"name": "preload"
 		}
 	],
@@ -158,6 +158,16 @@
 		},
 		{
 			"name": "toast-bg_png",
+			"type": "image",
+			"url": "loading/toast-bg.png"
+		},
+		{
+			"name": "loading22_png",
+			"type": "image",
+			"url": "loading/loading2.png"
+		},
+		{
+			"name": "toast-bg2_png",
 			"type": "image",
 			"url": "loading/toast-bg.png"
 		}
