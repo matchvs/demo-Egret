@@ -315,6 +315,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         }else{
             this._isInRoom = true;
             this._roomID = rsp.roomID;
+            GameData.roomID = rsp.roomID;
             this._roomidText.text = ("房间号：\n"+rsp.roomID);
             console.log("创建房间成功 roomID="+rsp.roomID);
             this._userID_1.text = rsp.owner.toString();
@@ -347,6 +348,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
             this._isInRoom = true;
             this._roomidText.text = ("房间号：\n"+roomInfo.roomID);
+            this._roomID  = roomInfo.roomID;
+            GameData.roomID = roomInfo.roomID;
             if(roomInfo.roomProperty === GameData.roomPropertyType.mapB){
                 GameData.roomPropertyValue = GameData.roomPropertyType.mapB
                 this._gameMapB.selected = true;
@@ -609,10 +612,5 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
     private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo):void{
         console.log("roomProperty = "+rsp.roomProperty);
-        // if(rsp.roomProperty === GameData.roomPropertyType.mapB){
-        //     this._gameMapB.selected = true;
-        // }else{
-        //     this._gameMapA.selected = true;
-        // }
     }
 }

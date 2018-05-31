@@ -1,20 +1,19 @@
-class LoginView extends eui.UILayer{
-	private _gameidInput:eui.TextInput;
+class LoginView extends eui.UILayer {
+    private _gameidInput: eui.TextInput;
 
-    private _inputBox_W = 400 ;
-    private _inputBox_H = 40 ;
+    private _inputBox_W = 400;
+    private _inputBox_H = 40;
     private _inputBox_Fsize = 24;
     private _inputBox_Fcolor = 0x000000;
 
-    private _environment = GameData.DEFAULT_ENV;
+
 
     public constructor() {
         super();
-		this.initView();
+        this.initView();
     }
-	private initView():void
-	{
-        
+    private initView(): void {
+
         let colorLabel = new eui.Label();
         colorLabel.textColor = 0xffffff;
         colorLabel.fontFamily = "Tahoma";  //设置字体
@@ -26,19 +25,29 @@ class LoginView extends eui.UILayer{
         colorLabel.verticalCenter = -250;
         this.addChild(colorLabel);
 
+        var input = new eui.TextInput();
+        input.text = GameData.CHANNEL;
+        input.prompt = input.text;
+        input.horizontalCenter = 0;
+        input.width = this._inputBox_W;
+        input.height = this._inputBox_H;
+        input.verticalCenter = -200;
+        input.textColor = this._inputBox_Fcolor;
+        this.addChild(input);
+
         let gameidInput = new eui.TextInput();
-        gameidInput.prompt = "200757";
-        gameidInput.text = "200757";
+        gameidInput.prompt = GameData.gameID + "";
+        gameidInput.text = GameData.gameID + "";
         gameidInput.horizontalCenter = 0;
         gameidInput.width = this._inputBox_W;
         gameidInput.height = this._inputBox_H;
         gameidInput.verticalCenter = -150;
         gameidInput.textColor = this._inputBox_Fcolor;
-		this._gameidInput = gameidInput;
+        this._gameidInput = gameidInput;
         this.addChild(this._gameidInput);
 
         let appkeyInput = new eui.TextInput();
-        appkeyInput.prompt = "6783e7d174ef41b98a91957c561cf305";
+        appkeyInput.prompt = GameData.appkey;
         appkeyInput.width = this._inputBox_W;
         appkeyInput.height = this._inputBox_H;
         appkeyInput.textColor = this._inputBox_Fcolor;
@@ -47,7 +56,7 @@ class LoginView extends eui.UILayer{
         this.addChild(appkeyInput);
 
         let appSecretInput = new eui.TextInput();
-        appSecretInput.prompt = "da47754579fa47e4affab5785451622c";
+        appSecretInput.prompt = GameData.secretKey;
         appSecretInput.width = this._inputBox_W;
         appSecretInput.height = this._inputBox_H;
         appSecretInput.textColor = this._inputBox_Fcolor;
@@ -59,17 +68,24 @@ class LoginView extends eui.UILayer{
         button.label = "确定";
         button.width = 300;
         button.horizontalCenter = 0;
-        button.verticalCenter = 0+50;
+        button.verticalCenter = 0 + 50;
         this.addChild(button);
-        button.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonClick, this);
+        button.addEventListener(egret.TouchEvent.TOUCH_TAP, e => {
+            GameData.configEnvir(input.text, cbx.selected);
+            GameData.response.initResponse = this.initResponse.bind(this);
+            //GameData.gameID = Number(this._gameidInput.text);
+            console.log(" environment=" + GameData.DEFAULT_ENV + " gameid=" + GameData.gameID);
+            let result = GameData.engine.init(GameData.response, GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
+            console.log("mvs.init result:" + result);
+        }, this);
 
         let clearCachebtn = new eui.Button();
         clearCachebtn.label = "清除缓存";
         clearCachebtn.width = 300;
         clearCachebtn.horizontalCenter = 0;
-        clearCachebtn.verticalCenter = 0+120;
+        clearCachebtn.verticalCenter = 0 + 120;
         this.addChild(clearCachebtn);
-        clearCachebtn.addEventListener(egret.TouchEvent.TOUCH_TAP, (event:egret.TouchEvent)=>{
+        clearCachebtn.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
             LocalStore_Clear();
         }, this);
 
@@ -78,64 +94,48 @@ class LoginView extends eui.UILayer{
         cbx.horizontalCenter = 0;
         cbx.verticalCenter = 0;
         cbx.height = 20;
-        if(this._environment === GameData.ENVIRONMENT.dev)cbx.selected = true;
+        cbx.selected = true;
         this.addChild(cbx);
-        cbx.addEventListener(eui.UIEvent.CHANGE,(evt:eui.UIEvent)=>{
-            if(evt.target.selected){
-                this._environment = GameData.ENVIRONMENT.dev;//alpha开发环境
-            }else{
-                this._environment = GameData.ENVIRONMENT.pro;//release正式环境
-            }
-        },this
-        );
-	}
+    }
 
-    private onButtonClick(e: egret.TouchEvent) {
-		GameData.response.initResponse = this.initResponse.bind(this);
-        GameData.gameID = Number(this._gameidInput.text);
-        console.log(" environment="+ this._environment + " gameid="+ GameData.gameID);
-        let result = GameData.engine.init(GameData.response, GameData.CHANNEL, this._environment, GameData.gameID);
-        console.log("mvs.init result:" + result);
-	}
 
-	private initResponse(status:number) {
-		console.log("initResponse,status:" + status);
-		GameData.response.registerUserResponse = this.registerUserResponse.bind(this);
+    private initResponse(status: number) {
+        console.log("initResponse,status:" + status);
+        GameData.response.registerUserResponse = this.registerUserResponse.bind(this);
         var result = GameData.engine.registerUser();
         if (result !== 0) {
-			console.log('注册用户失败，错误码:' + result);
-		} else {
-			console.log('注册用户成功');
-		}
-	}
+            console.log('注册用户失败，错误码:' + result);
+        } else {
+            console.log('注册用户成功');
+        }
+    }
 
-	private registerUserResponse(userInfo:MsRegistRsp) {
-		console.log("registerUserResponse:" + JSON.stringify(userInfo));
-		GameData.userInfo = userInfo;
-		var deviceId = 'abcdef';
-		var gatewayId = 0;
-		console.log("开始登陆,用户Id:" + userInfo.id);
-		GameData.response.loginResponse = this.loginResponse.bind(this);
-		// var result = GameData.engine.login(userInfo.id, userInfo.token,
-        //     200757, 1,
-        //     "6783e7d174ef41b98a91957c561cf305", "da47754579fa47e4affab5785451622c",
-        //     deviceId, gatewayId);
-        var result = GameData.engine.login(userInfo.id, userInfo.token,
-        200922, 1,
-        "42471a8aaf0a41ba86f0506552838644", "09acfcab27ad49b9ac960345cf40b293",
-        deviceId, gatewayId);
-		if (result !== 0) {
-			console.log("登陆失败,result:" + result);
-		}
-	}
+    private registerUserResponse(userInfo: MsRegistRsp) {
+        console.log("registerUserResponse:" + JSON.stringify(userInfo));
+        GameData.userInfo = userInfo;
+        var deviceId = 'abcdef';
+        var gatewayId = 0;
+        console.log("开始登陆,用户Id:" + userInfo.id);
+        GameData.response.loginResponse = this.loginResponse.bind(this);
+        var result = GameData.engine.login(userInfo.id, userInfo.token, GameData.gameID, 1, GameData.appkey, GameData.secretKey, deviceId, gatewayId);
+        if (result !== 0) {
+            console.log("登陆失败,result:" + result);
+        }
+    }
 
-	private loginResponse(login:MsLoginRsp) {
-		console.log("loginResponse, status=" + login.status);
-		if (login.status != 200) {
-			console.log("登陆失败");
-		} else {
-			console.log("登陆成功");
-			GameSceneView._gameScene.lobby();
-		}
-	}
+    private loginResponse(login: MsLoginRsp) {
+        console.log("loginResponse, status=" + login.status);
+        if (login.status != 200) {
+            console.log("登陆失败");
+        } else {
+            console.log("登陆成功 roomID=" + login.roomID);
+            if (login.roomID !== "0") {
+                GameData.roomID = login.roomID;
+                //重新连接
+                GameSceneView._gameScene.reconnectView();
+            } else {
+                GameSceneView._gameScene.lobby();
+            }
+        }
+    }
 }

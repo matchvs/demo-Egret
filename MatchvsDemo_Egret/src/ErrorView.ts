@@ -1,5 +1,6 @@
 class ErrorView extends egret.DisplayObjectContainer{
     private _parent:egret.DisplayObjectContainer;
+    
     public ReturnCallback = function(msg:string){
     }
 
@@ -15,12 +16,16 @@ class ErrorView extends egret.DisplayObjectContainer{
         this.initView();
     }
     private initView(){
+        //清理定时器
+        while(GameData.intervalList.length > 0){
+            clearTimeout(GameData.intervalList.pop());
+        }
 
         let spt = new egret.Sprite();
         spt.graphics.beginFill(0x555555, 2);
         spt.graphics.drawRect( 0, 0, this._parent.width, this._parent.height );
         spt.graphics.endFill();
-        this.addChild( spt );
+        this.addChild( spt );   
 
         let errorMsg:eui.Label = new eui.Label();
         errorMsg.textAlign = "center";
@@ -41,13 +46,31 @@ class ErrorView extends egret.DisplayObjectContainer{
         exitBtn.height = 60;
         exitBtn.horizontalCenter = 0;
         exitBtn.x = this._parent.width*0.3;
-        exitBtn.y = this._parent.height*0.8;
+        exitBtn.y = this._parent.height*0.7;
         exitBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
         spt.addChild(exitBtn);
 
     }
 
+    public showReconnect(){
+        let recBtn:eui.Button = new eui.Button();
+        recBtn.label = "重新连接";
+        recBtn.width = 400;
+        recBtn.height = 50;
+        recBtn.horizontalCenter = 0;
+        recBtn.x = this._parent.width*0.3;
+        recBtn.y = this._parent.height*0.8;
+        recBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonReconnRoom, this);
+        this.addChild(recBtn);
+    }
+
+    private mbuttonReconnRoom(event:egret.TouchEvent){
+        //重连
+        GameSceneView._gameScene.reconnectView();
+    }
+    
     private mbuttonExitRoom(event:egret.TouchEvent){
         this.ReturnCallback("");
     }
+
 }

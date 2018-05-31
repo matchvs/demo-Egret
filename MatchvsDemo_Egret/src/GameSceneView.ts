@@ -85,7 +85,6 @@ class GameSceneView extends egret.Sprite
             containt.doJoinRoomSpecial(roomID,userPropery);
         }
         this.thisContainer.addChild(containt);
-        
     }
 
     /**
@@ -97,10 +96,17 @@ class GameSceneView extends egret.Sprite
         this.thisContainer.addChild(joinroom);
     }
 
+    public reconnectView(){
+        this.removeAll();
+        let reconnect = new ReconnectView(this);
+        this.thisContainer.addChild(reconnect);
+    }
+
     public errorView(pageNo:number,msg:string):void{
         this.removeAll();
         let errorView = new ErrorView(this);
         errorView.SetErrorMsg(msg);
+        errorView.showReconnect();
         
         if(pageNo === 0){
             errorView.ReturnCallback = ()=>{
