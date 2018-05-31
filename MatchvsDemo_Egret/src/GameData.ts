@@ -5,7 +5,7 @@ declare class UserScore{
 }
 
 class GameData {
-    public static CHANNEL = "MatchVS-Test";
+    public static CHANNEL = "MatchVS";
     public static DEFAULT_ENV = "alpha";
     public static ENVIRONMENT = {"dev":"alpha","pro":"release"}
     public static gameID:number = 200757;
