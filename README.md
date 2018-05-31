@@ -4,13 +4,23 @@
 
 ## 目录
 
+v3.2.7.0 去除之前的 matchvs_wx 目录。现在目录如下：
+
 ````
-┌─── matchvs SDK库文件
-├─── matchvs_wx 支持微信下游戏的SDK库文件
+┌─── matchvs 支持 Egret SDK库文件
 ├─── MatchvsDemo_Egret Demo 工程
-├─── CHANGELOG.md
 └─── README.md
 ````
+
+
+
+> 注意：v3.2.7.0 合并了 matchvs 与 matchvs_wx 的内容为 matchvs。
+> 版本 v3.2.7.0 之前目录为
+> ┌─── matchvs 支持 Egret SDK库文件
+> ├─── matchvs_wx 支持微信小游戏的SDK库文件
+> ├─── MatchvsDemo_Egret Demo 工程
+> └─── README.md
+> 
 
 ## Demo下载和体验
 

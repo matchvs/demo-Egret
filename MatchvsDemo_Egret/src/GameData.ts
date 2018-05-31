@@ -6,12 +6,11 @@ declare class UserScore {
 
 class GameData {
     public static CHANNEL = "MatchVS";
-    // public static CHANNEL = "MatchVS-Test";
     public static DEFAULT_ENV = "alpha";
     public static ENVIRONMENT = { "dev": "alpha", "pro": "release" }
-    public static gameID: number = 201170;//200757;
-    public static appkey: string = "a5b937f29a4c480bb6946093105c0565";//6783e7d174ef41b98a91957c561cf305
-    public static secretKey: string = "a8c5c84afde44136a5eea6f0ac09887c";//da47754579fa47e4affab5785451622c
+    public static gameID: number = 200757;//200757;
+    public static appkey: string = "6783e7d174ef41b98a91957c561cf305";//6783e7d174ef41b98a91957c561cf305
+    public static secretKey: string = "da47754579fa47e4affab5785451622c";//da47754579fa47e4affab5785451622c
     public static engine: MatchvsEngine = new MatchvsEngine();
     public static response: MatchvsResponse = new MatchvsResponse();
     public static userInfo: MsRegistRsp = null;
