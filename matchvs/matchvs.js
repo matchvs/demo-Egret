@@ -303,7 +303,15 @@ var format = function (fmt) {
     return result;
 };
 /* ================ matchvsLog.js ================= */
-var MatchvsLog = {};
+var MatchvsLog = {
+    toArray: function (argument) {
+        var args = [];
+        for (var i = 0; i < argument.length; i++) {
+            args.push(argument[i]);
+        }
+        return args;
+    }
+};
 function getNowFormatDate() {
     var date = new Date();
     var ___ = "-";
@@ -323,8 +331,34 @@ function getNowFormatDate() {
 }
 MatchvsLog.openLog = function () {
     console.log("---- open log ----");
-    MatchvsLog.logI = console.log.bind(console, "[INFO ] " + getNowFormatDate() + " ");
-    MatchvsLog.logE = console.error.bind(console, "[ERROR] " + getNowFormatDate() + " ");
+    if (typeof (wx) === "undefined") {
+        MatchvsLog.logI = console.log.bind(console, "[INFO ] " + " ");
+        MatchvsLog.logE = console.error.bind(console, "[ERROR] " + " ");
+    }
+    else {
+        MatchvsLog.logI = function () {
+            var loc = "";
+            try {
+                throw new Error();
+            }
+            catch (e) {
+                var line = e.stack.split(/\n/)[1];
+                loc = line.slice(line.lastIndexOf("/") + 1, line.lastIndexOf(")"));
+            }
+            console.info("[INFO ] " + getNowFormatDate() + " " + this.toArray(arguments) + " " + loc);
+        };
+        MatchvsLog.logE = function () {
+            var loc = "";
+            try {
+                throw new Error();
+            }
+            catch (e) {
+                var line = e.stack.split(/\n/)[1];
+                loc = line.slice(line.lastIndexOf("/") + 1, line.lastIndexOf(")"));
+            }
+            console.error("[ERROR] " + getNowFormatDate() + " " + this.toArray(arguments) + " " + loc);
+        };
+    }
 };
 MatchvsLog.closeLog = function () {
     console.log("---- close log ----");
@@ -19226,7 +19260,7 @@ try {
             socket.onClose(function (e) {
                 socketOpen = false;
                 mCallBack.onDisConnect && mCallBack.onDisConnect(mHost, e);
-                MatchvsLog.logI("[wx.WebSocket] [onClose] case:" + e);
+                MatchvsLog.logI("[wx.WebSocket] [onClose] case:" + JSON.stringify(e));
             });
             socket.onMessage(function (res) {
                 var dataView = new DataView(res.data);
@@ -19234,7 +19268,7 @@ try {
             });
             socket.onError(function (event) {
                 mCallBack.onDisConnect && mCallBack.onDisConnect(mHost, event);
-                MatchvsLog.logI("[wx.WebSocket] [onError] case:" + event);
+                MatchvsLog.logI("[wx.WebSocket] [onError] case:" + JSON.stringify(event));
             });
         };
         MatchvsHttp = function MatchvsHttp(callback) {
@@ -20068,7 +20102,7 @@ function MatchvsEngine() {
                     else {
                         engine.mEngineState &= ~ENGE_STATE.LOGINING;
                         engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
+                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Login is fail,Server Response Error");
                     }
                     engine.mEngineState &= ~ENGE_STATE.LOGINING;
                     engine.mRecntRoomID = packet.payload.getRoomid();
@@ -20352,7 +20386,7 @@ function MatchvsEngine() {
             if (host.endsWith(HttpConf.HOST_GATWAY_ADDR)) {
                 if ((engine.mEngineState & ENGE_STATE.LOGOUTING) !== ENGE_STATE.LOGOUTING) {
                     //如果gateway 异常断开连接了就返回错误消息
-                    if (event && event.code && event.code === 1000) {
+                    if (event && event.code && (event.code === 1000 || event.code === 1005)) {
                         MatchvsLog.logI("gateway close is friend");
                     }
                     else {
@@ -20368,7 +20402,7 @@ function MatchvsEngine() {
                 MatchvsLog.logI("hotel disconnect");
                 if ((engine.mEngineState & ENGE_STATE.LEAVE_ROOMING) !== ENGE_STATE.LEAVE_ROOMING) {
                     //针对，如果直接退出房间，没有调用 leaveRoom接口
-                    if (event && event.code && event.code === 1000) {
+                    if (event && event.code && (event.code === 1000 || event.code === 1005)) {
                         MatchvsLog.logI("hotel close is friend");
                     }
                     else {
@@ -20387,10 +20421,6 @@ function MatchvsEngine() {
         };
     };
     this.init = function (response, channel, platform, gameID) {
-        if (!(("Matchvs" === channel) || ("MatchVS" === channel) || ("MatchVS-Test" === channel) || ("MatchVS-Test1" === channel)))
-            return -25; //非法channel
-        if (!("alpha" === platform || "Alpha" === platform || "release" === platform || "Release" === platform))
-            return -26; //非法Environment
         this.mRsp = response;
         this.mChannel = channel;
         this.mPlatform = platform;
@@ -20516,7 +20546,8 @@ function MatchvsEngine() {
         return "MatchVS-SDK-JS_v1.3.0.beta.201805016";
     };
     this.uninit = function () {
-        engine.mEngineState = ENGE_STATE.NONE;
+        this.mEngineState = ENGE_STATE.NONE;
+        MatchvsLog.logI("unInit ");
         return 0;
     };
     /**
@@ -20960,7 +20991,7 @@ MatchvsEngine.prototype.logout = function (cpProto) {
         return -4;
     if ((this.mEngineState & ENGE_STATE.IN_ROOM) === ENGE_STATE.IN_ROOM) {
         this.mEngineState |= ENGE_STATE.LEAVE_ROOMING;
-        this.mEngineState.leaveRoom();
+        this.leaveRoom("user logout");
         this.mHotelNetWork && this.mHotelNetWork.close();
     }
     var buf = this.mProtocol.logout(cpProto);
