@@ -55,6 +55,8 @@ class RoomListView  extends egret.DisplayObjectContainer{
         this.getRoomListEx();
         this._timer = new egret.Timer(2000, 0);
         this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
+        //监听获取房间列表事件
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMLIST_EX_RSP,this.getRoomListExResponse,this);
         this._timer.start();
         
     }
@@ -71,8 +73,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         GameData.createRoomInfo.mode,
         GameData.createRoomInfo.canWatch,
         GameData.createRoomInfo.roomProperty, 0, 1, 0, 0, 0, 3);
-        GameData.response.getRoomListExResponse = this.getRoomListExResponse.bind(this);
-        GameData.engine.getRoomListEx(filter);
+        mvs.MsEngine.getInstance.getRoomListEx(filter);
     }
 
     private mbuttonExitRoom(event:egret.TouchEvent){
@@ -90,6 +91,9 @@ class RoomListView  extends egret.DisplayObjectContainer{
         }
     }
 
+    /**
+     * 获取房间列表 简单版接口，现在没有使用
+     */
     private getRoomListResponse(status:number, roomInfos:Array<MsRoomInfoEx>){
         if( status !== 200){
             this._messageText.text = "获取房间列表错误："+status;
@@ -114,7 +118,8 @@ class RoomListView  extends egret.DisplayObjectContainer{
     /**
      * 获取房间信息列表扩展接口，跟getRoomList接口相比 此接口提供更多的房间信息
      */
-    private getRoomListExResponse(rsp:MsGetRoomListExRsp){
+    private getRoomListExResponse(ev:egret.Event){
+        let rsp:MsGetRoomListExRsp = ev.data;
         if(rsp.status !== 200){
             this._messageText.text = "获取房间列表错误："+status;
             this._messageText.visible = false;
@@ -150,5 +155,6 @@ class RoomListView  extends egret.DisplayObjectContainer{
     }
     public Release(){
         this._timer.stop();
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMLIST_EX_RSP,this.getRoomListExResponse,this);
     }
 }

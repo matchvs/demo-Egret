@@ -29,7 +29,7 @@ class ResultView extends eui.UILayer {
 	}
 	private onButtonLeaveRoom(e: egret.TouchEvent) {
 		console.log("onButtonLeaveRoom");
-		GameData.engine.leaveRoom('');
+		mvs.MsEngine.getInstance.leaveRoom("游戏玩完一次离开");
 		GameSceneView._gameScene.lobby();
 		GameData.isRoomOwner = false;
 		GameData.syncFrame = false;

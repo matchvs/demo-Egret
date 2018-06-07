@@ -8,20 +8,20 @@
 		"libs/modules/game/game.js",
 		"libs/modules/promise/promise.js",
 		"libs/modules/socket/socket.js",
-		"libs/modules/matchvs/matchvs.js"
+		"libs/modules/matchvs/matchvs.js",
+		"libs/modules/wxshare/wxshare.js"
 	],
 	"game": [
-		"bin-debug/Main.js",
-		"bin-debug/AssetAdapter.js",
+		"bin-debug/Game/GameUser.js",
+		"bin-debug/util/Toast.js",
 		"bin-debug/ErrorView.js",
-		"bin-debug/GameData.js",
 		"bin-debug/GamePlayView.js",
 		"bin-debug/GameSceneView.js",
 		"bin-debug/JoinRoomSpecialView.js",
 		"bin-debug/LoadingUI.js",
 		"bin-debug/LobbyView.js",
 		"bin-debug/LoginView.js",
-		"bin-debug/CreateRoomView.js",
+		"bin-debug/Main.js",
 		"bin-debug/MatchView.js",
 		"bin-debug/Platform.js",
 		"bin-debug/ReconnectView.js",
@@ -30,6 +30,12 @@
 		"bin-debug/RoomView.js",
 		"bin-debug/TagsMatch.js",
 		"bin-debug/ThemeAdapter.js",
-		"bin-debug/util/Toast.js"
+		"bin-debug/Game/GameData.js",
+		"bin-debug/AssetAdapter.js",
+		"bin-debug/matchvs/MsEngine.js",
+		"bin-debug/matchvs/MsEvent.js",
+		"bin-debug/matchvs/MsResponse.js",
+		"bin-debug/util/MD5.js",
+		"bin-debug/CreateRoomView.js"
 	]
 }

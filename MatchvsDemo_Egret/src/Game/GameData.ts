@@ -1,9 +1,3 @@
-declare class UserScore {
-    public userID: number;
-    public score: number;
-    constructor(userID: number, score: number)
-}
-
 class GameData {
     public static CHANNEL = "MatchVS";
     public static DEFAULT_ENV = "alpha";
@@ -11,16 +5,17 @@ class GameData {
     public static gameID: number = 200757;//200757;
     public static appkey: string = "6783e7d174ef41b98a91957c561cf305";//6783e7d174ef41b98a91957c561cf305
     public static secretKey: string = "da47754579fa47e4affab5785451622c";//da47754579fa47e4affab5785451622c
-    public static engine: MatchvsEngine = new MatchvsEngine();
-    public static response: MatchvsResponse = new MatchvsResponse();
-    public static userInfo: MsRegistRsp = null;
+
+    public static gameUser: GameUser = new GameUser();
+    public static playerUserIds: Array<GameUser> = [];
+
     public static matchType: number = 0; //匹配类型
     public static randomMatch: number = 1;//随机匹配
     public static specialMatch: number = 2;//指定房间号匹配
     public static tagsMatch: number = 3; //指定属性匹配
     public static maxPlayerNum: number = 3;
-    public static playerUserIds: Array<number> = null;
     public static isRoomOwner: boolean = false;
+    
     public static gameStartEvent: string = "gameStart";
     public static playerPositionEvent: string = "playerPosition";
     public static reconnectStartEvent: string = "gameReconnectStart";
@@ -28,6 +23,7 @@ class GameData {
     public static changeStarEvent: string = "changeStar";
     public static gameReadyEvent: string = "gameReady";
     public static reconnectReadyEvent: string = "gameReconnectReady";
+
     public static events = {};
     public static syncFrame: boolean = false;
     public static isGameOver: boolean = false;
@@ -36,7 +32,6 @@ class GameData {
     public static frameRate: number = 5;
     public static defaultHeight: number = 400;
     public static roomID: string = "";
-    public static userScoreAll: Array<UserScore>;
     public static intervalList: Array<number> = [];
     public static number1: string = "";
     public static number2: string = "";
@@ -68,6 +63,35 @@ class GameData {
             GameData.appkey="938e1ee0db444a079fe0695598677ba0";
             GameData.secretKey="9b11e0eca09141a1961d49d6b6028075";
         }
+    }
 
+    /**
+     * 获取绑定openID地址
+     */
+    public static getBindOpenIDAddr(channel:string, platform:string):string{
+        if(channel == "MatchVS" || channel == "Matchvs"){
+            if(platform == "release"){
+                return "http://vsuser.matchvs.com/wc6/thirdBind.do?"
+            }else if(platform == "alpha"){
+                return "http://alphavsuser.matchvs.com/wc6/thirdBind.do?";
+            }
+        }else if(channel == "MatchVS-Test1"){
+            if(platform == "release"){
+                return "http://zwuser.matchvs.com/wc6/thirdBind.do?"
+            }else if(platform == "alpha"){
+                return "http://alphazwuser.matchvs.com/wc6/thirdBind.do?";
+            }
+        }
+        
+    }
+
+
+    /**
+     * 获取签名
+     */
+    public static getSign(params:string):string{
+        let str = GameData.appkey+"&"+params+"&"+GameData.secretKey;
+        let md5Str:string = new MD5().hex_md5(str);
+        return md5Str;
     }
 }

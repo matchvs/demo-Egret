@@ -6,7 +6,6 @@ class GameSceneView extends egret.Sprite
     {
         super();
         GameSceneView._gameScene = this;
-        GameData.response.errorResponse = GameSceneView.errorResponse;
         this.initView();
     }
     public static errorResponse(errCode:number, errMsg:string){
@@ -124,7 +123,6 @@ class GameSceneView extends egret.Sprite
 
     private removeAll():void
     {
-        GameData.response.errorResponse = GameSceneView.errorResponse;
         this.thisContainer.removeChildren();
     }
 

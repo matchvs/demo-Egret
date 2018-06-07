@@ -25,19 +25,18 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this.startLoad();
 	}
 	private startLoad():void {
+		
+
 		GameData.starPositionX = 0;
-		GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
-		GameData.response.networkStateNotify = this.networkStateNotify.bind(this);
 
         if (GameData.syncFrame === true && GameData.isRoomOwner === true) {
-            GameData.response.setFrameSyncResponse = this.setFrameSyncResponse.bind(this);
-            var result = GameData.engine.setFrameSync(GameData.frameRate);
+			let result = mvs.MsEngine.getInstance.setFrameSync(GameData.frameRate);
             if (result !== 0){
 				console.log('设置帧同步率失败,错误码:' + result);
 			}
         }
 
-		GameData.userScoreAll = [];
+		// GameData.userScoreAll = [];
 		GameData.isGameOver = false;
 		this._score = 0;
 		this._receiveCountValue = 0;
@@ -61,7 +60,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         let userIdLabel = new eui.Label();
         userIdLabel.textColor = 0xffffff;
         userIdLabel.fontFamily = "Tahoma";  //设置字体
-		userIdLabel.text = "用户id:" + GameData.userInfo.id;
+		userIdLabel.text = "用户id:" + GameData.gameUser.id+"["+GameData.gameUser.name+"]";
 		userIdLabel.size = this._fontSize;
         userIdLabel.x = 20;
         userIdLabel.y = 20;
@@ -154,17 +153,42 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		loader3.addEventListener(egret.Event.COMPLETE, this.onLoadComplete3, this);
 		var url:string = "resource/assets/Game/cartoon-egret_03.png";
 		loader3.load(url);
-	
+		
+		//注册matchvs网络监听事件
+		this.addMsResponseListen();
 	}
+
+	/**
+	 * 注册 matchvs 组件监听事件
+	 */
+	private addMsResponseListen(){
+        //发送消息
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SENDEVENT_NTFY, this.sendEventNotify,this);
+        //离开房间
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
+
+		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_NETWORKSTATE_NTFY, this.networkStateNotify,this);
+
+		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SETFRAMESYNC_RSP, this.setFrameSyncResponse,this);
+		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_FRAMEUPDATE, this.frameUpdate,this);
+    }
+
+    public release(){
+
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SENDEVENT_NTFY, this.sendEventNotify,this);
+
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
+
+		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_NETWORKSTATE_NTFY, this.networkStateNotify,this);
+
+		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SETFRAMESYNC_RSP, this.setFrameSyncResponse,this);
+		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_FRAMEUPDATE, this.frameUpdate,this);
+    }
 
 	private initUserScore() {
 		var i:number = 0;
 		for(i = 0; i < GameData.playerUserIds.length; i++) {
-			var userScore = {
-				userID: GameData.playerUserIds[i],
-				score: 0,
-			};
-			GameData.userScoreAll.push(userScore);
+			GameData.playerUserIds[i].pValue = 0;
 		}
 		this.setScoreLabel();
 	}
@@ -172,46 +196,42 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	private setUserScore(userID:number, score:number) {
 		var isFind:boolean = false;
 		var i:number = 0;
-		for(i = 0; i < GameData.userScoreAll.length; i++) {
-			if (GameData.userScoreAll[i].userID == userID) {
+		for(i = 0; i < GameData.playerUserIds.length; i++) {
+			if (GameData.playerUserIds[i].id == userID) {
 				isFind = true;
-				GameData.userScoreAll[i].score = score;
+				GameData.playerUserIds[i].pValue = score;
 				break;
 			}
-		}
-		if (isFind == false) {
-			var userScore = {
-				userID: userID,
-				score: score,
-			};
-			GameData.userScoreAll.push(userScore);
 		}
 		this.bubbleSort();
 		this.setScoreLabel();
 	}
 
 	private setScoreLabel() {
-		GameData.number1 = GameData.userScoreAll[0].userID + ': ' + GameData.userScoreAll[0].score;
-		GameData.number2 = GameData.userScoreAll[1].userID + ': ' + GameData.userScoreAll[1].score;
-		GameData.number3 = GameData.userScoreAll[2].userID + ': ' + GameData.userScoreAll[2].score;
+		GameData.number1 = (GameData.playerUserIds[0].name != "" ? GameData.playerUserIds[0].name : GameData.playerUserIds[0].id) + ': ' + GameData.playerUserIds[0].pValue;
+		GameData.number2 = (GameData.playerUserIds[1].name != "" ? GameData.playerUserIds[1].name : GameData.playerUserIds[1].id) + ': ' + GameData.playerUserIds[1].pValue;
+		GameData.number3 = (GameData.playerUserIds[2].name != "" ? GameData.playerUserIds[2].name : GameData.playerUserIds[2].id) + ': ' + GameData.playerUserIds[2].pValue;
 		this._scoreLabel.text = GameData.number1 + "\n" + GameData.number2 + "\n" + GameData.number3;
 	}
 
     private bubbleSort() {
-        var len = GameData.userScoreAll.length;
+        var len = GameData.playerUserIds.length;
         for (var i = 0; i < len; i++) {
             for (var j = 0; j < len - 1 - i; j++) {
-                if (GameData.userScoreAll[j].score > GameData.userScoreAll[j+1].score) {        //相邻元素两两对比
-                    var temp = GameData.userScoreAll[j+1];        //元素交换
-                    GameData.userScoreAll[j+1] = GameData.userScoreAll[j];
-                    GameData.userScoreAll[j] = temp;
+                if (GameData.playerUserIds[j].pValue > GameData.playerUserIds[j+1].pValue) {        //相邻元素两两对比
+                    var temp = GameData.playerUserIds[j+1];        //元素交换
+                    GameData.playerUserIds[j+1] = GameData.playerUserIds[j];
+                    GameData.playerUserIds[j] = temp;
                 }
             }
         }
     }
 
-	private setFrameSyncResponse(rsp:MsSetChannelFrameSyncRsp) {
-		console.log("setFrameSyncResponse:mStatus="+rsp.mStatus);
+	/**
+	 * 设置帧同步
+	 */
+	private setFrameSyncResponse(ev:egret.Event) {
+		let rsp = ev.data;
 		if(rsp.mStatus == 200) {
 			console.log("设置帧同步率成功");
 		} else {
@@ -219,6 +239,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		}
 	}
 
+	/**
+	 * 玩家1 加载完成
+	 */
 	private onLoadComplete(event:egret.Event):void {
 		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
 		var bitmapData:egret.BitmapData = loader.data;
@@ -229,7 +252,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this._egretBird0.anchorOffsetY = this._egretBird0.height/2;
         this._egretBird0.x = this.stage.stageWidth/2;
         this._egretBird0.y = GameData.defaultHeight;
-		this._egretBird0.name = GameData.playerUserIds[0].toString();
+		this._egretBird0.name = GameData.playerUserIds[0].id.toString();
         this.addChild(this._egretBird0);		
 
         let buttonLeft = new eui.Button();
@@ -248,7 +271,6 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this.addChild(buttonRight);
 		buttonRight.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickRight, this);
 
-		GameData.response.leaveRoomNotify = this.leaveRoomNotify.bind(this);
         let buttonLeave = new eui.Button();
         buttonLeave.label = "离开游戏";
         buttonLeave.x = this.stage.stageWidth - 120;
@@ -260,6 +282,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		var idCountDown = setInterval(() => {
 			this._countDownLabel.text = (Number(this._countDownLabel.text) - 1).toString();
 			if(this._countDownLabel.text == "0") {
+				this.release();
 				GameData.isGameOver = true;
 				GameSceneView._gameScene.showResult();
 			}
@@ -272,30 +295,33 @@ class GamePlayView extends egret.DisplayObjectContainer{
 
 		//发送位置信息
         if (GameData.syncFrame === false) {
-			GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
+
+			let userids = [];
+			
+			 GameData.playerUserIds.forEach((user)=>{
+				 userids.push(user.id);
+			 });
             var id = setInterval(() => {
-                GameData.engine.sendEventEx(0, JSON.stringify({
+				mvs.MsEngine.getInstance.sendEventEx(0, JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,
 					y: GameData.defaultHeight,
                     ts: new Date().getTime(),
-					uid: GameData.userInfo.id
-                }), 0, GameData.playerUserIds);
+					uid: GameData.gameUser.id
+                }), 0, userids);
                 if (GameData.isGameOver === true) {
                     clearInterval(id);
                 }
             }, 200);
 			GameData.intervalList.push(id);
         } else {
-			GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
-			GameData.response.frameUpdate = this.frameUpdate.bind(this);
             var id = setInterval(() => {
-                GameData.engine.sendFrameEvent(JSON.stringify({
+				mvs.MsEngine.getInstance.sendFrameEvent(JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,
 					y: GameData.defaultHeight,
                     ts: new Date().getTime(),
-					uid: GameData.userInfo.id
+					uid: GameData.gameUser.id
                 }));
                 if (GameData.isGameOver === true) {
                     clearInterval(id);
@@ -304,10 +330,19 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			GameData.intervalList.push(id);
 		}
 	}
-	private leaveRoomNotify(roomId:string, roomuserinfo:MsRoomUserInfo) {
+
+	/**
+	 * 离开房间异步回调
+	 */
+	private leaveRoomNotify(ev:egret.Event) {
 		GameData.isGameOver = true;
+		this.release();
 		GameSceneView._gameScene.showResult();
 	}
+
+	/**
+	 * 玩家2加载完成
+	 */
 	private onLoadComplete2(event:egret.Event):void {
 		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
 		var bitmapData:egret.BitmapData = loader.data;
@@ -318,9 +353,13 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this._egretBird1.anchorOffsetY = this._egretBird1.height/2;
         this._egretBird1.x = this.stage.stageWidth/2;
         this._egretBird1.y = GameData.defaultHeight;
-		this._egretBird1.name = GameData.playerUserIds[1].toString();
+		this._egretBird1.name = GameData.playerUserIds[1].id.toString();
         this.addChild(this._egretBird1);
 	}
+
+	/**
+	 * 玩家3加载完成
+	 */
 	private onLoadComplete3(event:egret.Event):void {
 		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
 		var bitmapData:egret.BitmapData = loader.data;
@@ -331,15 +370,16 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this._egretBird2.anchorOffsetY = this._egretBird2.height/2;
         this._egretBird2.x = this.stage.stageWidth/2;
         this._egretBird2.y = GameData.defaultHeight;
-		this._egretBird2.name = GameData.playerUserIds[2].toString();
+		this._egretBird2.name = GameData.playerUserIds[2].id.toString();
         this.addChild(this._egretBird2);
 	}
+
 	private processStar() {
 		var length:number = Math.abs(this._egretBird0.x - this._star.x);
 		console.log("length:" + length);
 		if (length <= (this._star.width + this._egretBird0.width)/2) {
 			this._score++;
-			this.setUserScore(GameData.userInfo.id, this._score);
+			this.setUserScore(GameData.gameUser.id, this._score);
 
 			var newX:number = 0;
 			newX = Math.random() * this.stage.width;
@@ -350,7 +390,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				y: GameData.defaultHeight,
 				score: this._score,
 			}
-			var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+			var result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0)
 				return console.log('足球位置变更事件发送失败:' + JSON.stringify(result));			
 		}
@@ -376,8 +416,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this.processStar();
 	}
 	private onButtonLeaveRoom(e: egret.TouchEvent) {
-		//console.log("onButtonLeaveRoom");
-		GameData.engine.leaveRoom('');
+		this.release();
+		mvs.MsEngine.getInstance.leaveRoom("踢球好累");
 		GameSceneView._gameScene.lobby();
 		GameData.isGameOver = true;
 		GameData.isRoomOwner = false;
@@ -389,12 +429,19 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		var url:string = "resource/assets/Game/star1.png";
 		loader.load(url);
 	}
+	/**
+	 * 第一次生成小足球
+	 */
 	private createStarFirst() {
 		var loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStarFirst, this);
 		var url:string = "resource/assets/Game/star1.png";
 		loader.load(url);
 	}	
+
+	/**
+	 * 小足球图片加载完成事件
+	 */
 	private onLoadStarFirst(event:egret.Event):void {
 		GameData.starPositionX = Math.random() * this.stage.width;
 		GameData.starPositionY = GameData.defaultHeight;		
@@ -414,7 +461,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				x: this._star.x,
 				y: GameData.defaultHeight
 			}
-			var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+			var result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0) {
 				return console.log('创建足球事件发送失败');
 			}
@@ -432,16 +479,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._star.x = GameData.starPositionX;
         this._star.y = GameData.starPositionY;
         this._starObject = this.addChild(this._star);
-		// if (GameData.isRoomOwner === true) {
-		// 	var eventTemp = {
-		// 		action: GameData.newStarEvent,
-		// 		x: this._star.x,
-		// 		y: GameData.defaultHeight
-		// 	}
-		// 	var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
-		// 	if (!result || result.result !== 0)
-		// 		return console.log('创建足球事件发送失败');
-		// }
+
 	}
 	private deleteStar() {
 		if(this.contains(this._star)){
@@ -453,11 +491,14 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._star.y = y;
 	}
 
-	private sendEventNotify(sdnotify:MsSendEventNotify) {
-		//console.log("sendEventNotify:" + JSON.stringify(sdnotify));
+	/**
+	 * 收到消息事件，用于控制小鸭子的情况
+	 */
+	private sendEventNotify(event:egret.Event) {
+		let sdnotify = event.data;
         if (sdnotify && sdnotify.cpProto) {
             if (sdnotify.cpProto.indexOf(GameData.newStarEvent) >= 0) {
-				if(sdnotify.srcUserId != GameData.userInfo.id) {
+				if(sdnotify.srcUserId != GameData.gameUser.id) {
 					//console.log("new star event");
 					var info = JSON.parse(sdnotify.cpProto);
 					GameData.starPositionX = info.x;
@@ -471,7 +512,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				this._receiveMsgCountLabel.text = "receive msg count: " + this._receiveCountValue;
                 var cpProto = JSON.parse(sdnotify.cpProto);
                 
-                if (sdnotify.srcUserId == GameData.userInfo.id) {
+                if (sdnotify.srcUserId == GameData.gameUser.id) {
                     var delayValue = new Date().getTime() - cpProto.ts;
                     if (this._minDelayValue === undefined || delayValue < this._minDelayValue) {
                         this._minDelayValue = delayValue;
@@ -492,14 +533,14 @@ class GamePlayView extends egret.DisplayObjectContainer{
                 }
             } else if (sdnotify.cpProto.indexOf(GameData.reconnectStartEvent) >= 0) {
 				var info = JSON.parse(sdnotify.cpProto);
-				if(info.userID === GameData.userInfo.id && GameData.starPositionX === 0) {
+				if(info.userID === GameData.gameUser.id && GameData.starPositionX === 0) {
 					GameData.starPositionX = info.x;
 					GameData.starPositionY = info.y;
-					GameData.userScoreAll = info.PlayerScoreInfos;
+					GameData.playerUserIds = info.PlayerScoreInfos;
 					let self = this;
-					GameData.userScoreAll.forEach(function(value){
-						if(value.userID === info.userID){
-							self._score = value.score;
+					GameData.playerUserIds.forEach(function(value){
+						if(value.id === info.userID){
+							self._score = value.pValue;
 						}
 					});
 					this._countDownLabel.text = info.timeCount;
@@ -508,7 +549,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					this.setScoreLabel();
 				}
 			} else if (sdnotify.cpProto.indexOf(GameData.changeStarEvent) >= 0) {
-				if(sdnotify.srcUserId != GameData.userInfo.id) {
+				if(sdnotify.srcUserId != GameData.gameUser.id) {
 					var info = JSON.parse(sdnotify.cpProto);
 					this.changeStarPosition(info.x, info.y);
 					this.setUserScore(sdnotify.srcUserId, info.score);
@@ -518,12 +559,13 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				var eventTemp = {
 					action: GameData.reconnectStartEvent,
 					userID: sdnotify.srcUserId,
-					PlayerScoreInfos:GameData.userScoreAll,
+					PlayerScoreInfos:GameData.playerUserIds,
 					timeCount:Number(this._countDownLabel.text),
 					x: this._star.x,
 					y: GameData.defaultHeight
 				}
-				var result = GameData.engine.sendEvent(JSON.stringify(eventTemp));
+				//发送游戏数据
+				let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
 				if (!result || result.result !== 0) {
 					return console.log('重连创建足球事件发送失败');
 				}
@@ -532,7 +574,11 @@ class GamePlayView extends egret.DisplayObjectContainer{
         }
 	}
 
-	private frameUpdate(data:MsFrameData) {
+	/**
+	 * 帧同步更新
+	 */
+	private frameUpdate(ev:egret.Event) {
+		let data = ev.data;
 		for (var i = 0 ; i < data.frameItems.length; i++) {
 			var info:MsFrameItem = data.frameItems[i];
 			if (info.cpProto.indexOf(GameData.playerPositionEvent) >= 0) {
@@ -541,7 +587,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					this._receiveMsgCountLabel.text = "receive msg count: " + this._receiveCountValue;
 					var cpProto = JSON.parse(info.cpProto);
 					
-					if (info.srcUserID == GameData.userInfo.id) {
+					if (info.srcUserID == GameData.gameUser.id) {
 						var delayValue = new Date().getTime() - cpProto.ts;
 						if (this._minDelayValue === undefined || delayValue < this._minDelayValue) {
 							this._minDelayValue = delayValue;
@@ -565,8 +611,11 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	}
 
 
-	private networkStateNotify(netnotify:MsNetworkStateNotify){
-		
+	/**
+	 * 收到其他玩家的网络状态情况
+	 */
+	private networkStateNotify(ev:egret.Event){
+		let netnotify = ev.data;
 		console.log("玩家："+netnotify.userID+" state:"+netnotify.state);
 		if(netnotify.state === 1){
 			this._netWorkNoticeLabel.text = "玩家掉线:"+netnotify.userID;
@@ -576,7 +625,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			this._netWorkNoticeLabel.text = "";
 		}else{
 			console.log("玩家："+ netnotify.userID+" 重新连接失败！离开房间，游戏结束");
-			GameData.engine.leaveRoom('');
+			mvs.MsEngine.getInstance.leaveRoom("玩累了");
+			this.release();
 			GameSceneView._gameScene.lobby();
 			GameData.isGameOver = true;
 			GameData.isRoomOwner = false;
