@@ -26,7 +26,7 @@ class LobbyView extends eui.UILayer{
         userid.textColor = 0xffffff;
         userid.width = 200;
         userid.textAlign = "center";
-        userid.text = "用户："+GameData.userInfo.id;
+        userid.text = "用户："+GameData.gameUser.id+"["+GameData.gameUser.name+"]";
         userid.size = 28;
         userid.horizontalCenter = -400;
         userid.verticalCenter = 0-(4*(this._funcButton_H+10));
@@ -150,10 +150,13 @@ class LobbyView extends eui.UILayer{
     }
 
     private onButtonClicklogOutGame(e:egret.TouchEvent){
-        GameData.response.logoutResponse = this.logoutResponse.bind(this);
-        GameData.engine.logout("logout");
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LOGOUT_RSP, this.logoutResponse,this);
+        mvs.MsEngine.getInstance.logOut();
     }
-    private logoutResponse(status:number){
+    //
+    private logoutResponse(ev:egret.Event){
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGOUT_RSP, this.logoutResponse,this);
+        let status = ev.data.status;
         if( status !== 200){
             console.log("退出登录失败!");
             return;

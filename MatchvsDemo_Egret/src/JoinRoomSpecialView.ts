@@ -79,8 +79,9 @@ class JoinRoomSpecialView extends eui.Group{
             console.log("请求输入有效的房间号")
             return
         }
-
-        GameSceneView._gameScene.createRoom(this._roomIDInput.text,GameData.userInfo.avatar);
+        let info = {name:GameData.gameUser.name,avatar:GameData.gameUser.avatar};
+		let infostr = JSON.stringify(info);
+        GameSceneView._gameScene.createRoom(this._roomIDInput.text, infostr);
     }
 
     // private errorResponse(errCode:number, errMsg:string){

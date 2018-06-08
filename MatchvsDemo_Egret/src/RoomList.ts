@@ -53,8 +53,10 @@ class RoomListView  extends egret.DisplayObjectContainer{
         exitBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
         this.addChild(exitBtn);
         this.getRoomListEx();
-        this._timer = new egret.Timer(3000, 0);
+        this._timer = new egret.Timer(2000, 0);
         this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
+        //监听获取房间列表事件
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMLIST_EX_RSP,this.getRoomListExResponse,this);
         this._timer.start();
         
     }
@@ -71,13 +73,13 @@ class RoomListView  extends egret.DisplayObjectContainer{
         GameData.createRoomInfo.mode,
         GameData.createRoomInfo.canWatch,
         GameData.createRoomInfo.roomProperty, 0, 1, 0, 0, 0, 3);
-        GameData.response.getRoomListExResponse = this.getRoomListExResponse.bind(this);
-        GameData.engine.getRoomListEx(filter);
+        mvs.MsEngine.getInstance.getRoomListEx(filter);
     }
 
     private mbuttonExitRoom(event:egret.TouchEvent){
+        this._timer.stop();
         //退出房间成功进入游戏大厅
-            GameSceneView._gameScene.lobby();
+        GameSceneView._gameScene.lobby();
     }
 
     private addRoomViews(roomCnt:number, roomIDList:Array<string>){
@@ -89,6 +91,9 @@ class RoomListView  extends egret.DisplayObjectContainer{
         }
     }
 
+    /**
+     * 获取房间列表 简单版接口，现在没有使用
+     */
     private getRoomListResponse(status:number, roomInfos:Array<MsRoomInfoEx>){
         if( status !== 200){
             this._messageText.text = "获取房间列表错误："+status;
@@ -113,7 +118,8 @@ class RoomListView  extends egret.DisplayObjectContainer{
     /**
      * 获取房间信息列表扩展接口，跟getRoomList接口相比 此接口提供更多的房间信息
      */
-    private getRoomListExResponse(rsp:MsGetRoomListExRsp){
+    private getRoomListExResponse(ev:egret.Event){
+        let rsp:MsGetRoomListExRsp = ev.data;
         if(rsp.status !== 200){
             this._messageText.text = "获取房间列表错误："+status;
             this._messageText.visible = false;
@@ -136,7 +142,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         for(let i = 0; i < rsp.roomAttrs.length && i < 3; i++){
             let stateStr:string = rsp.roomAttrs[i].state === 1 ? "开放":"关闭";
             let mapValue:string = rsp.roomAttrs[i].roomProperty === GameData.roomPropertyType.mapA ? "[地图：彩图]":"[地图：灰图]";
-            let room1 = new RoomView();
+            let room1 = new RoomView(this);
             room1.name = "room";
             room1.layContents(this._parent.width*0.3,
             i*(room1.height+5)+120,
@@ -146,5 +152,9 @@ class RoomListView  extends egret.DisplayObjectContainer{
             this.addChild(room1);
             this._roomList.push(room1);
         }
+    }
+    public Release(){
+        this._timer.stop();
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMLIST_EX_RSP,this.getRoomListExResponse,this);
     }
 }

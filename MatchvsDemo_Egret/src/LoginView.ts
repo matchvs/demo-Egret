@@ -6,14 +6,13 @@ class LoginView extends eui.UILayer {
     private _inputBox_Fsize = 24;
     private _inputBox_Fcolor = 0x000000;
 
-
-
     public constructor() {
         super();
         this.initView();
     }
-    private initView(): void {
 
+    private initView(): void {
+        this.addMsResponseListen();
         let colorLabel = new eui.Label();
         colorLabel.textColor = 0xffffff;
         colorLabel.fontFamily = "Tahoma";  //设置字体
@@ -72,11 +71,8 @@ class LoginView extends eui.UILayer {
         this.addChild(button);
         button.addEventListener(egret.TouchEvent.TOUCH_TAP, e => {
             GameData.configEnvir(input.text, cbx.selected);
-            GameData.response.initResponse = this.initResponse.bind(this);
-            //GameData.gameID = Number(this._gameidInput.text);
             console.log(" environment=" + GameData.DEFAULT_ENV + " gameid=" + GameData.gameID);
-            let result = GameData.engine.init(GameData.response, GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
-            console.log("mvs.init result:" + result);
+            let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
         }, this);
 
         let clearCachebtn = new eui.Button();
@@ -99,31 +95,50 @@ class LoginView extends eui.UILayer {
     }
 
 
-    private initResponse(status: number) {
-        console.log("initResponse,status:" + status);
-        GameData.response.registerUserResponse = this.registerUserResponse.bind(this);
-        var result = GameData.engine.registerUser();
-        if (result !== 0) {
-            console.log('注册用户失败，错误码:' + result);
-        } else {
-            console.log('注册用户成功');
-        }
+    private addMsResponseListen(){
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_INIT_RSP, this.initResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_REGISTERUSER_RSP, this.registerUserResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
     }
 
-    private registerUserResponse(userInfo: MsRegistRsp) {
-        console.log("registerUserResponse:" + JSON.stringify(userInfo));
-        GameData.userInfo = userInfo;
-        var deviceId = 'abcdef';
-        var gatewayId = 0;
-        console.log("开始登陆,用户Id:" + userInfo.id);
-        GameData.response.loginResponse = this.loginResponse.bind(this);
-        var result = GameData.engine.login(userInfo.id, userInfo.token, GameData.gameID, 1, GameData.appkey, GameData.secretKey, deviceId, gatewayId);
-        if (result !== 0) {
-            console.log("登陆失败,result:" + result);
-        }
+    private release(){
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_INIT_RSP, this.initResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_REGISTERUSER_RSP, this.registerUserResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
     }
 
-    private loginResponse(login: MsLoginRsp) {
+    private initResponse(ev:egret.Event) {
+        console.log("initResponse,status:" + ev.data.status);
+        //获取微信信息
+        this.getUserFromWeChat((userInfos)=>{
+            //绑定 微信 openID 成功 生成一个 专用 userID 登录
+            LoginView.bindOpenIDWithUserID(userInfos);
+        },(res)=>{
+            //获取微信信息失败，注册游客身份登录
+            mvs.MsEngine.getInstance.registerUser();
+        });
+    }
+
+    /**
+     * 调用 matchvs 注册接口回调
+     */
+    private registerUserResponse(ev:egret.Event) {
+        let userInfo = ev.data;
+        GameData.gameUser.id = userInfo.id;
+        GameData.gameUser.name = userInfo.name;
+        GameData.gameUser.avatar = userInfo.avatar;
+        GameData.gameUser.token = userInfo.token;
+        //登录
+        if(userInfo.status == 0){
+            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token, GameData.gameID,GameData.appkey, GameData.secretKey);
+        }
+    }
+    /**
+     * 调用 matchvs login 接口回调处理
+     */
+    private loginResponse(ev:egret.Event) {
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
+        let login = ev.data;
         console.log("loginResponse, status=" + login.status);
         if (login.status != 200) {
             console.log("登陆失败");
@@ -137,5 +152,76 @@ class LoginView extends eui.UILayer {
                 GameSceneView._gameScene.lobby();
             }
         }
+    }
+
+    /**
+     * 获取微信中的用户信息,这个是支持微信用户绑定的，如果使用微信身份登录，将执行绑定操作，如果是游客身份登录将到 matchvs 生成一个游客身份的userID
+     */
+    private getUserFromWeChat(success:Function, fail:Function){
+        //获取微信信息
+        try {
+            getWxUserInfo({
+                success:(userInfos)=>{
+                    //获取OpenID
+                    getUserOpenID({
+                        success:function(openInfos){
+                            success({userInfo:userInfos, openInfo:openInfos});
+                        },
+                        fail:fail
+                    });
+                },
+                fail:fail
+            });
+        } catch (error) {
+            console.log("不是在微信平台，调用不进行绑定！");
+            fail(error);
+            
+        }
+    }
+
+    /**
+     * 绑定微信OpenID 返回用户信息
+     */
+    private static bindOpenIDWithUserID(wxUserInfo:any){
+        console.log("获取到的微信用户信息",wxUserInfo);
+        if(!wxUserInfo){
+            return;
+        }
+
+        let reqUrl = GameData.getBindOpenIDAddr(GameData.CHANNEL,GameData.DEFAULT_ENV);
+        //sign=md5(appKey&gameID=value1&openID=value2&session=value3&thirdFlag=value4&appSecret)
+        let params = "gameID="+GameData.gameID+"&openID="+wxUserInfo.openInfo.openid+"&session="+wxUserInfo.openInfo.session_key+"&thirdFlag=1";
+
+        //计算签名
+        let sign = GameData.getSign(params);
+        //重组参数
+        params = "userID=0&"+params+"&sign="+sign;
+
+        var request = new egret.HttpRequest();
+        request.responseType = egret.HttpResponseType.TEXT;
+        request.open(reqUrl+params,egret.HttpMethod.GET);
+        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.send();
+        request.addEventListener(egret.Event.COMPLETE,(event:egret.Event)=>{
+            var request = <egret.HttpRequest>event.currentTarget;
+            console.log("bindOpenIDWithUserID get data : ",request.response);
+            let repData = JSON.parse(request.response);
+            console.log("bindOpenIDWithUserID repData : ",repData);
+            //绑定成功
+            if( repData.status == 0){
+                GameData.gameUser.id = repData.data.userid;
+                GameData.gameUser.name = wxUserInfo.userInfo.nickName;
+                GameData.gameUser.avatar = wxUserInfo.userInfo.avatarUrl;
+                GameData.gameUser.token = repData.data.token;
+                //绑定成功就登录
+                mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token, GameData.gameID,GameData.appkey, GameData.secretKey);
+            }
+        },this);
+        request.addEventListener(egret.IOErrorEvent.IO_ERROR,(event:egret.IOErrorEvent)=>{
+             console.log("bindOpenIDWithUserID get error : " + event);
+        },this);
+        request.addEventListener(egret.ProgressEvent.PROGRESS,(event:egret.ProgressEvent)=>{
+            //console.log("bindOpenIDWithUserID get progress : " + Math.floor(100*event.bytesLoaded/event.bytesTotal) + "%");
+        },this);
     }
 }

@@ -9,7 +9,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private _SizeWith :number = 400;
 
     private _isInRoom:boolean = false;
-    private _isOwner:boolean = false;
+    private _isOwner:boolean = false; //房主
 
     private _createRoomInfo:MsCreateRoomInfo;
     private _startGameButton:eui.Button;
@@ -17,6 +17,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private _userHeard1:egret.Sprite;
     private _userHeard2:egret.Sprite;
     private _userHeard3:egret.Sprite;
+
+    private _headimg1:eui.Image = null;
 
     private _gameMapA:eui.RadioButton;
     private _gameMapB:eui.RadioButton;
@@ -34,7 +36,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
     private _allgameReady:Array<boolean> = [false];
     private _roomRealUserNum:number = 0;  //房间玩家数量
-    public  _userIds = [];
+    public  _playerList:Array<GameUser> = [];
     public _roomID:string = "";
 
     constructor( pr?: egret.DisplayObjectContainer){
@@ -45,42 +47,38 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         }else{
             this._parent = this;
         }
-        this._userIds = [GameData.userInfo.id];
+        this._playerList = [GameData.gameUser];
         this.initView();
     }
 
+    /**
+     * 创建界面显示元素
+     */
     private initView(){
 
-        
-        let userHeard1:egret.Sprite = new egret.Sprite;
-        userHeard1.graphics.lineStyle(3,0xffff00);
-        userHeard1.graphics.beginFill(0x112200,1);
-        userHeard1.x = this._SizeWith;
-        userHeard1.y = 200;
-        userHeard1.graphics.drawCircle(0, 0, this._UserHeadradius);
-        userHeard1.graphics.endFill();
-        userHeard1.graphics.clear;
-        this.addChild(userHeard1);
+        this._userHeard1 = new egret.Sprite;
+        this._userHeard1.graphics.lineStyle(3,0xffff00,1);
+        this._userHeard1.graphics.beginFill(0x112200,1);
+        this._userHeard1.x = this._SizeWith;
+        this._userHeard1.y = 200;
+        this._userHeard1.graphics.drawCircle(0, 0, this._UserHeadradius);
+        this._userHeard1.graphics.endFill();
+        this._userHeard1.graphics.clear;
+        this.addChild(this._userHeard1);
 
-        let userHeard2:egret.Sprite = new egret.Sprite;
-        userHeard2.graphics.lineStyle(3,0xffff00);
-        userHeard2.graphics.beginFill(0x910270,1);
-        userHeard2.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*4), 200, this._UserHeadradius);
-        userHeard2.graphics.endFill();
-        this.addChild(userHeard2);
+        this._userHeard2 = new egret.Sprite;
+        this._userHeard2.graphics.lineStyle(3,0xffff00);
+        this._userHeard2.graphics.beginFill(0x910270,1);
+        this._userHeard2.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*4), 200, this._UserHeadradius);
+        this._userHeard2.graphics.endFill();
+        this.addChild(this._userHeard2);
 
-        let userHeard3:egret.Sprite = new egret.Sprite;
-        userHeard3.graphics.lineStyle(3,0xffff00);
-        userHeard3.graphics.beginFill(0x11117f,1);
-        userHeard3.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*8), 200, this._UserHeadradius);
-        userHeard3.graphics.endFill();
-        this.addChild(userHeard3);
-
-        this._userHeard1 = userHeard1;
-        this._userHeard2 = userHeard2;
-        this._userHeard3 = userHeard3;
-
-
+        this._userHeard3 = new egret.Sprite;
+        this._userHeard3.graphics.lineStyle(3,0xffff00);
+        this._userHeard3.graphics.beginFill(0x11117f,1);
+        this._userHeard3.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*8), 200, this._UserHeadradius);
+        this._userHeard3.graphics.endFill();
+        this.addChild(this._userHeard3);
 
         var img:egret.ImageLoader = new egret.ImageLoader();
         this._imgHead1 = img;
@@ -195,34 +193,81 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this._gameMapB = rdb2;
         this.addChild(this._gameMapB);
 
-        
         exitRoom.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
         startGameBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonStartGameBtn, this);
         this._kickUserButton3.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonKickUserButton3, this);
         this._kickUserButton2.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonKickUserButton2, this);
-
-        GameData.response.errorResponse = this.errorResponse;
-        //加入房间回调
-        GameData.response.joinRoomResponse = this.joinRoomResponse.bind(this);
-        GameData.response.joinRoomNotify = this.joinRoomNotify.bind(this);
-        GameData.response.createRoomResponse = this.createRoomResponse.bind(this);
-        //离开房间回调
-        GameData.response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
-        GameData.response.leaveRoomNotify =  this.leaveRoomNotify.bind(this);
-        //踢人相关的回调
-        GameData.response.kickPlayerNotify = this.kickPlayerNotify.bind(this);
-        GameData.response.kickPlayerResponse = this.kickPlayerResponse.bind(this);
-        //发送消息相关回调
-        GameData.response.sendEventNotify = this.sendEventNotify.bind(this);
-        GameData.response.sendEventResponse = this.sendEventResponse.bind(this); // 设置事件发射之后的回调
-
-        GameData.response.joinOverNotify = this.joinOverNotify.bind(this);
-
-        GameData.response.setRoomPropertyNotify = this.setRoomPropertynotify.bind(this);
-        GameData.response.setRoomPropertyResponse = this.setRoomPropertyResponse.bind(this);
-
-
+        // 添加 matchvs 接口回调监听
+        this.addMsResponseListen();
     }
+
+        /**
+     * 注册监听
+     */
+    private addMsResponseListen(){
+        
+        //错误回调
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_ERROR_RSP, this.errorResponse, this);
+
+        //创建房间
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_CREATEROOM_RSP, this.createRoomResponse,this);
+
+        //加入房间
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_JOINROOM_RSP, this.joinRoomResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_JOINROOM_NTFY, this.joinRoomNotify,this);
+
+        //关闭房间
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_JOINOVER_NTFY, this.joinOverNotify,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_JOINOVER_RSP, this.joinOverResponse,this);
+
+        //发送消息
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SENDEVENT_RSP, this.sendEventResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SENDEVENT_NTFY, this.sendEventNotify,this);
+
+        //离开房间
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LEAVEROOM_RSP, this.leaveRoomResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
+
+        //踢人
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_KICKPLAYER_RSP, this.kickPlayerResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_KICKPLAYER_NTFY, this.kickPlayerNotify,this);
+
+        //设置房间属性
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_RSP, this.setRoomPropertyResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_NTFY, this.setRoomPropertynotify,this);
+
+        //踢人
+    }
+
+    /**
+     * 取消监听
+     */
+    public release(){
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_ERROR_RSP, this.errorResponse, this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_CREATEROOM_RSP, this.createRoomResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_JOINROOM_RSP, this.joinRoomResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_JOINROOM_NTFY, this.joinRoomNotify,this);
+
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_JOINOVER_NTFY, this.joinOverNotify,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_JOINOVER_RSP, this.joinOverResponse,this);
+
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SENDEVENT_RSP, this.sendEventResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SENDEVENT_NTFY, this.sendEventNotify,this);
+
+
+        //离开房间
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LEAVEROOM_RSP, this.leaveRoomResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
+
+        //踢人
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_KICKPLAYER_RSP, this.kickPlayerResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_KICKPLAYER_NTFY, this.kickPlayerNotify,this);
+
+        //设置房间属性
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_RSP, this.setRoomPropertyResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_NTFY, this.setRoomPropertynotify,this);
+    }
+
 
     private imgLoadHandler( event:egret.Event ):void{
         var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
@@ -231,7 +276,6 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         let texture = new egret.Texture();
         texture.bitmapData = loader.data;
         let bmp1:egret.Bitmap = new egret.Bitmap(texture);
-
         this._userHeard1.addChild(bmp1);
     }
 
@@ -241,24 +285,23 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private mbuttonLeaveRoom(event:egret.TouchEvent){
         //如果没有进入房间成功就直接返回游戏大厅界面
         if(this._isInRoom){
-            GameData.engine.leaveRoom("leaveRoom");
+            mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
         }else{
+            this.release();
             //退出房间成功进入游戏大厅
             GameSceneView._gameScene.lobby();
-        }
-        
+        } 
     }
 
     /**
      * 开始游戏
      */
     private mbuttonStartGameBtn(event:egret.TouchEvent){
-        if((this._roomRealUserNum >= GameData.maxPlayerNum)
+        if((this._playerList.length >= GameData.maxPlayerNum)
             && this.canStartGame){
-
-            GameData.response.joinOverResponse = this.joinOverResponse.bind(this);
+            GameData.playerUserIds = this._playerList;
             //停止加入房间
-            GameData.engine.joinOver("joinOver");
+            mvs.MsEngine.getInstance.joinOver("joinOver");
         }else{
             console.log("人不够，或者还有人没有准备！");
         }
@@ -268,14 +311,14 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      */
     private mbuttonKickUserButton3(event:egret.TouchEvent){
         this._kickUserID = this._userID_3.text;
-        GameData.engine.kickPlayer(Number(this._kickUserID),"");
+        mvs.MsEngine.getInstance.kickPlayer(Number(this._kickUserID),"");
     }
     /**
      * 踢掉用户2
      */
     private mbuttonKickUserButton2(event:egret.TouchEvent){
         this._kickUserID = this._userID_2.text;
-        GameData.engine.kickPlayer(Number(this._kickUserID),"");
+        mvs.MsEngine.getInstance.kickPlayer(Number(this._kickUserID),"");
     }
 
 
@@ -285,7 +328,15 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     public doCreateRoom(){
         this._createRoomInfo = GameData.createRoomInfo;
         GameData.roomPropertyValue = GameData.createRoomInfo.roomProperty;
-        GameData.engine.createRoom(GameData.createRoomInfo, "myroom");
+        //调用 matchvs 创建房间接口
+        mvs.MsEngine.getInstance.createRoom(GameData.createRoomInfo, JSON.stringify({name:GameData.gameUser.name,avatar:GameData.gameUser.avatar}));
+    }
+
+    /**
+     * 其他玩家加入房间
+     */
+    public doJoinRoomSpecial(roomID:string, userProperty:string){
+        mvs.MsEngine.getInstance.joinRoom(roomID, userProperty);
     }
 
     /**
@@ -303,11 +354,11 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this.addChild(roomid);
     }
 
-    public createKickButton(){
-    }
-
-
-    private createRoomResponse(rsp:MsCreateRoomRsp){
+    /**
+     * 创建房间事件回调
+     */
+    private createRoomResponse(ev:egret.Event){
+        let rsp = ev.data;
         if(rsp.status !== 200){
             this._roomidText.text = ("创建房间失败：status="+status);
             console.log("创建房间失败 status="+status);
@@ -318,27 +369,26 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             GameData.roomID = rsp.roomID;
             this._roomidText.text = ("房间号：\n"+rsp.roomID);
             console.log("创建房间成功 roomID="+rsp.roomID);
-            this._userID_1.text = rsp.owner.toString();
-            this._roomRealUserNum = 1;
-            this._startGameButton.visible = true;
-            this._isOwner = true;
-            this._gameMapA.enabled = true;
-            this._gameMapB.enabled = true;
-        }
-    }
 
-    /**
-     * 非房主加入房间
-     */
-    public doJoinRoomSpecial(roomID:string, userProperty:string){
-        GameData.engine.joinRoom(roomID, userProperty);
+            this._userID_1.text = rsp.owner.toString();
+
+            this._isOwner = true;
+            GameData.gameUser.isOwner = true;
+
+            this._playerList = [];
+            this._playerList.push(GameData.gameUser);
+            this.showPlayerInfo(GameData.gameUser,true);
+        }
     }
 
     /**
      * 非房主自己加入房间的回调
      */
-    private joinRoomResponse(status:number, roomuserInfoList:Array<MsRoomUserInfo>, roomInfo:MsRoomInfo){
-        if(status !== 200){
+    private joinRoomResponse(event:egret.Event){
+        let data = event.data;
+        let roomInfo = data.roomInfo;
+        let roomuserInfoList = data.userList;
+        if(data.status !== 200){
             this._roomidText.text = ("加入房间失败：status="+status);
             console.log("加入房间失败： status="+status);
             return;
@@ -346,10 +396,12 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
             console.log("owner ="+ roomInfo.ownerId.toString());
 
+            //显示房间信息
             this._isInRoom = true;
             this._roomidText.text = ("房间号：\n"+roomInfo.roomID);
             this._roomID  = roomInfo.roomID;
             GameData.roomID = roomInfo.roomID;
+
             if(roomInfo.roomProperty === GameData.roomPropertyType.mapB){
                 GameData.roomPropertyValue = GameData.roomPropertyType.mapB
                 this._gameMapB.selected = true;
@@ -357,22 +409,28 @@ class CreateRoomView extends egret.DisplayObjectContainer{
                 GameData.roomPropertyValue = GameData.roomPropertyType.mapA
                 this._gameMapA.selected = true;
             }
-            //真实人数
-            this._roomRealUserNum = roomuserInfoList.length+1;
+
+            this._playerList  = [];
+            this._playerList.push(GameData.gameUser);
+            this.showPlayerInfo(GameData.gameUser,true);
             //显示我自己的
             for(let i = 0; i < roomuserInfoList.length; i++){
                 console.log("userProfile:"+roomuserInfoList[i].userProfile);
+                let user = this.addPlayUser( roomuserInfoList[i].userId, roomuserInfoList[i].userProfile);
+                
                 /**
                  * 如果是房主就现在最左边
                  */
                 if(roomuserInfoList[i].userId === roomInfo.ownerId){
-                    this._userID_2.text =  GameData.userInfo.id.toString();
+                    user.isOwner = true;
+                    //this._userID_2.text =  GameData.gameUser.id.toString();
                 }else {
-                    this._userID_3.text = roomuserInfoList[i].userId.toString();
+                    //this._userID_3.text = roomuserInfoList[i].userId.toString();
                 }
+                this.showPlayerInfo(user,true);
             }
-            this._userID_1.text = roomInfo.ownerId.toString();
-            this._userID_2.text =  GameData.userInfo.id.toString();
+            //this._userID_1.text = roomInfo.ownerId.toString();
+            //this._userID_2.text =  GameData.gameUser.id.toString();
 
             //非房主发送准备游戏
             if(this._isOwner === false){
@@ -384,26 +442,36 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     /**
      * 有其他人加入房间的回调
      */
-    private joinRoomNotify(roomUserInfo:MsRoomUserInfo){
-        this.changeUserIDs(roomUserInfo.userId, 1);
+    private joinRoomNotify(ev:egret.Event){
+        let roomUserInfo = ev.data;
+        //加入房间
+        let user:GameUser = this.addPlayUser(roomUserInfo.userId, roomUserInfo.userProfile);
+        //显示用户
+        this.showPlayerInfo(user,true);
     }
 
-    private leaveRoomNotify(leaveRoomInfo:MsLeaveRoomNotify){
+    /**
+     * 他人离开房间回调
+     */
+    private leaveRoomNotify(ev:egret.Event){
+        let leaveRoomInfo = ev.data;
         if(leaveRoomInfo.userId.toString() === this._userID_1.text){
             //房主退出
             console.log("房主退出房间");
-            GameData.engine.leaveRoom("leaveRoom");
-            // if(leaveRoomInfo.userId === GameData.userInfo.id){
-
-            // }
+            mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
         }
-        this.changeUserIDs(leaveRoomInfo.userId, -1);
+        this.delPlayUser(leaveRoomInfo.userId);
     }
 
-    private leaveRoomResponse(rsp:MsLeaveRoomRsp){
+    /**
+     * 自己离开房间回调
+     */
+    private leaveRoomResponse(ev:egret.Event){
+        let rsp = ev.data;
         if(rsp.status !== 200){
             this._roomidText.text = ("退出房间失败！status="+rsp.status);
         }else{
+            this.release();
             //退出房间成功进入游戏大厅
             GameSceneView._gameScene.lobby();
         }
@@ -413,27 +481,31 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     /**
      * 房主剔人，其他用户收到的异步回调
      */
-    private kickPlayerNotify(knotify:MsKickPlayerNotify){
+    private kickPlayerNotify(ev:egret.Event){
+        let knotify = ev.data;
         this._kickUserID = knotify.userId.toString();
 
         //如果剔除的是自己，就退出房间
-        if(this._kickUserID === GameData.userInfo.id.toString()){
+        if(this._kickUserID === GameData.gameUser.id.toString()){
+            this.release();
             //退出房间成功进入游戏大厅
             GameSceneView._gameScene.lobby();
             return
         }else{
-            this.changeUserIDs(knotify.userId, -1);
+            this.delPlayUser(knotify.userId);
         }
     }
     /**
      * 剔除用户房主自己收到的回调
      */
-    private kickPlayerResponse(rsp:MsKickPlayerRsp){
-
-        this.changeUserIDs(rsp.userID, -1);
+    private kickPlayerResponse(ev:egret.Event){
+        let rsp = ev.data;
+        this.delPlayUser(rsp.userID);
+        //this.changeUserIDs(rsp.userID, -1);
     }
 
-    private joinOverResponse(rsp:MsJoinOverRsp){
+    private joinOverResponse(ev:egret.Event){
+        let rsp = ev.data;
         if(rsp.status !== 200){
             console.log("关闭房间失败，回调通知错误码：", rsp.status);
             return;
@@ -442,56 +514,108 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this.notifyGameStart();
     }
 
-    private changeUserIDs(userid:number, open:number){
-        console.log("用户变动：userid:="+userid+" 操作："+open)
-        if(open === 1){
-            this._roomRealUserNum += 1;
-            this._userIds.push(userid);
-
-            //显示信息
-            if(this._userID_2.text === this._userID_ptext){
-                this._userID_2.text = userid.toString();
-                if(this._isOwner){
-                    this._kickUserButton2.visible = true;
+    /**
+     * 显示用户信息
+     * @param {} user
+     * @param {} isShow true 显示用户 false 不显示用户
+     */
+    private showPlayerInfo(user:GameUser,isShow:boolean){
+        let info = user.id.toString()+"\n"+user.name;
+        if(isShow){
+            if(user.isOwner){
+                //房主在最右边位置
+                this._userID_1.text = info;
+                //如果这个房主是我自己
+                if(user.id === GameData.gameUser.id){
+                    //显示地图选择
+                    this._gameMapA.enabled = true;
+                    this._gameMapB.enabled = true;
+                    //显示开始按钮
+                    this._startGameButton.visible = true;
                 }
-            }else if(this._userID_3.text === this._userID_ptext){
-                this._userID_3.text = userid.toString();
-                if(this._isOwner){
-                    this._kickUserButton3.visible = true;
+            }else{
+                //不是房主，哪个为空就坐哪个
+                if(this._userID_2.text === this._userID_ptext){
+                    this._userID_2.text = info;
+                    //如果我自己是房主就显示踢人的标记
+                    if(this._isOwner){
+                        this._kickUserButton2.visible = true;
+                    }
+                }else if(this._userID_3.text === this._userID_ptext){
+                    this._userID_3.text = info;
+                    if(this._isOwner){
+                        this._kickUserButton3.visible = true;
+                    }
                 }
             }
-
-
-        }else if(open === -1){
-            this._roomRealUserNum -= 1;
-            for(let i = 0; i < this._userIds.length; i++){
-                if(this._userIds[i] === userid){
-                    this._userIds.splice(i,1);
-                }
-            }
-
+        }else{
             //取消显示
-            if(userid.toString() === this._userID_2.text){
+            if((info) === this._userID_2.text){
                 this._userID_2.text = this._userID_ptext;
                 this._kickUserButton2.visible = false;
-            }else if(userid.toString() === this._userID_3.text){
+            }else if(info === this._userID_3.text){
                 this._userID_3.text = this._userID_ptext;
                 this._kickUserButton3.visible = false;
             }
         }
-        if(this._isOwner)console.log("房间人数：" + this._userIds.length + " userids:"+this._userIds);
-        
     }
 
+    /**
+     * 添加用户
+     */
+    private addPlayUser(userid:number,userProfile:string):GameUser{
+        //先默认为空的
+        let userPro = {name:"",avatar:""};
+
+        if(userProfile !== ""){
+            userPro = JSON.parse(userProfile);
+        }
+
+        let gUser:GameUser = new GameUser;
+        gUser.avatar = userPro.avatar;
+        gUser.name = userPro.name;
+        gUser.id = userid;
+        this._playerList.push(gUser);
+
+        return gUser;
+    }
+
+    /**
+     * 删除用户
+     */
+    private delPlayUser(userid:number):GameUser{
+        let user:GameUser  = new GameUser();
+        for(let i = 0; i < this._playerList.length; i++){
+            if(this._playerList[i].id === userid){
+                user.id = this._playerList[i].id;
+                user.avatar = this._playerList[i].avatar;
+                user.name = this._playerList[i].name;
+                user.isOwner = this._playerList[i].isOwner;
+                //移除该用户
+                this._playerList.splice(i,1);
+            }
+        }
+        //取消显示
+        this.showPlayerInfo(user, false);
+        return user;
+    }
+
+
     private notifyGameStart(){
+        //设置房主标记，到游戏界面要用到，如果是房主要第一个 创建球的位置
         GameData.isRoomOwner = this._isOwner;
-        GameData.playerUserIds = this._userIds;
+
+        let arrs = [];
+        this._playerList.forEach((element)=>{
+            arrs.push({id:element.id,name:element.name,avatar:element.avatar});
+        });
+
         let event = {
             action: GameData.gameStartEvent,
-            userIds: GameData.playerUserIds
+            userIds: arrs
         };
         
-        let result = GameData.engine.sendEvent(JSON.stringify(event));
+        let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(event));
         if (result.result !== 0){
             console.log('发送游戏开始通知失败，错误码' + result.result);
             return;
@@ -505,7 +629,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     /**
      * 发送消息回调
      */
-    private sendEventResponse(rsp:MsSendEventRsp){
+    private sendEventResponse(ev:egret.Event){
+        let rsp = ev.data;
         if (rsp.status !== 200) {
             return console.log('事件发送失败,status:'+status);
         }
@@ -513,7 +638,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         var event = GameData.events[rsp.sequence]
 
         if (event && event.action === GameData.gameStartEvent) {
-            delete GameData.events[rsp.sequence]
+            delete GameData.events[rsp.sequence];
+            this.release();
             GameSceneView._gameScene.play();
         }
     }
@@ -521,16 +647,27 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     /**
      * 收到消息回调
      */
-    private sendEventNotify(eventInfo:MsSendEventNotify){
+    private sendEventNotify(ev:egret.Event){
+        let eventInfo = ev.data;
+        // 判断是否收到开始游戏消息
         if (eventInfo
             && eventInfo.cpProto
             && eventInfo.cpProto.indexOf(GameData.gameStartEvent) >= 0) {
-            GameData.playerUserIds = [GameData.userInfo.id]
+            this._playerList = [];
+            this._playerList.push(GameData.gameUser);
             // 通过游戏开始的玩家会把userIds传过来，这里找出所有除本玩家之外的用户ID，
             // 添加到全局变量playerUserIds中
-            JSON.parse(eventInfo.cpProto).userIds.forEach(function(userId) {
-                if (userId !== GameData.userInfo.id) GameData.playerUserIds.push(userId)
+            JSON.parse(eventInfo.cpProto).userIds.forEach((userId)=> {
+                let gUser:GameUser = new GameUser;
+                gUser.avatar = userId.avatar;
+                gUser.name = userId.name;
+                gUser.id = userId.id;
+                if(gUser.id !==GameData.gameUser.id ){
+                    this._playerList.push(gUser);
+                }
             });
+            GameData.playerUserIds = this._playerList;
+            this.release();
             GameSceneView._gameScene.play();
         }
         if(this._isOwner){
@@ -545,12 +682,15 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         }
     }
 
+    /**
+     * 检测是否可以开始游戏
+     */
     private canStartGame():boolean{
-        if(this._userIds.length < GameData.maxPlayerNum){
+        if(this._playerList.length < GameData.maxPlayerNum){
             return false;
         }
         for(let i = 0; i < GameData.maxPlayerNum; i++ ){
-            if( !this._userIds[i] && this._allgameReady[this._userIds[i]] === false){
+            if( !this._playerList[i] && this._allgameReady[this._playerList[i].id] === false){
                 return false;
             }
         }
@@ -558,14 +698,14 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     }
 
     /**
-     * 发送游戏准备
+     * 发送游戏准备通知消息
      */
     private gameReadyNotify(){
         let event = {
             action: GameData.gameReadyEvent,
             data:{},
         };
-        let result = GameData.engine.sendEvent(JSON.stringify(event));
+        let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(event));
         if (result.result !== 0){
             console.log('发送游戏准备通知失败，错误码' + result.result);
             return;
@@ -576,30 +716,41 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         console.log("发起游戏准备的通知，等待开始游戏");
     }
 
-
-    private errorResponse(errCode:number, errMsg:string){
-        console.log("加入房间错误错误回调：errCode=" + errCode + " errMsg="+errMsg);
-        GameSceneView._gameScene.errorView(2, "加入房间错误错误回调：errCode=" + errCode + " errMsg="+errMsg);
+    /**
+     * matchvs 发送错误回调
+     */
+    private errorResponse(ev:egret.Event){
+        console.log("加入房间错误错误回调：errCode=" + ev.data.errCode + " errMsg="+ev.data.errMsg);
+        this.release();
+        GameSceneView._gameScene.errorView(2, "加入房间错误错误回调：errCode=" + ev.data.errCode + " errMsg="+ev.data.errMsg);
         return
     }
 
-    private joinOverNotify(notifyInfo:MsJoinOverNotifyInfo){
+    private joinOverNotify(ev:egret.Event){
+        let notifyInfo = ev.data;
         console.log("userID:"+notifyInfo.srcUserID+" 关闭房间："+notifyInfo.roomID+" cpProto:"+notifyInfo.cpProto);
     }
 
+    /**
+     * 地图改变事件
+     */
     private radioChangeHandler(evt:eui.UIEvent):void {
         if(evt.target.value === 0){
             //地图A
             GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
-            GameData.engine.setRoomProperty(this._roomID,GameData.roomPropertyType.mapA);
+            mvs.MsEngine.getInstance.setRoomProperty(this._roomID,GameData.roomPropertyType.mapA);
         }else {
             //地图B
             GameData.roomPropertyValue = GameData.roomPropertyType.mapB;
-            GameData.engine.setRoomProperty(this._roomID,GameData.roomPropertyType.mapB);
+            mvs.MsEngine.getInstance.setRoomProperty(this._roomID,GameData.roomPropertyType.mapB);
         }
     }
 
-    private setRoomPropertynotify(notify:MsRoomPropertyNotifyInfo):void{
+    /**
+     * 他人设置房间属性回调事件
+     */
+    private setRoomPropertynotify(ev:egret.Event):void{
+        let notify = ev.data;
         console.log("roomProperty = "+notify.roomProperty);
         if(notify.roomProperty === GameData.roomPropertyType.mapB){
             GameData.roomPropertyValue = GameData.roomPropertyType.mapB;
@@ -610,7 +761,10 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         }
     }
 
-    private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo):void{
-        console.log("roomProperty = "+rsp.roomProperty);
+    /**
+     * 自己设置房间数据回调事件
+     */
+    private setRoomPropertyResponse(ev:egret.Event):void{
+        console.log("roomProperty = "+ev.data.roomProperty);
     }
 }
