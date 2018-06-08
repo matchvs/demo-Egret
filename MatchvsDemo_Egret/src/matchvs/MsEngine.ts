@@ -100,14 +100,14 @@ module mvs {
 		}
 
 		/**
-		 *
+		 * 创建房间
 		 * @param {MsCreateRoomInfo} createRoomInfo 房间信息
-		 * @param {string} userProfile 附带数据，默认指定 ""
+		 * @param {string} userProfile 附带数据，默认指定
 		 * @returns {number}
 		 */
 		public createRoom(createRoomInfo:MsCreateRoomInfo, userProfile:string):number{
 			let res = this._engine.createRoom(createRoomInfo,userProfile);
-			console.info("[MsEngine createRoom ] resCode:",res);
+			console.info("[MsEngine createRoom ] resCode:",res,JSON.stringify(createRoomInfo),userProfile);
 			return res;
 		}
 
@@ -150,7 +150,7 @@ module mvs {
 		 */
 		public sendEvent(data:string):any{
 			let res = this._engine.sendEvent(data);
-			console.info("[MsEngine sendEvent ] resCode:",JSON.stringify( res),data);
+			//console.info("[MsEngine sendEvent ] resCode:",JSON.stringify(res));
 			return res;
 		}
 
@@ -164,7 +164,7 @@ module mvs {
      	*/
 		public sendEventEx(msgType:number, data:string, desttype:number, userids:Array<number>):any{
 			let res = this._engine.sendEventEx(msgType, data, desttype, userids);
-			console.info("[MsEngine sendEventEx ] resCode:",JSON.stringify(res));
+			//console.info("[MsEngine sendEventEx ] resCode:",JSON.stringify(res));
 			return res;
 		}
 

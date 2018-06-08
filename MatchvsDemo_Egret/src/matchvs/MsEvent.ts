@@ -1,4 +1,6 @@
-// TypeScript file
+/**
+ * matchvs 事件类型定义
+ */
 module mvs {
     export class MsEvent {
 

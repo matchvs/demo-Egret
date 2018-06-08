@@ -1,14 +1,14 @@
+/**
+ * 对 MatchvsResponse 回调接口 进行封装，使用 事件触发的机制 对消息进行处理，调用者只需要在使用的时候接受该事件消息，然后释放即可
+ */
 module mvs {
 	export class MsResponse extends egret.EventDispatcher{
 		private static _instance:MsResponse = null;
 		private _response:MatchvsResponse = null; //Matchvs 引擎
-
-
 		public constructor() {
 			super();
 			this.registResponseCall();
 		}
-
 		/**
 		 * 获取实例
 		 */
@@ -35,7 +35,7 @@ module mvs {
 		}
 
 		/**
-		 * 注册
+		 * MatchvsResponse 接口回调的重新注册
 		 */
 		private registResponseCall(){
 			this._response = new MatchvsResponse();
@@ -48,31 +48,23 @@ module mvs {
 			this._response.sendEventResponse = this.sendEventResponse.bind(this);
 			this._response.sendEventNotify = this.sendEventNotify.bind(this);
 			this._response.gameServerNotify = this.gameServerNotify.bind(this);
-			
 			this._response.joinOverResponse = this.joinOverResponse.bind(this);
 			this._response.joinOverNotify = this.joinOverNotify.bind(this);
-
 			this._response.leaveRoomResponse = this.leaveRoomResponse.bind(this);
 			this._response.leaveRoomNotify = this.leaveRoomNotify.bind(this);
-			
 			this._response.networkStateNotify = this.networkStateNotify.bind(this);
 			this._response.setFrameSyncResponse = this.setFrameSyncResponse.bind(this);
 			this._response.frameUpdate = this.frameUpdate.bind(this);
-
 			this._response.errorResponse = this.errorResponse.bind(this);
 			this._response.logoutResponse = this.logOutResponse.bind(this);
-
 			this._response.joinOpenResponse = this.joinOpenResponse.bind(this);
 			this._response.joinOpenNotify = this.joinOpenNotify.bind(this);
-
 			//踢人回调
 			this._response.kickPlayerNotify = this.kickPlayerNotify.bind(this);
 			this._response.kickPlayerResponse = this.kickPlayerResponse.bind(this);
-
 			//设置房间属性回调
 			this._response.setRoomPropertyNotify = this.setRoomPropertyNotify.bind(this);
 			this._response.setRoomPropertyResponse = this.setRoomPropertyResponse.bind(this);
-
 			// 获取房间详细信息回调
 			this._response.getRoomDetailResponse = this.getRoomDetailResponse.bind(this);
 			//获取房间列表 扩展 接口回调
@@ -154,7 +146,7 @@ module mvs {
 		 * 发送消息回调
 		 */
 		private sendEventResponse(rsp:MsSendEventRsp){
-			console.info("[sendEventResponse]"+JSON.stringify(rsp));
+			//console.info("[sendEventResponse]"+JSON.stringify(rsp));
 			let data = {
 				status:rsp.status,
 				sequence:rsp.sequence
@@ -166,7 +158,7 @@ module mvs {
 		 * 发送消息异步回调
 		 */
 		private sendEventNotify(eventInfo:MsSendEventNotify){
-			console.info("[sendEventNotify] "+JSON.stringify(eventInfo));
+			//console.info("[sendEventNotify] "+JSON.stringify(eventInfo));
 			let data = {
 				srcUserId:eventInfo.srcUserId,
 				cpProto:eventInfo.cpProto
@@ -252,7 +244,7 @@ module mvs {
 		 * 设置帧同步回调
 		 */
 		private setFrameSyncResponse(rsp:MsSetChannelFrameSyncRsp){
-			console.info("[setFrameSyncResponse] "+JSON.stringify(rsp));
+			//console.info("[setFrameSyncResponse] "+JSON.stringify(rsp));
 			let data = {
 				mStatus:rsp.mStatus
 			};
@@ -263,7 +255,7 @@ module mvs {
 		 * 更新帧数据
 		 */
 		private frameUpdate(fd:MsFrameData){
-			console.info("[setFrameSyncResponse] "+JSON.stringify(fd));
+			//console.info("[setFrameSyncResponse] "+JSON.stringify(fd));
 			let data = {
 				frameIndex:fd.frameIndex,
 				frameItems:fd.frameItems,

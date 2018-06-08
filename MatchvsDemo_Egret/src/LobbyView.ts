@@ -153,6 +153,7 @@ class LobbyView extends eui.UILayer{
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LOGOUT_RSP, this.logoutResponse,this);
         mvs.MsEngine.getInstance.logOut();
     }
+    //
     private logoutResponse(ev:egret.Event){
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGOUT_RSP, this.logoutResponse,this);
         let status = ev.data.status;

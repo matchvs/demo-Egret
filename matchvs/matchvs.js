@@ -19230,7 +19230,7 @@ try {
             this.send = function (msg) {
                 if (socketOpen) {
                     socket.send({
-                        data: msg.buffer,
+                        data: msg.buffer
                     });
                 }
                 else {
@@ -20299,6 +20299,7 @@ function MatchvsEngine() {
                         engine.mHotelHeartBeatTimer = null;
                         engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
                         engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+                        engine.mHotelNetWork.close();
                     }
                     engine.mRsp.kickPlayerNotify && engine.mRsp.kickPlayerNotify(new MsKickPlayerNotify(packet.payload.getUserid(), packet.payload.getSrcuserid(), utf8ByteArrayToString(packet.payload.getCpproto()), packet.payload.getOwner()));
                     break;

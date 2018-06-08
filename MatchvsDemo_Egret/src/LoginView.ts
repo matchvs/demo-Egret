@@ -101,16 +101,28 @@ class LoginView extends eui.UILayer {
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
     }
 
-    private initResponse(ev:egret.Event) {
-         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_INIT_RSP, this.initResponse,this);
-        console.log("initResponse,status:" + ev.data.status);
-        //获取微信信息
-        this.getUserFromWeChat();
-        //
+    private release(){
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_INIT_RSP, this.initResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_REGISTERUSER_RSP, this.registerUserResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
     }
 
+    private initResponse(ev:egret.Event) {
+        console.log("initResponse,status:" + ev.data.status);
+        //获取微信信息
+        this.getUserFromWeChat((userInfos)=>{
+            //绑定 微信 openID 成功 生成一个 专用 userID 登录
+            LoginView.bindOpenIDWithUserID(userInfos);
+        },(res)=>{
+            //获取微信信息失败，注册游客身份登录
+            mvs.MsEngine.getInstance.registerUser();
+        });
+    }
+
+    /**
+     * 调用 matchvs 注册接口回调
+     */
     private registerUserResponse(ev:egret.Event) {
-        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_REGISTERUSER_RSP, this.registerUserResponse,this);
         let userInfo = ev.data;
         GameData.gameUser.id = userInfo.id;
         GameData.gameUser.name = userInfo.name;
@@ -121,7 +133,9 @@ class LoginView extends eui.UILayer {
             mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token, GameData.gameID,GameData.appkey, GameData.secretKey);
         }
     }
-
+    /**
+     * 调用 matchvs login 接口回调处理
+     */
     private loginResponse(ev:egret.Event) {
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
         let login = ev.data;
@@ -141,25 +155,27 @@ class LoginView extends eui.UILayer {
     }
 
     /**
-     * 获取微信中的用户信息
+     * 获取微信中的用户信息,这个是支持微信用户绑定的，如果使用微信身份登录，将执行绑定操作，如果是游客身份登录将到 matchvs 生成一个游客身份的userID
      */
-    private getUserFromWeChat(){
+    private getUserFromWeChat(success:Function, fail:Function){
         //获取微信信息
         try {
-            getWxUserInfo((userInfos)=>{
-                //获取OpenID
-                getUserOpenID({
-                    success:function(openInfos){
-                        LoginView.bindOpenIDWithUserID({userInfo:userInfos, openInfo:openInfos});
-                    },
-                    fail:function(res){
-                        console.log(res);
-                    }
-                });
+            getWxUserInfo({
+                success:(userInfos)=>{
+                    //获取OpenID
+                    getUserOpenID({
+                        success:function(openInfos){
+                            success({userInfo:userInfos, openInfo:openInfos});
+                        },
+                        fail:fail
+                    });
+                },
+                fail:fail
             });
         } catch (error) {
             console.log("不是在微信平台，调用不进行绑定！");
-            mvs.MsEngine.getInstance.registerUser();
+            fail(error);
+            
         }
     }
 
@@ -176,8 +192,9 @@ class LoginView extends eui.UILayer {
         //sign=md5(appKey&gameID=value1&openID=value2&session=value3&thirdFlag=value4&appSecret)
         let params = "gameID="+GameData.gameID+"&openID="+wxUserInfo.openInfo.openid+"&session="+wxUserInfo.openInfo.session_key+"&thirdFlag=1";
 
+        //计算签名
         let sign = GameData.getSign(params);
-
+        //重组参数
         params = "userID=0&"+params+"&sign="+sign;
 
         var request = new egret.HttpRequest();

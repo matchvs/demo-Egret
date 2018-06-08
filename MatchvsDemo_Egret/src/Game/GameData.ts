@@ -32,7 +32,7 @@ class GameData {
     public static frameRate: number = 5;
     public static defaultHeight: number = 400;
     public static roomID: string = "";
-    public static intervalList: Array<number> = [];
+    public static intervalList: Array<number> = []; //定时器列表
     public static number1: string = "";
     public static number2: string = "";
     public static number3: string = "";

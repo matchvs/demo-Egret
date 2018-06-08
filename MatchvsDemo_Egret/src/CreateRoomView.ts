@@ -18,6 +18,8 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private _userHeard2:egret.Sprite;
     private _userHeard3:egret.Sprite;
 
+    private _headimg1:eui.Image = null;
+
     private _gameMapA:eui.RadioButton;
     private _gameMapB:eui.RadioButton;
 
@@ -49,38 +51,34 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this.initView();
     }
 
+    /**
+     * 创建界面显示元素
+     */
     private initView(){
 
-        
-        let userHeard1:egret.Sprite = new egret.Sprite;
-        userHeard1.graphics.lineStyle(3,0xffff00);
-        userHeard1.graphics.beginFill(0x112200,1);
-        userHeard1.x = this._SizeWith;
-        userHeard1.y = 200;
-        userHeard1.graphics.drawCircle(0, 0, this._UserHeadradius);
-        userHeard1.graphics.endFill();
-        userHeard1.graphics.clear;
-        this.addChild(userHeard1);
+        this._userHeard1 = new egret.Sprite;
+        this._userHeard1.graphics.lineStyle(3,0xffff00,1);
+        this._userHeard1.graphics.beginFill(0x112200,1);
+        this._userHeard1.x = this._SizeWith;
+        this._userHeard1.y = 200;
+        this._userHeard1.graphics.drawCircle(0, 0, this._UserHeadradius);
+        this._userHeard1.graphics.endFill();
+        this._userHeard1.graphics.clear;
+        this.addChild(this._userHeard1);
 
-        let userHeard2:egret.Sprite = new egret.Sprite;
-        userHeard2.graphics.lineStyle(3,0xffff00);
-        userHeard2.graphics.beginFill(0x910270,1);
-        userHeard2.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*4), 200, this._UserHeadradius);
-        userHeard2.graphics.endFill();
-        this.addChild(userHeard2);
+        this._userHeard2 = new egret.Sprite;
+        this._userHeard2.graphics.lineStyle(3,0xffff00);
+        this._userHeard2.graphics.beginFill(0x910270,1);
+        this._userHeard2.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*4), 200, this._UserHeadradius);
+        this._userHeard2.graphics.endFill();
+        this.addChild(this._userHeard2);
 
-        let userHeard3:egret.Sprite = new egret.Sprite;
-        userHeard3.graphics.lineStyle(3,0xffff00);
-        userHeard3.graphics.beginFill(0x11117f,1);
-        userHeard3.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*8), 200, this._UserHeadradius);
-        userHeard3.graphics.endFill();
-        this.addChild(userHeard3);
-
-        this._userHeard1 = userHeard1;
-        this._userHeard2 = userHeard2;
-        this._userHeard3 = userHeard3;
-
-
+        this._userHeard3 = new egret.Sprite;
+        this._userHeard3.graphics.lineStyle(3,0xffff00);
+        this._userHeard3.graphics.beginFill(0x11117f,1);
+        this._userHeard3.graphics.drawCircle(this._SizeWith+(this._UserHeadradius*8), 200, this._UserHeadradius);
+        this._userHeard3.graphics.endFill();
+        this.addChild(this._userHeard3);
 
         var img:egret.ImageLoader = new egret.ImageLoader();
         this._imgHead1 = img;
@@ -195,13 +193,12 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this._gameMapB = rdb2;
         this.addChild(this._gameMapB);
 
-        
         exitRoom.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
         startGameBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonStartGameBtn, this);
         this._kickUserButton3.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonKickUserButton3, this);
         this._kickUserButton2.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonKickUserButton2, this);
+        // 添加 matchvs 接口回调监听
         this.addMsResponseListen();
-
     }
 
         /**
@@ -293,8 +290,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             this.release();
             //退出房间成功进入游戏大厅
             GameSceneView._gameScene.lobby();
-        }
-        
+        } 
     }
 
     /**
@@ -332,12 +328,15 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     public doCreateRoom(){
         this._createRoomInfo = GameData.createRoomInfo;
         GameData.roomPropertyValue = GameData.createRoomInfo.roomProperty;
-        console.info(this._createRoomInfo);
+        //调用 matchvs 创建房间接口
+        mvs.MsEngine.getInstance.createRoom(GameData.createRoomInfo, JSON.stringify({name:GameData.gameUser.name,avatar:GameData.gameUser.avatar}));
+    }
 
-        let info = {name:GameData.gameUser.name,avatar:GameData.gameUser.avatar};
-        let infostr = JSON.stringify(info);
-
-        mvs.MsEngine.getInstance.createRoom(GameData.createRoomInfo, infostr);
+    /**
+     * 其他玩家加入房间
+     */
+    public doJoinRoomSpecial(roomID:string, userProperty:string){
+        mvs.MsEngine.getInstance.joinRoom(roomID, userProperty);
     }
 
     /**
@@ -354,10 +353,6 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this._roomidText = roomid;
         this.addChild(roomid);
     }
-
-    public createKickButton(){
-    }
-
 
     /**
      * 创建房间事件回调
@@ -384,14 +379,6 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             this._playerList.push(GameData.gameUser);
             this.showPlayerInfo(GameData.gameUser,true);
         }
-    }
-
-    /**
-     * 非房主加入房间
-     */
-    public doJoinRoomSpecial(roomID:string, userProperty:string){
-
-        mvs.MsEngine.getInstance.joinRoom(roomID, userProperty);
     }
 
     /**
@@ -425,22 +412,25 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
             this._playerList  = [];
             this._playerList.push(GameData.gameUser);
+            this.showPlayerInfo(GameData.gameUser,true);
             //显示我自己的
             for(let i = 0; i < roomuserInfoList.length; i++){
                 console.log("userProfile:"+roomuserInfoList[i].userProfile);
-                this.addPlayUser( roomuserInfoList[i].userId, roomuserInfoList[i].userProfile);
+                let user = this.addPlayUser( roomuserInfoList[i].userId, roomuserInfoList[i].userProfile);
                 
                 /**
                  * 如果是房主就现在最左边
                  */
                 if(roomuserInfoList[i].userId === roomInfo.ownerId){
-                    this._userID_2.text =  GameData.gameUser.id.toString();
+                    user.isOwner = true;
+                    //this._userID_2.text =  GameData.gameUser.id.toString();
                 }else {
-                    this._userID_3.text = roomuserInfoList[i].userId.toString();
+                    //this._userID_3.text = roomuserInfoList[i].userId.toString();
                 }
+                this.showPlayerInfo(user,true);
             }
-            this._userID_1.text = roomInfo.ownerId.toString();
-            this._userID_2.text =  GameData.gameUser.id.toString();
+            //this._userID_1.text = roomInfo.ownerId.toString();
+            //this._userID_2.text =  GameData.gameUser.id.toString();
 
             //非房主发送准备游戏
             if(this._isOwner === false){
@@ -458,23 +448,24 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         let user:GameUser = this.addPlayUser(roomUserInfo.userId, roomUserInfo.userProfile);
         //显示用户
         this.showPlayerInfo(user,true);
-        //this.changeUserIDs(roomUserInfo.userId, 1);
     }
 
+    /**
+     * 他人离开房间回调
+     */
     private leaveRoomNotify(ev:egret.Event){
         let leaveRoomInfo = ev.data;
         if(leaveRoomInfo.userId.toString() === this._userID_1.text){
             //房主退出
             console.log("房主退出房间");
             mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
-            // if(leaveRoomInfo.userId === GameData.userInfo.id){
-
-            // }
         }
         this.delPlayUser(leaveRoomInfo.userId);
-        //this.changeUserIDs(leaveRoomInfo.userId, -1);
     }
 
+    /**
+     * 自己离开房间回调
+     */
     private leaveRoomResponse(ev:egret.Event){
         let rsp = ev.data;
         if(rsp.status !== 200){
@@ -502,7 +493,6 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             return
         }else{
             this.delPlayUser(knotify.userId);
-            //this.changeUserIDs(knotify.userId, -1);
         }
     }
     /**
@@ -530,10 +520,11 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      * @param {} isShow true 显示用户 false 不显示用户
      */
     private showPlayerInfo(user:GameUser,isShow:boolean){
+        let info = user.id.toString()+"\n"+user.name;
         if(isShow){
             if(user.isOwner){
                 //房主在最右边位置
-                this._userID_1.text = user.id.toString();
+                this._userID_1.text = info;
                 //如果这个房主是我自己
                 if(user.id === GameData.gameUser.id){
                     //显示地图选择
@@ -545,56 +536,24 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             }else{
                 //不是房主，哪个为空就坐哪个
                 if(this._userID_2.text === this._userID_ptext){
-                    this._userID_2.text = user.id.toString();
+                    this._userID_2.text = info;
                     //如果我自己是房主就显示踢人的标记
                     if(this._isOwner){
                         this._kickUserButton2.visible = true;
                     }
                 }else if(this._userID_3.text === this._userID_ptext){
-                    this._userID_3.text = user.id.toString();
+                    this._userID_3.text = info;
                     if(this._isOwner){
                         this._kickUserButton3.visible = true;
                     }
                 }
             }
-
-
-            // //显示我自己的信息
-            // if(user.id === GameData.gameUser.id){
-            //     //判断这个人是不是房主
-            //     if(user.isOwner){
-            //         //房主在最右边
-            //         this._userID_1.text = user.id.toString();
-            //     }else{
-            //         //显示信息
-            //         if(this._userID_2.text === this._userID_ptext){
-            //             this._userID_2.text = user.id.toString();
-            //         }else if(this._userID_3.text === this._userID_ptext){
-            //             this._userID_3.text = user.id.toString();
-            //         }
-            //     } 
-            // }else{
-
-            //     //显示 对手 的信息
-            //     if(this._userID_2.text === this._userID_ptext){
-            //         this._userID_2.text = user.id.toString();
-            //         //如果我自己是房主就显示踢人的标记
-            //         if(this._isOwner){
-            //             this._kickUserButton2.visible = true;
-            //         }
-            //     }else if(this._userID_3.text === this._userID_ptext){
-            //         this._userID_3.text = user.id.toString();
-            //         if(this._isOwner){
-            //             this._kickUserButton3.visible = true;
-            //         }
-            //     }
-            // }
         }else{
             //取消显示
-            if(user.id.toString() === this._userID_2.text){
+            if((info) === this._userID_2.text){
                 this._userID_2.text = this._userID_ptext;
                 this._kickUserButton2.visible = false;
-            }else if(user.id.toString() === this._userID_3.text){
+            }else if(info === this._userID_3.text){
                 this._userID_3.text = this._userID_ptext;
                 this._kickUserButton3.visible = false;
             }
@@ -643,6 +602,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
 
 
     private notifyGameStart(){
+        //设置房主标记，到游戏界面要用到，如果是房主要第一个 创建球的位置
         GameData.isRoomOwner = this._isOwner;
 
         let arrs = [];
@@ -689,6 +649,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      */
     private sendEventNotify(ev:egret.Event){
         let eventInfo = ev.data;
+        // 判断是否收到开始游戏消息
         if (eventInfo
             && eventInfo.cpProto
             && eventInfo.cpProto.indexOf(GameData.gameStartEvent) >= 0) {
@@ -721,6 +682,9 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         }
     }
 
+    /**
+     * 检测是否可以开始游戏
+     */
     private canStartGame():boolean{
         if(this._playerList.length < GameData.maxPlayerNum){
             return false;
@@ -734,7 +698,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     }
 
     /**
-     * 发送游戏准备
+     * 发送游戏准备通知消息
      */
     private gameReadyNotify(){
         let event = {
@@ -752,7 +716,9 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         console.log("发起游戏准备的通知，等待开始游戏");
     }
 
-
+    /**
+     * matchvs 发送错误回调
+     */
     private errorResponse(ev:egret.Event){
         console.log("加入房间错误错误回调：errCode=" + ev.data.errCode + " errMsg="+ev.data.errMsg);
         this.release();
