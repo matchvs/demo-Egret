@@ -392,51 +392,47 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             this._roomidText.text = ("加入房间失败：status="+status);
             console.log("加入房间失败： status="+status);
             return;
+        }
+
+        console.log("owner ="+ roomInfo.ownerId.toString());
+
+        //显示房间信息
+        this._isInRoom = true;
+        this._roomidText.text = ("房间号：\n"+roomInfo.roomID);
+        this._roomID  = roomInfo.roomID;
+        GameData.roomID = roomInfo.roomID;
+
+        if(roomInfo.roomProperty === GameData.roomPropertyType.mapB){
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapB
+            this._gameMapB.selected = true;
         }else{
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapA
+            this._gameMapA.selected = true;
+        }
 
-            console.log("owner ="+ roomInfo.ownerId.toString());
-
-            //显示房间信息
-            this._isInRoom = true;
-            this._roomidText.text = ("房间号：\n"+roomInfo.roomID);
-            this._roomID  = roomInfo.roomID;
-            GameData.roomID = roomInfo.roomID;
-
-            if(roomInfo.roomProperty === GameData.roomPropertyType.mapB){
-                GameData.roomPropertyValue = GameData.roomPropertyType.mapB
-                this._gameMapB.selected = true;
-            }else{
-                GameData.roomPropertyValue = GameData.roomPropertyType.mapA
-                this._gameMapA.selected = true;
+        this._playerList  = [];
+        this._playerList.push(GameData.gameUser);
+        this.showPlayerInfo(GameData.gameUser,true);
+        //显示我自己的
+        for(let i = 0; i < roomuserInfoList.length; i++){
+            console.log("userProfile:"+roomuserInfoList[i].userProfile);
+            let user = this.addPlayUser( roomuserInfoList[i].userId, roomuserInfoList[i].userProfile);
+            
+            /**
+             * 如果是房主就现在最左边
+             */
+            if(roomuserInfoList[i].userId === roomInfo.ownerId){
+                user.isOwner = true;
+            }else {
+                user.isOwner = false;
             }
+            this.showPlayerInfo(user,true);
+        }
 
-            this._playerList  = [];
-            this._playerList.push(GameData.gameUser);
-            this.showPlayerInfo(GameData.gameUser,true);
-            //显示我自己的
-            for(let i = 0; i < roomuserInfoList.length; i++){
-                console.log("userProfile:"+roomuserInfoList[i].userProfile);
-                let user = this.addPlayUser( roomuserInfoList[i].userId, roomuserInfoList[i].userProfile);
-                
-                /**
-                 * 如果是房主就现在最左边
-                 */
-                if(roomuserInfoList[i].userId === roomInfo.ownerId){
-                    user.isOwner = true;
-                    //this._userID_2.text =  GameData.gameUser.id.toString();
-                }else {
-                    //this._userID_3.text = roomuserInfoList[i].userId.toString();
-                }
-                this.showPlayerInfo(user,true);
-            }
-            //this._userID_1.text = roomInfo.ownerId.toString();
-            //this._userID_2.text =  GameData.gameUser.id.toString();
-
-            //非房主发送准备游戏
-            if(this._isOwner === false){
-                console.log("非房主发送准备游戏消息！");
-                this.gameReadyNotify();
-            }
+        //非房主发送准备游戏
+        if(this._isOwner === false){
+            console.log("非房主发送准备游戏消息！");
+            this.gameReadyNotify();
         }
     }
     /**
