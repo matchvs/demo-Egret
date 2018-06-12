@@ -16,12 +16,19 @@ class GameSceneView extends egret.Sprite
     {
         this.thisContainer = new egret.Sprite();
         this.addChild(this.thisContainer);
-        this.login();
+        // this.login();
+        this.startModel();
     }
+
+    public startModel(){
+        this.removeAll();
+        let starting:StartModelUI = new StartModelUI();
+        this.thisContainer.addChild(starting);
+    }
+
     public login():void
     {
         this.removeAll();
-
         var loginview:LoginView = new LoginView();
         loginview.width = this.width;
         loginview.height = this.height;

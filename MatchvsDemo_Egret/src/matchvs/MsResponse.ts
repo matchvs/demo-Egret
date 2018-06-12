@@ -122,7 +122,7 @@ module mvs {
 		 * 加入房间异步回调 发送 event 事件
 		 */
 		private joinRoomNotify(roomUserInfo:MsRoomUserInfo){
-			console.info("[joinRoomNotify] "+JSON.stringify(roomUserInfo));
+			console.info("[joinRoomNotify] "+roomUserInfo.userProfile);
 			let data = {
 				userId : roomUserInfo.userId, 
 				userProfile : roomUserInfo.userProfile};
@@ -170,7 +170,7 @@ module mvs {
 		 * 收到 gameServe 消息回调 srcUserId = 0
 		 */
 		private gameServerNotify(eventInfo:MsGameServerNotifyInfo){
-			console.info("[gameServerNotify] "+JSON.stringify(eventInfo));
+			console.info("[gameServerNotify] ");
 			let data = {
 				srcUserId:eventInfo.srcUserId,
 				cpProto:eventInfo.cpProto
@@ -192,7 +192,7 @@ module mvs {
 		 * 关闭房间异步回调 并发送 Event 事件
 		 */
 		private joinOverNotify(Info:MsJoinOverNotifyInfo){
-			console.info("[joinOverNotify] "+JSON.stringify(Info));
+			console.info("[joinOverNotify] ");
 			let data = {roomID:Info.roomID,userID:Info.srcUserID,cpProto:Info.cpProto};
 			this.dispatchEvent(new egret.Event(MsEvent.EVENT_JOINOVER_NTFY, false, false,data));
 		}
@@ -201,7 +201,7 @@ module mvs {
 		 * 自己离开房间回调
 		 */
 		private leaveRoomResponse(rsp:MsLeaveRoomRsp){
-			console.info("[leaveRoomResponse] "+ JSON.stringify(rsp));
+			console.info("[leaveRoomResponse] status: "+rsp.status);
 			let data = {
 				roomID:rsp.roomID,
 				status:rsp.status,
@@ -215,7 +215,7 @@ module mvs {
 		 * 他人离开房间回调
 		 */
 		private leaveRoomNotify(leaveRoomInfo:MsLeaveRoomNotify){
-			console.info("[leaveRoomNotify] "+JSON.stringify(leaveRoomInfo));
+			console.info("[leaveRoomNotify] "+leaveRoomInfo.userId);
 			let data = {
 				roomID:leaveRoomInfo.roomID,
 				userId:leaveRoomInfo.userId,
@@ -229,7 +229,7 @@ module mvs {
 		 * 其他玩家网络状态回调
 		 */
 		private networkStateNotify(netnotify:MsNetworkStateNotify){
-			console.info("[networkStateNotify] "+JSON.stringify(netnotify));
+			console.info("[networkStateNotify] state: "+netnotify.state);
 			let data = {
 				roomID:netnotify.roomID,
 				userID:netnotify.userID,
@@ -291,7 +291,7 @@ module mvs {
 		 * 自己打开房间回调
 		 */
 		private joinOpenResponse(info:MsReopenRoomResponse){
-			console.info("[joinOpenResponse] info:", JSON.stringify(info));
+			console.info("[joinOpenResponse] info:", info.status);
 			let data = {
 				status:info.status,
 				cpProto:info.cpProto,
@@ -303,7 +303,7 @@ module mvs {
 		 * 他人打开房间回调
 		 */
 		private joinOpenNotify(info:MsReopenRoomNotify){
-			console.info("[joinOpenResponse] info:", JSON.stringify(info));
+			console.info("[joinOpenResponse] info:");
 			let data = {
 				roomID:info.roomID,
 				userID:info.userID,
@@ -313,7 +313,7 @@ module mvs {
 		}
 
 		private kickPlayerNotify(knotify:MsKickPlayerNotify){
-			console.info("[kickPlayerNotify] info:", JSON.stringify(knotify));
+			console.info("[kickPlayerNotify] info:");
 			let data = {
 				cpProto:knotify.cpProto,
 				owner:knotify.owner,
@@ -324,7 +324,7 @@ module mvs {
 		}
 
 		private kickPlayerResponse(rsp:MsKickPlayerRsp){
-			console.info("[kickPlayerResponse] info:", JSON.stringify(rsp));
+			console.info("[kickPlayerResponse] info:"+rsp.status);
 			let data = {
 				owner:rsp.owner,
 				userID:rsp.userID,
@@ -338,7 +338,7 @@ module mvs {
 		 * 设置房间属性 异步 回调
 		 */
 		private setRoomPropertyNotify(notify:MsRoomPropertyNotifyInfo){
-			console.info("[setRoomPropertyNotify] info:", JSON.stringify(notify));
+			console.info("[setRoomPropertyNotify] info:");
 			let data = {
 				roomID:notify.roomID,
 				userID:notify.userID,
@@ -352,7 +352,7 @@ module mvs {
 		 * 设置房间属性回调
 		 */
 		private setRoomPropertyResponse(rsp:MsSetRoomPropertyRspInfo){
-			console.info("[setRoomPropertyResponse] info:", JSON.stringify(rsp));
+			console.info("[setRoomPropertyResponse] info:", rsp.status);
 			let data = {
 				roomID:rsp.roomID,
 				userID:rsp.userID,
@@ -366,7 +366,7 @@ module mvs {
 		 * 获取房间详细信息回调
 		 */
 		private getRoomDetailResponse(rsp:MsGetRoomDetailRsp){
-			console.info("[getRoomDetailResponse] info:", JSON.stringify(rsp));
+			console.info("[getRoomDetailResponse] info:", rsp.status);
 			let data = {
 				canWatch : rsp.canWatch,
 				createFlag : rsp.createFlag,
@@ -386,7 +386,7 @@ module mvs {
 		 * 获取房间列表 扩展接口 回调 
 		 */
 		private getRoomListExResponse(rsp:MsGetRoomListExRsp){
-			console.info("[getRoomListExResponse] info:", JSON.stringify(rsp));
+			console.info("[getRoomListExResponse] info:",rsp.status);
 			let data = {
 				roomAttrs : rsp.roomAttrs,
 				status : rsp.status,
@@ -400,7 +400,7 @@ module mvs {
 		 * 获取房间列表接口回调(信息较少推进使用 getRoomListEx)
 		 */
 		private getRoomListResponse(status:number, roomInfos:Array<MsRoomInfoEx>){
-			console.info("[getRoomListResponse] info:", status , JSON.stringify(roomInfos));
+			console.info("[getRoomListResponse] info:", status );
 			let data = {
 				status : status,
 				roomInfos : roomInfos

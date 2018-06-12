@@ -165,7 +165,12 @@ class LoginView extends eui.UILayer {
                     //获取OpenID
                     getUserOpenID({
                         success:function(openInfos){
-                            success({userInfo:userInfos, openInfo:openInfos});
+                            if(openInfos.status == 0){
+                                success({userInfo:userInfos, openInfo:openInfos.data});
+                                //console.info("userInfo:",userInfos,"openInfo:",openInfos.data);
+                            }else{
+                                fail("获取OpenID失败！");
+                            }
                         },
                         fail:fail
                     });
@@ -175,7 +180,6 @@ class LoginView extends eui.UILayer {
         } catch (error) {
             console.log("不是在微信平台，调用不进行绑定！");
             fail(error);
-            
         }
     }
 
@@ -193,15 +197,23 @@ class LoginView extends eui.UILayer {
         let params = "gameID="+GameData.gameID+"&openID="+wxUserInfo.openInfo.openid+"&session="+wxUserInfo.openInfo.session_key+"&thirdFlag=1";
 
         //计算签名
-        let sign = GameData.getSign(params);
+        let signstr = GameData.getSign(params);
         //重组参数
-        params = "userID=0&"+params+"&sign="+sign;
-
+        params = "userID=0&"+params+"&sign="+signstr;
+        //用于post请求，不能使用get请求，如果使用get请求可能会出现签名失败，因为微信session_key有需要url编码的字符
+        let jsonParam = {
+            userID:0,
+            gameID:GameData.gameID,
+            openID:wxUserInfo.openInfo.openid,
+            session:wxUserInfo.openInfo.session_key,
+            thirdFlag:1,
+            sign:signstr
+            };
         var request = new egret.HttpRequest();
         request.responseType = egret.HttpResponseType.TEXT;
-        request.open(reqUrl+params,egret.HttpMethod.GET);
-        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        request.send();
+        request.open(reqUrl,egret.HttpMethod.POST);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.send(jsonParam);
         request.addEventListener(egret.Event.COMPLETE,(event:egret.Event)=>{
             var request = <egret.HttpRequest>event.currentTarget;
             console.log("bindOpenIDWithUserID get data : ",request.response);
@@ -219,9 +231,6 @@ class LoginView extends eui.UILayer {
         },this);
         request.addEventListener(egret.IOErrorEvent.IO_ERROR,(event:egret.IOErrorEvent)=>{
              console.log("bindOpenIDWithUserID get error : " + event);
-        },this);
-        request.addEventListener(egret.ProgressEvent.PROGRESS,(event:egret.ProgressEvent)=>{
-            //console.log("bindOpenIDWithUserID get progress : " + Math.floor(100*event.bytesLoaded/event.bytesTotal) + "%");
         },this);
     }
 }

@@ -91,6 +91,7 @@ class GameData {
      */
     public static getSign(params:string):string{
         let str = GameData.appkey+"&"+params+"&"+GameData.secretKey;
+        console.info("待签名："+str);
         let md5Str:string = new MD5().hex_md5(str);
         return md5Str;
     }
