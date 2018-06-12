@@ -5,7 +5,7 @@
 class CreateRoomView extends egret.DisplayObjectContainer{
     private _UserHeadradius = 60;
     private _parent:egret.DisplayObjectContainer;
-    private _roomidText:eui.Label;
+    private _roomidText:eui.Label = null;
     private _SizeWith :number = 400;
 
     private _isInRoom:boolean = false;
@@ -55,6 +55,36 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      * 创建界面显示元素
      */
     private initView(){
+        let gamemapfull:egret.Sprite = new egret.Sprite;
+        gamemapfull.graphics.lineStyle(3,0x00ff00);
+        gamemapfull.graphics.beginFill(0x000000,1);
+        gamemapfull.graphics.drawRect(this._SizeWith+(this._UserHeadradius*7.5)-20, 40, 140, 80);
+        gamemapfull.graphics.endFill();
+        this.addChild(gamemapfull);
+
+        let rdb: eui.RadioButton = new eui.RadioButton();
+        rdb.label = "彩色地图A";
+        rdb.value = 0;
+        rdb.groupName = "p1";
+        rdb.selected = true;//默认选项
+        rdb.x = this._SizeWith+(this._UserHeadradius*7.5)-10;
+        rdb.y = 50;
+        rdb.enabled = false;
+        rdb.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
+        this._gameMapA = rdb;
+        this.addChild(this._gameMapA);
+
+        let rdb2: eui.RadioButton = new eui.RadioButton();
+        
+        rdb2.label = "灰色地图B";
+        rdb2.value = 1;
+        rdb2.groupName = "p1";
+        rdb2.x = this._SizeWith+(this._UserHeadradius*7.5)-10;
+        rdb2.enabled = false;
+        rdb2.y = 90;
+        rdb2.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
+        this._gameMapB = rdb2;
+        this.addChild(this._gameMapB);
 
         this._userHeard1 = new egret.Sprite;
         this._userHeard1.graphics.lineStyle(3,0xffff00,1);
@@ -86,15 +116,14 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         this._imgHead1.load("resource/assets/Game/star1.png");
 
 
-        let roomid = new eui.Label();
-        roomid.width = 400;
-        roomid.x = (this._parent.width-roomid.width)/2;
-        roomid.y = this._parent.y + 50;
-        roomid.size = 35;
-        roomid.text = "正在加载......";
-        roomid.textAlign = "center";
-        this._roomidText = roomid;
-        this.addChild(roomid);
+        this._roomidText = new eui.Label();
+        this._roomidText.width = 400;
+        this._roomidText.x = (this._parent.width- this._roomidText.width)/2;
+        this._roomidText.y = this._parent.y + 50;
+        this._roomidText.size = 35;
+        this._roomidText.text = "正在加载......";
+        this._roomidText.textAlign = "center";
+        this.addChild(this._roomidText);
 
         let userID1 = new eui.Label();
         userID1.text = this._userID_ptext;
@@ -162,36 +191,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         exitRoom.height = 80;
         this.addChild(exitRoom);
 
-        let gamemapfull:egret.Sprite = new egret.Sprite;
-        gamemapfull.graphics.lineStyle(3,0x00ff00);
-        gamemapfull.graphics.beginFill(0x000000,1);
-        gamemapfull.graphics.drawRect(this._SizeWith+(this._UserHeadradius*7.5)-20, 40, 140, 80);
-        gamemapfull.graphics.endFill();
-        this.addChild(gamemapfull);
-
-        let rdb: eui.RadioButton = new eui.RadioButton();
-        rdb.label = "彩色地图A";
-        rdb.value = 0;
-        rdb.groupName = "p1";
-        rdb.selected = true;//默认选项
-        rdb.x = this._SizeWith+(this._UserHeadradius*7.5)-10;
-        rdb.y = 50;
-        rdb.enabled = false;
-        rdb.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
-        this._gameMapA = rdb;
-        this.addChild(this._gameMapA);
-
-        let rdb2: eui.RadioButton = new eui.RadioButton();
         
-        rdb2.label = "灰色地图B";
-        rdb2.value = 1;
-        rdb2.groupName = "p1";
-        rdb2.x = this._SizeWith+(this._UserHeadradius*7.5)-10;
-        rdb2.enabled = false;
-        rdb2.y = 90;
-        rdb2.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
-        this._gameMapB = rdb2;
-        this.addChild(this._gameMapB);
 
         exitRoom.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
         startGameBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonStartGameBtn, this);
@@ -368,9 +368,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
             this._roomID = rsp.roomID;
             GameData.roomID = rsp.roomID;
             this._roomidText.text = ("房间号：\n"+rsp.roomID);
-            console.log("创建房间成功 roomID="+rsp.roomID);
-
-            this._userID_1.text = rsp.owner.toString();
+            console.log("创建房间成功 roomID="+this._roomidText.text);
 
             this._isOwner = true;
             GameData.gameUser.isOwner = true;
@@ -516,7 +514,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      * @param {} isShow true 显示用户 false 不显示用户
      */
     private showPlayerInfo(user:GameUser,isShow:boolean){
-        let info = user.id.toString()+"\n"+user.name;
+        let info = user.id+"\n"+user.name;
         if(isShow){
             if(user.isOwner){
                 //房主在最右边位置
