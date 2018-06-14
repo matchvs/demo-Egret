@@ -310,15 +310,27 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      * 踢掉用户3
      */
     private mbuttonKickUserButton3(event:egret.TouchEvent){
-        this._kickUserID = this._userID_3.text;
-        mvs.MsEngine.getInstance.kickPlayer(Number(this._kickUserID),"");
+        let kickUserID = this._userID_3.text;
+        let uid:number = 0;
+        this._playerList.forEach(function(element){
+            if(kickUserID.indexOf(""+element.id) >= 0){
+                uid = element.id;
+            }
+        });
+        mvs.MsEngine.getInstance.kickPlayer(uid,"");
     }
     /**
      * 踢掉用户2
      */
     private mbuttonKickUserButton2(event:egret.TouchEvent){
-        this._kickUserID = this._userID_2.text;
-        mvs.MsEngine.getInstance.kickPlayer(Number(this._kickUserID),"");
+        let kickUserID = this._userID_2.text;
+        let uid:number = 0;
+        this._playerList.forEach(function(element){
+            if(kickUserID.indexOf(""+element.id) >= 0){
+                uid = element.id;
+            }
+        });
+        mvs.MsEngine.getInstance.kickPlayer(uid,"");
     }
 
 
@@ -409,6 +421,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
         }
 
         this._playerList  = [];
+        GameData.gameUser.isOwner = false;
         this._playerList.push(GameData.gameUser);
         this.showPlayerInfo(GameData.gameUser,true);
         //显示我自己的

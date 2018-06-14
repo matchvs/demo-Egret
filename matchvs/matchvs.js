@@ -18858,8 +18858,7 @@ function MsRegistRsp(status, userID, token, name, avatar) {
 function MsLoginRsp(status, roomID) {
     this.status = status; //int
     this.roomID = roomID; //unsigned long long
-    MatchvsLog.logI("MsLoginRsp:"
-        + ":" + JSON.stringify(this));
+    MatchvsLog.logI("MsLoginRsp:" + ":" + JSON.stringify(this));
 }
 function MsPublicMemberArgs(channle, platform, userID, token, gameID, gameVersion, appkey, secretKey, deviceID, gatewayID) {
     this.userID = userID;
@@ -19221,7 +19220,7 @@ try {
             var that = this;
             this.close = function () {
                 if (socket) {
-                    socket.close();
+                    socket.close(1000, "");
                 }
             };
             /**
@@ -19338,7 +19337,7 @@ try {
             };
             this.close = function () {
                 if (socket) {
-                    socket.close();
+                    socket.close(1000, "");
                 }
             };
             if (!window.WebSocket) {
@@ -19346,6 +19345,8 @@ try {
             }
             if (window.WebSocket) {
                 socket = new WebSocket(host);
+                socket.hashcode = new Date().getMilliseconds();
+                MatchvsLog.logI("try to create a socket:" + mHost + " socket is " + socket.hashcode);
                 socket.onmessage = function (event) {
                     var reader = new FileReader();
                     reader.readAsArrayBuffer(event.data);
@@ -19361,6 +19362,7 @@ try {
                     };
                 };
                 socket.onopen = function (event) {
+                    MatchvsLog.logI("Create the socket is success :" + mHost + " socket is " + socket.hashcode);
                     while (bufQueue.length > 0) {
                         socket.send(bufQueue.pop());
                     }
@@ -19515,38 +19517,38 @@ var MsProtoMapDesc = new MatchvsProtoMap();
 MsProtoMapDesc[MATCHVS_USER_LOGIN_RSP] = proto.stream.LoginRsp;
 MsProtoMapDesc[MATCHVS_USER_LOGIN_RSP] = proto.stream.LoginRsp;
 MsProtoMapDesc[MATCHVS_ROOM_JOIN_RSP] = proto.stream.JoinRoomRsp;
-MsProtoMapDesc[MATCHVS_ROOM_CREATE_RSP] = proto.stream.CreateRoomRsp;
 MsProtoMapDesc[MATCHVS_ROOM_CHECK_IN_RSP] = proto.stream.CheckInAck;
+MsProtoMapDesc[MATCHVS_ROOM_CREATE_RSP] = proto.stream.CreateRoomRsp;
 MsProtoMapDesc[MATCHVS_ROOM_CHECKIN_NOTIFY] = proto.stream.CheckInNotify;
-MsProtoMapDesc[MATCHVS_ROOM_LEAVE_RSP] = proto.stream.LeaveRoomRsp;
 MsProtoMapDesc[MATCHVS_ROOM_JOIN_OVER_RSP] = proto.stream.JoinOverRsp;
+MsProtoMapDesc[MATCHVS_ROOM_LEAVE_RSP] = proto.stream.LeaveRoomRsp;
 MsProtoMapDesc[MATCHVS_ROOM_NOTICE_USER_JOIN] = proto.stream.NoticeJoin;
-MsProtoMapDesc[MATCHVS_ROOM_NOTICE_USER_LEAVE] = proto.stream.NoticeLeave;
 MsProtoMapDesc[MATCHVS_HEARTBEAT_HOTEL_RSP] = proto.stream.HeartbeatAck;
+MsProtoMapDesc[MATCHVS_ROOM_NOTICE_USER_LEAVE] = proto.stream.NoticeLeave;
 MsProtoMapDesc[MATCHVS_BROADCAST_HOTEL_RSP] = proto.stream.BroadcastAck;
-MsProtoMapDesc[MATCHVS_HOTEL_NOTIFY] = proto.stream.Notify;
 MsProtoMapDesc[CMD_SUBSCRIBE_ACK_CMDID] = proto.stream.SubscribeAck;
+MsProtoMapDesc[MATCHVS_HOTEL_NOTIFY] = proto.stream.Notify;
 MsProtoMapDesc[CMD_PUBLISH_ACKCMDID] = proto.stream.PublishAck;
-MsProtoMapDesc[CMD_PUBLISH_NOTIFYCMDID] = proto.stream.PublishNotify;
 //MsProtoMapDesc[MATCHVS_USER_GATEWAY_SPEED_RSP      ] = dataView;
+MsProtoMapDesc[CMD_PUBLISH_NOTIFYCMDID] = proto.stream.PublishNotify;
 MsProtoMapDesc[MATCHVS_USER_HEARTBEAT_RSP] = proto.stream.HeartbeatRsp;
-MsProtoMapDesc[MATCHVS_USER_LOGOUT_RSP] = proto.stream.LogoutRsp;
 MsProtoMapDesc[CMD_GET_ROOM_LIST_RSP] = proto.stream.GetRoomListRsp;
+MsProtoMapDesc[MATCHVS_USER_LOGOUT_RSP] = proto.stream.LogoutRsp;
 MsProtoMapDesc[CMD_DISCONNECT_RSP] = proto.stream.DisconnectRsp;
-MsProtoMapDesc[CMD_KICK_PLAYER_RSP] = proto.stream.KickPlayerRsp;
 MsProtoMapDesc[CMD_KICK_PLAYER_NOTIFY] = proto.stream.KickPlayerNotify;
+MsProtoMapDesc[CMD_KICK_PLAYER_RSP] = proto.stream.KickPlayerRsp;
 MsProtoMapDesc[CMD_SET_FRAME_SYNCRATEACK_CMDID] = proto.stream.SetFrameSyncRateAck;
-MsProtoMapDesc[CMD_SET_FRAME_SYNCRATENOTIFY_CMDID] = proto.stream.SetFrameSyncRateNotify;
 MsProtoMapDesc[CMD_FRAME_BROADCASTACK_CMDID] = proto.stream.FrameBroadcastAck;
+MsProtoMapDesc[CMD_SET_FRAME_SYNCRATENOTIFY_CMDID] = proto.stream.SetFrameSyncRateNotify;
 MsProtoMapDesc[CMD_FRAME_DATANOTIFY_CMDID] = proto.stream.FrameDataNotify;
-MsProtoMapDesc[CMD_FRAME_SYNCNOTIFY_CMDID] = proto.stream.FrameSyncNotify;
 MsProtoMapDesc[MATCHVS_NETWORK_STATE_NOTIFY] = proto.stream.NetworkStateNotify;
+MsProtoMapDesc[CMD_FRAME_SYNCNOTIFY_CMDID] = proto.stream.FrameSyncNotify;
 MsProtoMapDesc[CMD_GET_ROOM_LIST_EX_RSP] = proto.stream.GetRoomListExRsp;
-MsProtoMapDesc[CMD_GET_ROOM_DETAIL_RSP] = proto.stream.GetRoomDetailRsp;
 MsProtoMapDesc[MATCHVS_ROOM_JOIN_OVER_NOTIFY] = proto.stream.JoinOverNotify;
+MsProtoMapDesc[CMD_GET_ROOM_DETAIL_RSP] = proto.stream.GetRoomDetailRsp;
 MsProtoMapDesc[CMD_SET_ROOM_PROPERTY_RSP] = proto.stream.SetRoomPropertyRsp;
-MsProtoMapDesc[CMD_SET_ROOM_PROPERTY_NOTIFY] = proto.stream.NoticeRoomProperty;
 MsProtoMapDesc[CMD_ROOM_JOIN_OPEN_RSP] = proto.stream.JoinOpenRsp;
+MsProtoMapDesc[CMD_SET_ROOM_PROPERTY_NOTIFY] = proto.stream.NoticeRoomProperty;
 MsProtoMapDesc[CMD_ROOM_JOIN_OPEN_NOT] = proto.stream.JoinOpenNotify;
 /**
  * Encoder && Decoder
@@ -20062,7 +20064,726 @@ MatchvsProtocol.prototype.joinOpen = function (gameID, userID, roomID, cpProto) 
     reqEx.setCpproto(stringToUtf8ByteArray(cpProto));
     var bytes = reqEx.serializeBinary();
     return this.fillHeader(bytes, CMD_ROOM_JOIN_OPEN_REQ);
-}; /* ================ matchvs.js ================= */
+}; /* ================ EngineWork.js ================= */
+function EngineNetworkMap() {
+    this[MATCHVS_USER_LOGIN_RSP] = new LoginRspWork();
+    this[MATCHVS_ROOM_JOIN_RSP] = new JoinRoomRspWork();
+    this[MATCHVS_ROOM_NOTICE_USER_JOIN] = new JoinRoomNotifyWork();
+    this[MATCHVS_ROOM_CHECK_IN_RSP] = new CheckInRoomRspWork();
+    this[MATCHVS_ROOM_CREATE_RSP] = new CreateRoomRspWork();
+    this[MATCHVS_ROOM_CHECKIN_NOTIFY] = new CheckInRoomNtfyWork();
+    this[MATCHVS_ROOM_JOIN_OVER_RSP] = new JoinOverRspWork();
+    this[MATCHVS_ROOM_JOIN_OVER_NOTIFY] = new JoinOverNotifyWork();
+    this[MATCHVS_ROOM_LEAVE_RSP] = new LeaveRoomRspWork();
+    this[MATCHVS_ROOM_NOTICE_USER_LEAVE] = new LeaveRoomNotifyWork();
+    this[MATCHVS_USER_HEARTBEAT_RSP] = new HeartBeatGatewayRspWork();
+    this[MATCHVS_HEARTBEAT_HOTEL_RSP] = new HeartBeatHotelRspWork();
+    this[MATCHVS_BROADCAST_HOTEL_RSP] = new SendEventRspWork();
+    this[MATCHVS_HOTEL_NOTIFY] = new SendEventNotifyWork();
+    this[CMD_SUBSCRIBE_ACK_CMDID] = new SubscribeEventGroupRspWork();
+    this[CMD_PUBLISH_ACKCMDID] = new SendEventGroupRspWork();
+    this[CMD_PUBLISH_NOTIFYCMDID] = new SendEventGroupNotifyWork();
+    this[MATCHVS_USER_GATEWAY_SPEED_RSP] = new GatewaySpeedRspWork();
+    this[CMD_GET_ROOM_LIST_RSP] = new GetRoomListRspWork();
+    this[MATCHVS_USER_LOGOUT_RSP] = new LoginOutRspWork();
+    this[CMD_DISCONNECT_RSP] = new DisConnectRspWork();
+    this[CMD_KICK_PLAYER_NOTIFY] = new KickPlayerNotifyWork();
+    this[CMD_KICK_PLAYER_RSP] = new KickPlayerRspWork();
+    this[CMD_SET_FRAME_SYNCRATEACK_CMDID] = new SetFrameSyncRspWork();
+    this[CMD_FRAME_BROADCASTACK_CMDID] = new SendFrameEventRspWork();
+    this[CMD_SET_FRAME_SYNCRATENOTIFY_CMDID] = new SetFrameSyncNotifyWork();
+    this[CMD_FRAME_DATANOTIFY_CMDID] = new FrameDataNotifyWork();
+    this[CMD_FRAME_SYNCNOTIFY_CMDID] = new FrameSyncNotifyWork();
+    this[MATCHVS_NETWORK_STATE_NOTIFY] = new NetworkStateNotifyWork();
+    this[CMD_GET_ROOM_LIST_EX_RSP] = new GetRoomListRspWork_Ex();
+    this[CMD_GET_ROOM_DETAIL_RSP] = new GetRoomDetailRspWork();
+    this[CMD_SET_ROOM_PROPERTY_RSP] = new SetRoomPropertyRspWokr();
+    this[CMD_SET_ROOM_PROPERTY_NOTIFY] = new SetRoomPropertyNotifyWork();
+    this[CMD_ROOM_JOIN_OPEN_RSP] = new JoinOpenRspWork();
+    this[CMD_ROOM_JOIN_OPEN_NOT] = new JoinOpenNotifyWork();
+}
+var engineWorkMap = new EngineNetworkMap();
+var NetWorkCallBackImp = function (engine) {
+    MSExtend(this, MatchvsNetWork);
+    var lastTime = new Date().getTime();
+    var timer;
+    this.frameCache = [];
+    this.onMsg = function (dataView) {
+        // var time = new Date().getTime();
+        // var message = time - lastTime;
+        // if (message > 10) {
+        // }
+        // lastTime = time;
+        var packet = engine.mProtocol.handleMsg(dataView);
+        var roomInfo = new proto.stream.RoomInfo();
+        if (packet && packet.header) {
+        }
+        var event = {
+            payload: packet.payload,
+            seq: packet.header.seq,
+            roomInfo: roomInfo,
+            frameCache: this.frameCache
+        };
+        var dohand = engineWorkMap[packet.header.cmd];
+        if (dohand) {
+            dohand.doSubHandle(event, engine);
+        }
+        else {
+            MatchvsLog.logI("no the cmd: ", packet.header.cmd);
+        }
+        // switch (packet.header.cmd) {
+        //     // case MATCHVS_USER_LOGIN_RSP:
+        //     //     engineWorkMap[MATCHVS_USER_LOGIN_RSP].doSubHandle(event, engine);
+        //     //     break;
+        //     // case MATCHVS_ROOM_JOIN_RSP:
+        //     //     engineWorkMap[MATCHVS_ROOM_JOIN_RSP].doSubHandle(event, engine);
+        //     //     break;
+        //     // case MATCHVS_ROOM_CREATE_RSP:
+        //     //     engineWorkMap[MATCHVS_ROOM_CREATE_RSP].doSubHandle(event, engine);
+        //     //     break;
+        //     // case MATCHVS_ROOM_CHECK_IN_RSP:
+        //     //     engineWorkMap[MATCHVS_ROOM_CHECK_IN_RSP].doSubHandle(event, engine);
+        //     //     break;
+        //     // case MATCHVS_ROOM_CHECKIN_NOTIFY:
+        //     //     engineWorkMap[MATCHVS_ROOM_CHECKIN_NOTIFY].doSubHandle(event, engine);
+        //     //     // if (engine.joinRoomNotifyInfo) {
+        //     //     //     engine.mRsp.joinRoomNotify && engine.mRsp.joinRoomNotify(engine.joinRoomNotifyInfo);
+        //     //     // }
+        //     //     // engine.mAllPlayers = packet.payload.getCheckinsList();
+        //     //     // engine.mRsp.roomCheckInNotify && engine.mRsp.roomCheckInNotify(new MsCheckInNotify(packet.payload.getUserid(), packet.payload.getCheckinsList(), packet.payload.getPlayersList(), packet.payload.getMaxplayers()));
+        //     //     // engine.joinRoomNotifyInfo = null;
+        //     //     break;
+        //     // case MATCHVS_ROOM_LEAVE_RSP:
+        //     //     engineWorkMap[MATCHVS_ROOM_LEAVE_RSP].doSubHandle(event, engine);
+        //     //     // //退出房间状态取消
+        //     //     // engine.mEngineState &= ~ENGE_STATE.LEAVE_ROOMING;
+        //     //     // if (packet.payload.getStatus() !== 200) {
+        //     //     //     engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
+        //     //     // }
+        //     //     // roomInfo.setRoomid("0");
+        //     //     // engine.mRoomInfo = roomInfo;
+        //     //     // var leaveRoomRsp = new MsLeaveRoomRsp(packet.payload.getStatus(), packet.payload.getRoomid(), packet.payload.getUserid(), packet.payload.getCpproto());
+        //     //     // engine.mRsp.leaveRoomResponse && engine.mRsp.leaveRoomResponse(leaveRoomRsp);
+        //     //     // engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
+        //     //     break;
+        //     // case MATCHVS_ROOM_JOIN_OVER_RSP:
+        //     //     engineWorkMap[MATCHVS_ROOM_JOIN_OVER_RSP].doSubHandle(event, engine);
+        //     //     // if (packet.payload.getStatus() !== 200) {
+        //     //     //     engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
+        //     //     // }
+        //     //     // engine.mRsp.joinOverResponse && engine.mRsp.joinOverResponse(new MsJoinOverRsp(packet.payload.getStatus(), utf8ByteArrayToString(packet.payload.getCpproto())));
+        //     //     break;
+        //     // case MATCHVS_ROOM_NOTICE_USER_JOIN:
+        //     //     engineWorkMap[MATCHVS_ROOM_NOTICE_USER_JOIN].doSubHandle(event, engine);
+        //     //     // engine.joinRoomNotifyInfo = new MsRoomUserInfo(packet.payload.getUser().getUserid(), utf8ByteArrayToString(packet.payload.getUser().getUserprofile()));
+        //     //     break;
+        //     // case MATCHVS_ROOM_NOTICE_USER_LEAVE:
+        //     //     engineWorkMap[MATCHVS_ROOM_NOTICE_USER_LEAVE].doSubHandle(event, engine);
+        //     //     // var leaveRoomInfo = new MsLeaveRoomNotify(packet.payload.getRoomid(), packet.payload.getUserid(), packet.payload.getOwner(), utf8ByteArrayToString(packet.payload.getCpproto()));
+        //     //     // engine.mRsp.leaveRoomNotify && engine.mRsp.leaveRoomNotify(leaveRoomInfo);
+        //     //     break;
+        //     // case MATCHVS_HEARTBEAT_HOTEL_RSP:
+        //     //     engineWorkMap[MATCHVS_HEARTBEAT_HOTEL_RSP].doSubHandle(event, engine);
+        //     //     // //房间的心跳返回
+        //     //     // engine.mRsp.hotelHeartBeatRsp && engine.mRsp.hotelHeartBeatRsp(packet.payload.getStatus());
+        //     //     // MatchvsLog.logI("hotelHeartBeatRsp");
+        //     //     break;
+        //     // case MATCHVS_BROADCAST_HOTEL_RSP:
+        //     //     engineWorkMap[MATCHVS_BROADCAST_HOTEL_RSP].doSubHandle(event, engine);
+        //     //     // if (packet.payload.getStatus() !== 200) {
+        //     //     //     engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
+        //     //     // }
+        //     //     // engine.mRsp.sendEventResponse && engine.mRsp.sendEventResponse(new MsSendEventRsp(packet.payload.getStatus(), packet.header.seq));
+        //     //     break;
+        //     // case MATCHVS_HOTEL_NOTIFY:
+        //     //     engineWorkMap[MATCHVS_HOTEL_NOTIFY].doSubHandle(event, engine);
+        //     //     // var srcUserID = packet.payload.getSrcuid();
+        //     //     // if (srcUserID === 0) {
+        //     //     //     engine.mRsp.gameServerNotify && engine.mRsp.gameServerNotify(new MsGameServerNotifyInfo(packet.payload.getSrcuid(), utf8ByteArrayToString(packet.payload.getCpproto())));
+        //     //     // } else {
+        //     //     //     engine.mRsp.sendEventNotify && engine.mRsp.sendEventNotify(new MsSendEventNotify(packet.payload.getSrcuid(), utf8ByteArrayToString(packet.payload.getCpproto())));
+        //     //     // }
+        //     //     break;
+        //     // case CMD_SUBSCRIBE_ACK_CMDID://MATCHVS_SUBSCRIBE_EVENT_GROUP_RSP:
+        //     //     engineWorkMap[CMD_SUBSCRIBE_ACK_CMDID].doSubHandle(event, engine);
+        //     //     // engine.mRsp.subscribeEventGroupResponse && engine.mRsp.subscribeEventGroupResponse(packet.payload.getStatus(), packet.payload.getGroupsList());
+        //     //     break;
+        //     // case CMD_PUBLISH_ACKCMDID://MATCHVS_SEND_EVENT_GROUP_RSP:
+        //     //     engineWorkMap[CMD_PUBLISH_ACKCMDID].doSubHandle(event, engine);
+        //     //     // engine.mRsp.sendEventGroupResponse && engine.mRsp.sendEventGroupResponse(packet.payload.getStatus(), packet.payload.getDstnum());
+        //     //     break;
+        //     // case CMD_PUBLISH_NOTIFYCMDID://SEND_EVENT_GROUP_NOTIFY:
+        //     //     engineWorkMap[CMD_PUBLISH_NOTIFYCMDID].doSubHandle(event, engine);
+        //     //     // engine.mRsp.sendEventGroupNotify && engine.mRsp.sendEventGroupNotify(packet.payload.getSrcuid(), packet.payload.getGroupsList(), utf8ByteArrayToString(packet.payload.getCpproto()));
+        //     //     break;
+        //     // case MATCHVS_USER_GATEWAY_SPEED_RSP:
+        //     //     var status = packet.payload.getStatus();
+        //     //     var seq = packet.payload.getSeq();
+        //     //     engine.mRsp.gatewaySpeedResponse && engine.mRsp.gatewaySpeedResponse(new MsGatewaySpeedResponse(status, seq));
+        //     //     break;
+        //     // case MATCHVS_USER_HEARTBEAT_RSP:
+        //     //     var gameid = packet.payload.getGameid();
+        //     //     var gsExist = packet.payload.getGsexist();
+        //     //     //如果心跳存在视为已登录状态
+        //     //     engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+        //     //     engine.mRsp.heartBeatResponse && engine.mRsp.heartBeatResponse(new MsHeartBeatResponse(gameid, gsExist));
+        //     //     MatchvsLog.logI("gatewayHeartBeatResponse");
+        //     //     break;
+        //     // case MATCHVS_USER_LOGOUT_RSP:
+        //     //     engine.mNetWork.close();
+        //     //     engine.mRsp.logoutResponse && engine.mRsp.logoutResponse(packet.payload.getStatus());
+        //     //     break;
+        //     // case MATCHVS_NETWORK_STATE_NOTIFY:
+        //     //     engine.mRsp.networkStateNotify && engine.mRsp.networkStateNotify(new MsNetworkStateNotify(
+        //     //         packet.payload.getRoomid(),
+        //     //         packet.payload.getUserid(),
+        //     //         packet.payload.getState(),
+        //     //         packet.payload.getOwner()
+        //     //     ));
+        //     //     break;
+        //     // case CMD_GET_ROOM_LIST_RSP:
+        //     //     var roominfolist = packet.payload.getRoominfoList();
+        //     //     var roomList = [];
+        //     //     for (var i = 0; i < roominfolist.length; i++) {
+        //     //         roomList[i] = new MsRoomInfoEx(roominfolist[i].getRoomid(),
+        //     //             roominfolist[i].getRoomname(),
+        //     //             roominfolist[i].getMaxplayer(),
+        //     //             roominfolist[i].getMode(),
+        //     //             roominfolist[i].getCanwatch(),
+        //     //             utf8ByteArrayToString(roominfolist[i].getRoomproperty()));
+        //     //     }
+        //     //     engine.mRsp.getRoomListResponse && engine.mRsp.getRoomListResponse(packet.payload.getStatus(), roomList);
+        //     //     break;
+        //     // case CMD_DISCONNECT_RSP:
+        //     //     engine.mRsp.disConnectResponse && engine.mRsp.disConnectResponse(packet.payload.getStatus());
+        //     //     break;
+        //     // case CMD_KICK_PLAYER_RSP:
+        //     //     engine.mRsp.kickPlayerResponse && engine.mRsp.kickPlayerResponse(new MsKickPlayerRsp(packet.payload.getStatus(), packet.payload.getOwner(), packet.payload.getUserid()));
+        //     //     break;
+        //     // case CMD_KICK_PLAYER_NOTIFY:
+        //     //     if (packet.payload.getUserid().toString() === (""+engine.mUserID) && engine.mHotelHeartBeatTimer != null) {
+        //     //         clearInterval(engine.mHotelHeartBeatTimer);
+        //     //         engine.mHotelHeartBeatTimer = null;
+        //     //         engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
+        //     //         engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+        //     //         engine.mHotelNetWork.close();
+        //     //     }
+        //     //     engine.mRsp.kickPlayerNotify && engine.mRsp.kickPlayerNotify(
+        //     //         new MsKickPlayerNotify(packet.payload.getUserid(),
+        //     //             packet.payload.getSrcuserid(),
+        //     //             utf8ByteArrayToString(packet.payload.getCpproto()),
+        //     //             packet.payload.getOwner()
+        //     //         ));
+        //     //     break;
+        //     // case CMD_SET_FRAME_SYNCRATEACK_CMDID:
+        //     //     MatchvsLog.logI("SetFrameSyncRateAck:" + packet.payload);
+        //     //     engine.mRsp.setFrameSyncResponse && engine.mRsp.setFrameSyncResponse(
+        //     //         new MsSetChannelFrameSyncRsp(packet.payload.getStatus()));
+        //     //     break;
+        //     // case CMD_SET_FRAME_SYNCRATENOTIFY_CMDID:
+        //     //     //MatchvsLog.logI("SetFrameSyncRateNotify:"+packet.payload);
+        //     //     break;
+        //     // case CMD_FRAME_BROADCASTACK_CMDID:
+        //     //     //MatchvsLog.logI("FrameBroadcastAck:"+packet.payload);
+        //     //     engine.mRsp.sendFrameEventResponse && engine.mRsp.sendFrameEventResponse(
+        //     //         new MsSendFrameEventRsp(packet.payload.getStatus())
+        //     //     );
+        //     //     break;
+        //     // case CMD_FRAME_DATANOTIFY_CMDID:
+        //     //     //MatchvsLog.logI("FrameDataNotify:"+packet.payload);
+        //     //     frameCache.push(new MsFrameItem(packet.payload.getSrcuid(), utf8ByteArrayToString(packet.payload.getCpproto()), packet.payload.getTimestamp()));
+        //     //     break;
+        //     // case CMD_FRAME_SYNCNOTIFY_CMDID:
+        //     //     //MatchvsLog.logI("FrameSyncNotify:"+packet.payload);
+        //     //     var frameData = [];
+        //     //     while (frameCache.length > 0) {
+        //     //         frameData.push(frameCache.pop());
+        //     //     }
+        //     //     var msFrameData = new MsFrameData(packet.payload.getLastidx(), frameData, frameData.length);
+        //     //     engine.mRsp.frameUpdate && engine.mRsp.frameUpdate(msFrameData);
+        //     //     break;
+        //     // case CMD_GET_ROOM_LIST_EX_RSP:
+        //     //     var roomInfoList = packet.payload.getRoominfoexList();
+        //     //     var roomAttrs = [];
+        //     //     roomInfoList.forEach(function (roominfo) {
+        //     //         var roomAttr = new MsRoomAttribute(
+        //     //             roominfo.getRoomid(),
+        //     //             roominfo.getRoomname(),
+        //     //             roominfo.getMaxplayer(),
+        //     //             roominfo.getGameplayer(),
+        //     //             roominfo.getWatchplayer(),
+        //     //             roominfo.getMode(),
+        //     //             roominfo.getCanwatch(),
+        //     //             utf8ByteArrayToString(roominfo.getRoomproperty()),
+        //     //             roominfo.getOwner(),
+        //     //             roominfo.getState(),
+        //     //             roominfo.getCreatetime().toString()
+        //     //         );
+        //     //         roomAttrs.push(roomAttr);
+        //     //     });
+        //     //
+        //     //     var roomListExInfo = new MsGetRoomListExRsp(
+        //     //         packet.payload.getStatus(),
+        //     //         packet.payload.getTotal(),
+        //     //         roomAttrs
+        //     //     );
+        //     //     engine.mRsp.getRoomListExResponse && engine.mRsp.getRoomListExResponse(roomListExInfo);
+        //     //     break;
+        //     // case CMD_GET_ROOM_DETAIL_RSP:
+        //     //     if (packet.payload.getStatus() !== 200) {
+        //     //         engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(new MsGetRoomDetailRsp(packet.payload.getStatus()));
+        //     //         engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server error");
+        //     //     }
+        //     //     var roomDetail = packet.payload.getRoomdetail();
+        //     //     var userInfos = [];
+        //     //     var playerlist = roomDetail.getPlayerinfosList();
+        //     //     playerlist.forEach(function (player) {
+        //     //         var userinfo = new MsRoomUserInfo(player.getUserid(), utf8ByteArrayToString(player.getUserprofile()));
+        //     //         userInfos.push(userinfo);
+        //     //     });
+        //     //     var roomDetailRsp = new MsGetRoomDetailRsp(
+        //     //         packet.payload.getStatus(),
+        //     //         roomDetail.getState(),
+        //     //         roomDetail.getMaxplayer(),
+        //     //         roomDetail.getMode(),
+        //     //         roomDetail.getCanwatch(),
+        //     //         utf8ByteArrayToString(roomDetail.getRoomproperty()),
+        //     //         roomDetail.getOwner(),
+        //     //         roomDetail.getCreateflag(),
+        //     //         userInfos
+        //     //     );
+        //     //     engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(roomDetailRsp);
+        //     //     break;
+        //     // case MATCHVS_ROOM_JOIN_OVER_NOTIFY:
+        //     //     var joinoverNotifyInfo = new MsJoinOverNotifyInfo(
+        //     //         packet.payload.getRoomid(),
+        //     //         packet.payload.getSrcuserid(),
+        //     //         utf8ByteArrayToString(packet.payload.getCpproto())
+        //     //     );
+        //     //     engine.mRsp.joinOverNotify && engine.mRsp.joinOverNotify(joinoverNotifyInfo);
+        //     //     break;
+        //     // case CMD_SET_ROOM_PROPERTY_RSP:
+        //     //     if (packet.payload.getStatus() !== 200) {
+        //     //         engine.errorResponse && engine.errorResponse(packet.payload.getStatus(), "Server response error");
+        //     //     }
+        //     //     engine.mRsp.setRoomPropertyResponse && engine.mRsp.setRoomPropertyResponse(new MsSetRoomPropertyRspInfo(
+        //     //         packet.payload.getStatus(),
+        //     //         packet.payload.getRoomid(),
+        //     //         packet.payload.getUserid(),
+        //     //         utf8ByteArrayToString(packet.payload.getRoomproperty())
+        //     //     ));
+        //     //     break;
+        //     // case CMD_SET_ROOM_PROPERTY_NOTIFY:
+        //     //     engine.mRsp.setRoomPropertyNotify && engine.mRsp.setRoomPropertyNotify(new MsRoomPropertyNotifyInfo(
+        //     //         packet.payload.getRoomid(),
+        //     //         packet.payload.getUserid(),
+        //     //         utf8ByteArrayToString(packet.payload.getRoomproperty())
+        //     //     ));
+        //     //     break;
+        //     // case CMD_ROOM_JOIN_OPEN_RSP:
+        //     //     engine.mRsp.joinOpenResponse && engine.mRsp.joinOpenResponse(new MsReopenRoomResponse(
+        //     //         packet.payload.getStatus(),
+        //     //         utf8ByteArrayToString(packet.payload.getCpproto())
+        //     //     ));
+        //     //     break;
+        //     // case CMD_ROOM_JOIN_OPEN_NOT:
+        //     //     engine.mRsp.joinOpenNotify && engine.mRsp.joinOpenNotify(new MsReopenRoomNotify(
+        //     //         packet.payload.getRoomid(),
+        //     //         packet.payload.getUserid(),
+        //     //         utf8ByteArrayToString(packet.payload.getCpproto())
+        //     //     ));
+        //     //     break;
+        //     // default:
+        //     //     break;
+        // }
+    };
+    this.onErr = function (errCode, errMsg) {
+        engine.mRsp.errorResponse && engine.mRsp.errorResponse(errCode, errMsg);
+    };
+    this.onConnect = function (host) {
+        engine.mRsp.onConnect && engine.mRsp.onConnect(host);
+        timer = setInterval(engine.heartBeat, HEART_BEAT_INTERVAL);
+    };
+    this.onDisConnect = function (host, event) {
+        engine.mRsp.onDisConnect && engine.mRsp.onDisConnect(host);
+        if (host.endsWith(HttpConf.HOST_GATWAY_ADDR)) {
+            if ((engine.mEngineState & ENGE_STATE.LOGOUTING) !== ENGE_STATE.LOGOUTING) {
+                //如果gateway 异常断开连接了就返回错误消息
+                if (event && event.code && (event.code === 1000 || event.code === 1005)) {
+                    MatchvsLog.logI("gateway close is friend");
+                }
+                else {
+                    engine.mRsp.errorResponse && engine.mRsp.errorResponse(1001, "gateway network error");
+                }
+            }
+            engine.mEngineState = ENGE_STATE.NONE;
+            engine.mEngineState |= ENGE_STATE.HAVE_INIT;
+            MatchvsLog.logI("EngineState", engine.mEngineState);
+            clearInterval(timer);
+        }
+        else if (host.endsWith(HttpConf.HOST_HOTEL_ADDR)) {
+            MatchvsLog.logI("hotel disconnect");
+            if ((engine.mEngineState & ENGE_STATE.LEAVE_ROOMING) !== ENGE_STATE.LEAVE_ROOMING) {
+                //针对，如果直接退出房间，没有调用 leaveRoom接口
+                if (event && event.code && (event.code === 1000 || event.code === 1005)) {
+                    MatchvsLog.logI("hotel close is friend");
+                }
+                else {
+                    engine.mRsp.errorResponse && engine.mRsp.errorResponse(1001, "hotel network error");
+                }
+            }
+            //如果房间服务器断开了(包括异常断开情况)就把定时器关掉
+            if (engine.mHotelHeartBeatTimer != null) {
+                clearInterval(engine.mHotelHeartBeatTimer);
+                engine.mHotelHeartBeatTimer = null;
+            }
+            //退出房间状态取消
+            engine.mEngineState &= ~ENGE_STATE.LEAVE_ROOMING;
+            engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
+        }
+    };
+};
+function LoginRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() === 200) {
+            engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+        }
+        else {
+            engine.mEngineState &= ~ENGE_STATE.LOGINING;
+            engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Login is fail,Server Response Error");
+        }
+        engine.mEngineState &= ~ENGE_STATE.LOGINING;
+        engine.mRecntRoomID = event.payload.getRoomid();
+        if (((engine.mEngineState & ENGE_STATE.RECONNECTING) === ENGE_STATE.RECONNECTING)) {
+            if (engine.mRecntRoomID !== "0") {
+                var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, engine.mMsPubArgs.userID, engine.mRecntRoomID, engine.mMsPubArgs.gameID, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
+                var reconbuf = engine.mProtocol && engine.mProtocol.joinRoomSpecial(roomJoin);
+                engine.mNetWork && engine.mNetWork.send(reconbuf);
+            }
+            else {
+                engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
+                //201 重连成功但是不在房间
+                engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(201, null, null);
+            }
+        }
+        else {
+            engine.mRsp.loginResponse(new MsLoginRsp(event.payload.getStatus(), engine.mRecntRoomID));
+        }
+    };
+}
+function JoinRoomRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() === 200) {
+            engine.mEngineState |= ENGE_STATE.IN_ROOM;
+            engine.mBookInfo = event.payload.getBookinfo();
+            engine.mRoomInfo = event.payload.getRoominfo();
+            engine.mUserListForJoinRoomRsp = event.payload.getUsersList();
+            HttpConf.HOST_HOTEL_ADDR = getHotelUrl(engine);
+            engine.mHotelNetWork = new MatchvsNetWork(HttpConf.HOST_HOTEL_ADDR, engine.mNetWorkCallBackImp);
+            engine.mNetWorkCallBackImp.onConnect = function (host) {
+                engine.roomCheckIn(engine.mHotelNetWork, engine.mBookInfo, engine.mRoomInfo);
+                engine.mRsp.onConnect && engine.mRsp.onConnect(host);
+            };
+            if (engine.mHotelHeartBeatTimer == null) {
+                engine.mHotelHeartBeatTimer = setInterval(engine.hotelHeartBeat, HEART_BEAT_INTERVAL);
+            }
+        }
+        else {
+            engine.mEngineState &= ~ENGE_STATE.JOIN_ROOMING;
+            engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server Response Error");
+            engine.mRsp.joinRoomResponse && engine.mRsp.joinRoomResponse(event.payload.getStatus(), null, null);
+        }
+    };
+}
+function CreateRoomRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() === 200) {
+            engine.mEngineState |= ENGE_STATE.IN_ROOM;
+            engine.mBookInfo = event.payload.getBookinfo();
+            var roomid = event.payload.getRoomid();
+            event.roomInfo.setRoomid(roomid);
+            event.roomInfo.setOwner(event.payload.getOwner());
+            engine.mRoomInfo = event.roomInfo;
+            HttpConf.HOST_HOTEL_ADDR = getHotelUrl(engine);
+            engine.mHotelNetWork = new MatchvsNetWork(HttpConf.HOST_HOTEL_ADDR, engine.mNetWorkCallBackImp);
+            engine.mNetWorkCallBackImp.onConnect = function (host) {
+                engine.roomCheckIn(engine.mHotelNetWork, engine.mBookInfo, engine.mRoomInfo);
+                engine.mRsp.onConnect && engine.mRsp.onConnect(host);
+            };
+            if (engine.mHotelHeartBeatTimer == null) {
+                engine.mHotelHeartBeatTimer = setInterval(engine.hotelHeartBeat, HEART_BEAT_INTERVAL);
+            }
+        }
+        else {
+            engine.mEngineState &= ~ENGE_STATE.CREATEROOM;
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server Response Error");
+        }
+    };
+}
+function CheckInRoomRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() !== 200) {
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server Response Error");
+        }
+        engine.mAllPlayers = event.payload.getCheckinsList(); //checkins;
+        var roomUserList = [];
+        engine.mUserListForJoinRoomRsp.forEach(function (user) {
+            var roomuser = new MsRoomUserInfo(user.getUserid(), utf8ByteArrayToString(user.getUserprofile()));
+            roomUserList.push(roomuser);
+        });
+        //房间信息
+        var roominfo = new MsRoomInfo(engine.mRoomInfo.getRoomid(), utf8ByteArrayToString(engine.mRoomInfo.getRoomproperty()), engine.mRoomInfo.getOwner());
+        if ((engine.mEngineState & ENGE_STATE.CREATEROOM) === ENGE_STATE.CREATEROOM) {
+            //创建房间
+            engine.mEngineState &= ~ENGE_STATE.CREATEROOM;
+            engine.mRsp.createRoomResponse && engine.mRsp.createRoomResponse(new MsCreateRoomRsp(event.payload.getStatus(), engine.mRoomInfo.getRoomid(), engine.mRoomInfo.getOwner()));
+        }
+        else if ((engine.mEngineState & ENGE_STATE.JOIN_ROOMING) === ENGE_STATE.JOIN_ROOMING) {
+            //加入房间
+            engine.mEngineState &= ~ENGE_STATE.JOIN_ROOMING;
+            engine.mRsp.joinRoomResponse && engine.mRsp.joinRoomResponse(event.payload.getStatus(), roomUserList, roominfo);
+        }
+        else if ((engine.mEngineState & ENGE_STATE.RECONNECTING) === ENGE_STATE.RECONNECTING) {
+            engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
+            engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(event.payload.getStatus(), roomUserList, roominfo);
+        }
+    };
+}
+function CheckInRoomNtfyWork() {
+    this.doSubHandle = function (event, engine) {
+        if (engine.joinRoomNotifyInfo) {
+            engine.mRsp.joinRoomNotify && engine.mRsp.joinRoomNotify(engine.joinRoomNotifyInfo);
+        }
+        engine.mAllPlayers = event.payload.getCheckinsList();
+        engine.mRsp.roomCheckInNotify && engine.mRsp.roomCheckInNotify(new MsCheckInNotify(event.payload.getUserid(), event.payload.getCheckinsList(), event.payload.getPlayersList(), event.payload.getMaxplayers()));
+        engine.joinRoomNotifyInfo = null;
+    };
+}
+function LeaveRoomRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mEngineState &= ~ENGE_STATE.LEAVE_ROOMING;
+        if (event.payload.getStatus() !== 200) {
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server Response Error");
+        }
+        event.roomInfo.setRoomid("0");
+        engine.mRoomInfo = event.roomInfo;
+        var leaveRoomRsp = new MsLeaveRoomRsp(event.payload.getStatus(), event.payload.getRoomid(), event.payload.getUserid(), event.payload.getCpproto());
+        engine.mRsp.leaveRoomResponse && engine.mRsp.leaveRoomResponse(leaveRoomRsp);
+        engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
+    };
+}
+function JoinOverRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() !== 200) {
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server Response Error");
+        }
+        engine.mRsp.joinOverResponse && engine.mRsp.joinOverResponse(new MsJoinOverRsp(event.payload.getStatus(), utf8ByteArrayToString(event.payload.getCpproto())));
+    };
+}
+function JoinOverNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        var joinoverNotifyInfo = new MsJoinOverNotifyInfo(event.payload.getRoomid(), event.payload.getSrcuserid(), utf8ByteArrayToString(event.payload.getCpproto()));
+        engine.mRsp.joinOverNotify && engine.mRsp.joinOverNotify(joinoverNotifyInfo);
+    };
+}
+function JoinRoomNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.joinRoomNotifyInfo = new MsRoomUserInfo(event.payload.getUser().getUserid(), utf8ByteArrayToString(event.payload.getUser().getUserprofile()));
+    };
+}
+function LeaveRoomNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        var leaveRoomInfo = new MsLeaveRoomNotify(event.payload.getRoomid(), event.payload.getUserid(), event.payload.getOwner(), utf8ByteArrayToString(event.payload.getCpproto()));
+        engine.mRsp.leaveRoomNotify && engine.mRsp.leaveRoomNotify(leaveRoomInfo);
+    };
+}
+function HeartBeatHotelRspWork() {
+    this.doSubHandle = function (event, engine) {
+        //房间的心跳返回
+        engine.mRsp.hotelHeartBeatRsp && engine.mRsp.hotelHeartBeatRsp(event.payload.getStatus());
+        MatchvsLog.logI("hotelHeartBeatRsp");
+    };
+}
+function SendEventRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() !== 200) {
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server Response Error");
+        }
+        engine.mRsp.sendEventResponse && engine.mRsp.sendEventResponse(new MsSendEventRsp(event.payload.getStatus(), event.seq));
+    };
+}
+function SendEventNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        var srcUserID = event.payload.getSrcuid();
+        if (srcUserID === 0) {
+            engine.mRsp.gameServerNotify && engine.mRsp.gameServerNotify(new MsGameServerNotifyInfo(event.payload.getSrcuid(), utf8ByteArrayToString(event.payload.getCpproto())));
+        }
+        else {
+            engine.mRsp.sendEventNotify && engine.mRsp.sendEventNotify(new MsSendEventNotify(event.payload.getSrcuid(), utf8ByteArrayToString(event.payload.getCpproto())));
+        }
+    };
+}
+function SubscribeEventGroupRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.subscribeEventGroupResponse && engine.mRsp.subscribeEventGroupResponse(event.payload.getStatus(), event.payload.getGroupsList());
+    };
+}
+function SendEventGroupRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.sendEventGroupResponse && engine.mRsp.sendEventGroupResponse(event.payload.getStatus(), event.payload.getDstnum());
+    };
+}
+function SendEventGroupNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.sendEventGroupNotify && engine.mRsp.sendEventGroupNotify(event.payload.getSrcuid(), event.payload.getGroupsList(), utf8ByteArrayToString(event.payload.getCpproto()));
+    };
+}
+function GatewaySpeedRspWork() {
+    this.doSubHandle = function (event, engine) {
+        var status = event.payload.getStatus();
+        var seq = event.payload.getSeq();
+        engine.mRsp.gatewaySpeedResponse && engine.mRsp.gatewaySpeedResponse(new MsGatewaySpeedResponse(status, seq));
+    };
+}
+function HeartBeatGatewayRspWork() {
+    this.doSubHandle = function (event, engine) {
+        var gameid = event.payload.getGameid();
+        var gsExist = event.payload.getGsexist();
+        //如果心跳存在视为已登录状态
+        engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+        engine.mRsp.heartBeatResponse && engine.mRsp.heartBeatResponse(new MsHeartBeatResponse(gameid, gsExist));
+        MatchvsLog.logI("gatewayHeartBeatResponse");
+    };
+}
+function LoginOutRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mNetWork.close();
+        engine.mRsp.logoutResponse && engine.mRsp.logoutResponse(event.payload.getStatus());
+    };
+}
+function GetRoomListRspWork() {
+    this.doSubHandle = function (event, engine) {
+        var roominfolist = event.payload.getRoominfoList();
+        var roomList = [];
+        for (var i = 0; i < roominfolist.length; i++) {
+            roomList[i] = new MsRoomInfoEx(roominfolist[i].getRoomid(), roominfolist[i].getRoomname(), roominfolist[i].getMaxplayer(), roominfolist[i].getMode(), roominfolist[i].getCanwatch(), utf8ByteArrayToString(roominfolist[i].getRoomproperty()));
+        }
+        engine.mRsp.getRoomListResponse && engine.mRsp.getRoomListResponse(event.payload.getStatus(), roomList);
+    };
+}
+function DisConnectRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.disConnectResponse && engine.mRsp.disConnectResponse(event.payload.getStatus());
+    };
+}
+function KickPlayerRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.kickPlayerResponse && engine.mRsp.kickPlayerResponse(new MsKickPlayerRsp(event.payload.getStatus(), event.payload.getOwner(), event.payload.getUserid()));
+    };
+}
+function KickPlayerNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getUserid().toString() === ("" + engine.mUserID) && engine.mHotelHeartBeatTimer != null) {
+            clearInterval(engine.mHotelHeartBeatTimer);
+            engine.mHotelHeartBeatTimer = null;
+            engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
+            engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+            engine.mHotelNetWork.close();
+        }
+        engine.mRsp.kickPlayerNotify && engine.mRsp.kickPlayerNotify(new MsKickPlayerNotify(event.payload.getUserid(), event.payload.getSrcuserid(), utf8ByteArrayToString(event.payload.getCpproto()), event.payload.getOwner()));
+    };
+}
+function SetFrameSyncRspWork() {
+    this.doSubHandle = function (event, engine) {
+        MatchvsLog.logI("SetFrameSyncRateAck:" + event.payload);
+        engine.mRsp.setFrameSyncResponse && engine.mRsp.setFrameSyncResponse(new MsSetChannelFrameSyncRsp(event.payload.getStatus()));
+    };
+}
+function SetFrameSyncNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        //MatchvsLog.logI("SetFrameSyncRateNotify:"+event.payload);
+    };
+}
+function SendFrameEventRspWork() {
+    this.doSubHandle = function (event, engine) {
+        //MatchvsLog.logI("FrameBroadcastAck:"+event.payload);
+        engine.mRsp.sendFrameEventResponse && engine.mRsp.sendFrameEventResponse(new MsSendFrameEventRsp(event.payload.getStatus()));
+    };
+}
+function FrameDataNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        event.frameCache.push(new MsFrameItem(event.payload.getSrcuid(), utf8ByteArrayToString(event.payload.getCpproto()), event.payload.getTimestamp()));
+    };
+}
+function FrameSyncNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        var frameData = [];
+        while (event.frameCache.length > 0) {
+            frameData.push(event.frameCache.pop());
+        }
+        var msFrameData = new MsFrameData(event.payload.getLastidx(), frameData, frameData.length);
+        engine.mRsp.frameUpdate && engine.mRsp.frameUpdate(msFrameData);
+    };
+}
+function NetworkStateNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.networkStateNotify && engine.mRsp.networkStateNotify(new MsNetworkStateNotify(event.payload.getRoomid(), event.payload.getUserid(), event.payload.getState(), event.payload.getOwner()));
+    };
+}
+function GetRoomListRspWork_Ex() {
+    this.doSubHandle = function (event, engine) {
+        var roomInfoList = event.payload.getRoominfoexList();
+        var roomAttrs = [];
+        roomInfoList.forEach(function (roominfo) {
+            var roomAttr = new MsRoomAttribute(roominfo.getRoomid(), roominfo.getRoomname(), roominfo.getMaxplayer(), roominfo.getGameplayer(), roominfo.getWatchplayer(), roominfo.getMode(), roominfo.getCanwatch(), utf8ByteArrayToString(roominfo.getRoomproperty()), roominfo.getOwner(), roominfo.getState(), roominfo.getCreatetime().toString());
+            roomAttrs.push(roomAttr);
+        });
+        var roomListExInfo = new MsGetRoomListExRsp(event.payload.getStatus(), event.payload.getTotal(), roomAttrs);
+        engine.mRsp.getRoomListExResponse && engine.mRsp.getRoomListExResponse(roomListExInfo);
+    };
+}
+function GetRoomDetailRspWork() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() !== 200) {
+            engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(new MsGetRoomDetailRsp(event.payload.getStatus()));
+            engine.mRsp.errorResponse && engine.mRsp.errorResponse(event.payload.getStatus(), "Server error");
+        }
+        var roomDetail = event.payload.getRoomdetail();
+        var userInfos = [];
+        var playerlist = roomDetail.getPlayerinfosList();
+        playerlist.forEach(function (player) {
+            var userinfo = new MsRoomUserInfo(player.getUserid(), utf8ByteArrayToString(player.getUserprofile()));
+            userInfos.push(userinfo);
+        });
+        var roomDetailRsp = new MsGetRoomDetailRsp(event.payload.getStatus(), roomDetail.getState(), roomDetail.getMaxplayer(), roomDetail.getMode(), roomDetail.getCanwatch(), utf8ByteArrayToString(roomDetail.getRoomproperty()), roomDetail.getOwner(), roomDetail.getCreateflag(), userInfos);
+        engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(roomDetailRsp);
+    };
+}
+function SetRoomPropertyRspWokr() {
+    this.doSubHandle = function (event, engine) {
+        if (event.payload.getStatus() !== 200) {
+            engine.errorResponse && engine.errorResponse(event.payload.getStatus(), "Server response error");
+        }
+        engine.mRsp.setRoomPropertyResponse && engine.mRsp.setRoomPropertyResponse(new MsSetRoomPropertyRspInfo(event.payload.getStatus(), event.payload.getRoomid(), event.payload.getUserid(), utf8ByteArrayToString(event.payload.getRoomproperty())));
+    };
+}
+function SetRoomPropertyNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.setRoomPropertyNotify && engine.mRsp.setRoomPropertyNotify(new MsRoomPropertyNotifyInfo(event.payload.getRoomid(), event.payload.getUserid(), utf8ByteArrayToString(event.payload.getRoomproperty())));
+    };
+}
+function JoinOpenRspWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.joinOpenResponse && engine.mRsp.joinOpenResponse(new MsReopenRoomResponse(event.payload.getStatus(), utf8ByteArrayToString(event.payload.getCpproto())));
+    };
+}
+function JoinOpenNotifyWork() {
+    this.doSubHandle = function (event, engine) {
+        engine.mRsp.joinOpenNotify && engine.mRsp.joinOpenNotify(new MsReopenRoomNotify(event.payload.getRoomid(), event.payload.getUserid(), utf8ByteArrayToString(event.payload.getCpproto())));
+    };
+} /* ================ matchvs.js ================= */
 var M_ENGINE;
 function MatchvsEngine() {
     M_ENGINE = this;
@@ -20079,348 +20800,6 @@ function MatchvsEngine() {
     this.mBookInfo = null;
     this.mHotelHeartBeatTimer = null;
     this.mProtocol = new MatchvsProtocol();
-    var NetWorkCallBackImp = function (engine) {
-        MSExtend(this, MatchvsNetWork);
-        var lastTime = new Date().getTime();
-        var timer;
-        var frameCache = [];
-        this.onMsg = function (dataView) {
-            var time = new Date().getTime();
-            var message = time - lastTime;
-            if (message > 10) {
-            }
-            lastTime = time;
-            var packet = engine.mProtocol.handleMsg(dataView);
-            var roomInfo = new proto.stream.RoomInfo();
-            if (packet && packet.header) {
-            }
-            switch (packet.header.cmd) {
-                case MATCHVS_USER_LOGIN_RSP:
-                    if (packet.payload.getStatus() === 200) {
-                        engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
-                    }
-                    else {
-                        engine.mEngineState &= ~ENGE_STATE.LOGINING;
-                        engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Login is fail,Server Response Error");
-                    }
-                    engine.mEngineState &= ~ENGE_STATE.LOGINING;
-                    engine.mRecntRoomID = packet.payload.getRoomid();
-                    if (((engine.mEngineState & ENGE_STATE.RECONNECTING) === ENGE_STATE.RECONNECTING)) {
-                        if (engine.mRecntRoomID !== "0") {
-                            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, engine.mMsPubArgs.userID, engine.mRecntRoomID, engine.mMsPubArgs.gameID, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
-                            var reconbuf = engine.mProtocol && engine.mProtocol.joinRoomSpecial(roomJoin);
-                            engine.mNetWork && engine.mNetWork.send(reconbuf);
-                        }
-                        else {
-                            engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
-                            //201 重连成功但是不在房间
-                            engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(201, null, null);
-                        }
-                    }
-                    else {
-                        engine.mRsp.loginResponse(new MsLoginRsp(packet.payload.getStatus(), engine.mRecntRoomID));
-                    }
-                    break;
-                case MATCHVS_ROOM_JOIN_RSP:
-                    if (packet.payload.getStatus() === 200) {
-                        engine.mEngineState |= ENGE_STATE.IN_ROOM;
-                        engine.mBookInfo = packet.payload.getBookinfo();
-                        engine.mRoomInfo = packet.payload.getRoominfo();
-                        engine.mUserListForJoinRoomRsp = packet.payload.getUsersList();
-                        HttpConf.HOST_HOTEL_ADDR = getHotelUrl(engine);
-                        engine.mHotelNetWork = new MatchvsNetWork(HttpConf.HOST_HOTEL_ADDR, engine.mNetWorkCallBackImp);
-                        engine.mNetWorkCallBackImp.onConnect = function (host) {
-                            engine.roomCheckIn(engine.mHotelNetWork, engine.mBookInfo, engine.mRoomInfo);
-                            engine.mRsp.onConnect && engine.mRsp.onConnect(host);
-                        };
-                        if (engine.mHotelHeartBeatTimer == null) {
-                            engine.mHotelHeartBeatTimer = setInterval(engine.hotelHeartBeat, HEART_BEAT_INTERVAL);
-                        }
-                    }
-                    else {
-                        engine.mEngineState &= ~ENGE_STATE.JOIN_ROOMING;
-                        engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
-                        engine.mRsp.joinRoomResponse && engine.mRsp.joinRoomResponse(packet.payload.getStatus(), null, null);
-                    }
-                    break;
-                case MATCHVS_ROOM_CREATE_RSP:
-                    if (packet.payload.getStatus() === 200) {
-                        engine.mEngineState |= ENGE_STATE.IN_ROOM;
-                        engine.mBookInfo = packet.payload.getBookinfo();
-                        var roomid = packet.payload.getRoomid();
-                        roomInfo.setRoomid(roomid);
-                        roomInfo.setOwner(packet.payload.getOwner());
-                        engine.mRoomInfo = roomInfo;
-                        HttpConf.HOST_HOTEL_ADDR = getHotelUrl(engine);
-                        engine.mHotelNetWork = new MatchvsNetWork(HttpConf.HOST_HOTEL_ADDR, engine.mNetWorkCallBackImp);
-                        engine.mNetWorkCallBackImp.onConnect = function (host) {
-                            engine.roomCheckIn(engine.mHotelNetWork, engine.mBookInfo, engine.mRoomInfo);
-                            engine.mRsp.onConnect && engine.mRsp.onConnect(host);
-                        };
-                        if (engine.mHotelHeartBeatTimer == null) {
-                            engine.mHotelHeartBeatTimer = setInterval(engine.hotelHeartBeat, HEART_BEAT_INTERVAL);
-                        }
-                    }
-                    else {
-                        engine.mEngineState &= ~ENGE_STATE.CREATEROOM;
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
-                    }
-                    break;
-                case MATCHVS_ROOM_CHECK_IN_RSP:
-                    {
-                        if (packet.payload.getStatus() !== 200) {
-                            engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
-                        }
-                        engine.mAllPlayers = packet.payload.getCheckinsList(); //checkins;
-                        var roomUserList = [];
-                        engine.mUserListForJoinRoomRsp.forEach(function (user) {
-                            var roomuser = new MsRoomUserInfo(user.getUserid(), utf8ByteArrayToString(user.getUserprofile()));
-                            roomUserList.push(roomuser);
-                        });
-                        //房间信息
-                        var roominfo = new MsRoomInfo(engine.mRoomInfo.getRoomid(), utf8ByteArrayToString(engine.mRoomInfo.getRoomproperty()), engine.mRoomInfo.getOwner());
-                        if ((engine.mEngineState & ENGE_STATE.CREATEROOM) === ENGE_STATE.CREATEROOM) {
-                            //创建房间
-                            engine.mEngineState &= ~ENGE_STATE.CREATEROOM;
-                            engine.mRsp.createRoomResponse && engine.mRsp.createRoomResponse(new MsCreateRoomRsp(packet.payload.getStatus(), engine.mRoomInfo.getRoomid(), engine.mRoomInfo.getOwner()));
-                        }
-                        else if ((engine.mEngineState & ENGE_STATE.JOIN_ROOMING) === ENGE_STATE.JOIN_ROOMING) {
-                            //加入房间
-                            engine.mEngineState &= ~ENGE_STATE.JOIN_ROOMING;
-                            engine.mRsp.joinRoomResponse && engine.mRsp.joinRoomResponse(packet.payload.getStatus(), roomUserList, roominfo);
-                        }
-                        else if ((engine.mEngineState & ENGE_STATE.RECONNECTING) === ENGE_STATE.RECONNECTING) {
-                            engine.mEngineState &= ~ENGE_STATE.RECONNECTING;
-                            engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(packet.payload.getStatus(), roomUserList, roominfo);
-                        }
-                    }
-                    break;
-                case MATCHVS_ROOM_CHECKIN_NOTIFY:
-                    if (engine.joinRoomNotifyInfo) {
-                        engine.mRsp.joinRoomNotify && engine.mRsp.joinRoomNotify(engine.joinRoomNotifyInfo);
-                    }
-                    engine.mAllPlayers = packet.payload.getCheckinsList();
-                    engine.mRsp.roomCheckInNotify && engine.mRsp.roomCheckInNotify(new MsCheckInNotify(packet.payload.getUserid(), packet.payload.getCheckinsList(), packet.payload.getPlayersList(), packet.payload.getMaxplayers()));
-                    engine.joinRoomNotifyInfo = null;
-                    break;
-                case MATCHVS_ROOM_LEAVE_RSP:
-                    //退出房间状态取消
-                    engine.mEngineState &= ~ENGE_STATE.LEAVE_ROOMING;
-                    if (packet.payload.getStatus() !== 200) {
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
-                    }
-                    roomInfo.setRoomid("0");
-                    engine.mRoomInfo = roomInfo;
-                    var leaveRoomRsp = new MsLeaveRoomRsp(packet.payload.getStatus(), packet.payload.getRoomid(), packet.payload.getUserid(), packet.payload.getCpproto());
-                    engine.mRsp.leaveRoomResponse && engine.mRsp.leaveRoomResponse(leaveRoomRsp);
-                    engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
-                    break;
-                case MATCHVS_ROOM_JOIN_OVER_RSP:
-                    if (packet.payload.getStatus() !== 200) {
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
-                    }
-                    engine.mRsp.joinOverResponse && engine.mRsp.joinOverResponse(new MsJoinOverRsp(packet.payload.getStatus(), utf8ByteArrayToString(packet.payload.getCpproto())));
-                    break;
-                case MATCHVS_ROOM_NOTICE_USER_JOIN:
-                    engine.joinRoomNotifyInfo = new MsRoomUserInfo(packet.payload.getUser().getUserid(), utf8ByteArrayToString(packet.payload.getUser().getUserprofile()));
-                    break;
-                case MATCHVS_ROOM_NOTICE_USER_LEAVE:
-                    var leaveRoomInfo = new MsLeaveRoomNotify(packet.payload.getRoomid(), packet.payload.getUserid(), packet.payload.getOwner(), utf8ByteArrayToString(packet.payload.getCpproto()));
-                    engine.mRsp.leaveRoomNotify && engine.mRsp.leaveRoomNotify(leaveRoomInfo);
-                    break;
-                case MATCHVS_HEARTBEAT_HOTEL_RSP:
-                    //房间的心跳返回
-                    engine.mRsp.hotelHeartBeatRsp && engine.mRsp.hotelHeartBeatRsp(packet.payload.getStatus());
-                    MatchvsLog.logI("hotelHeartBeatRsp");
-                    break;
-                case MATCHVS_BROADCAST_HOTEL_RSP:
-                    if (packet.payload.getStatus() !== 200) {
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server Response Error");
-                    }
-                    engine.mRsp.sendEventResponse && engine.mRsp.sendEventResponse(new MsSendEventRsp(packet.payload.getStatus(), packet.header.seq));
-                    break;
-                case MATCHVS_HOTEL_NOTIFY:
-                    var srcUserID = packet.payload.getSrcuid();
-                    if (srcUserID === 0) {
-                        engine.mRsp.gameServerNotify && engine.mRsp.gameServerNotify(new MsGameServerNotifyInfo(packet.payload.getSrcuid(), utf8ByteArrayToString(packet.payload.getCpproto())));
-                    }
-                    else {
-                        engine.mRsp.sendEventNotify && engine.mRsp.sendEventNotify(new MsSendEventNotify(packet.payload.getSrcuid(), utf8ByteArrayToString(packet.payload.getCpproto())));
-                    }
-                    break;
-                case CMD_SUBSCRIBE_ACK_CMDID://MATCHVS_SUBSCRIBE_EVENT_GROUP_RSP:
-                    engine.mRsp.subscribeEventGroupResponse && engine.mRsp.subscribeEventGroupResponse(packet.payload.getStatus(), packet.payload.getGroupsList());
-                    break;
-                case CMD_PUBLISH_ACKCMDID://MATCHVS_SEND_EVENT_GROUP_RSP:
-                    engine.mRsp.sendEventGroupResponse && engine.mRsp.sendEventGroupResponse(packet.payload.getStatus(), packet.payload.getDstnum());
-                    break;
-                case CMD_PUBLISH_NOTIFYCMDID://SEND_EVENT_GROUP_NOTIFY:
-                    engine.mRsp.sendEventGroupNotify && engine.mRsp.sendEventGroupNotify(packet.payload.getSrcuid(), packet.payload.getGroupsList(), utf8ByteArrayToString(packet.payload.getCpproto()));
-                    break;
-                case MATCHVS_USER_GATEWAY_SPEED_RSP:
-                    var status = packet.payload.getStatus();
-                    var seq = packet.payload.getSeq();
-                    engine.mRsp.gatewaySpeedResponse && engine.mRsp.gatewaySpeedResponse(new MsGatewaySpeedResponse(status, seq));
-                    break;
-                case MATCHVS_USER_HEARTBEAT_RSP:
-                    var gameid = packet.payload.getGameid();
-                    var gsExist = packet.payload.getGsexist();
-                    //如果心跳存在视为已登录状态
-                    engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
-                    engine.mRsp.heartBeatResponse && engine.mRsp.heartBeatResponse(new MsHeartBeatResponse(gameid, gsExist));
-                    MatchvsLog.logI("gatewayHeartBeatResponse");
-                    break;
-                case MATCHVS_USER_LOGOUT_RSP:
-                    engine.mNetWork.close();
-                    engine.mRsp.logoutResponse && engine.mRsp.logoutResponse(packet.payload.getStatus());
-                    break;
-                case MATCHVS_NETWORK_STATE_NOTIFY:
-                    engine.mRsp.networkStateNotify && engine.mRsp.networkStateNotify(new MsNetworkStateNotify(packet.payload.getRoomid(), packet.payload.getUserid(), packet.payload.getState(), packet.payload.getOwner()));
-                    break;
-                case CMD_GET_ROOM_LIST_RSP:
-                    var roominfolist = packet.payload.getRoominfoList();
-                    var roomList = [];
-                    for (var i = 0; i < roominfolist.length; i++) {
-                        roomList[i] = new MsRoomInfoEx(roominfolist[i].getRoomid(), roominfolist[i].getRoomname(), roominfolist[i].getMaxplayer(), roominfolist[i].getMode(), roominfolist[i].getCanwatch(), utf8ByteArrayToString(roominfolist[i].getRoomproperty()));
-                    }
-                    engine.mRsp.getRoomListResponse && engine.mRsp.getRoomListResponse(packet.payload.getStatus(), roomList);
-                    break;
-                case CMD_DISCONNECT_RSP:
-                    engine.mRsp.disConnectResponse && engine.mRsp.disConnectResponse(packet.payload.getStatus());
-                    break;
-                case CMD_KICK_PLAYER_RSP:
-                    engine.mRsp.kickPlayerResponse && engine.mRsp.kickPlayerResponse(new MsKickPlayerRsp(packet.payload.getStatus(), packet.payload.getOwner(), packet.payload.getUserid()));
-                    break;
-                case CMD_KICK_PLAYER_NOTIFY:
-                    if (packet.payload.getUserid().toString() === ("" + engine.mUserID) && engine.mHotelHeartBeatTimer != null) {
-                        clearInterval(engine.mHotelHeartBeatTimer);
-                        engine.mHotelHeartBeatTimer = null;
-                        engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
-                        engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
-                        engine.mHotelNetWork.close();
-                    }
-                    engine.mRsp.kickPlayerNotify && engine.mRsp.kickPlayerNotify(new MsKickPlayerNotify(packet.payload.getUserid(), packet.payload.getSrcuserid(), utf8ByteArrayToString(packet.payload.getCpproto()), packet.payload.getOwner()));
-                    break;
-                case CMD_SET_FRAME_SYNCRATEACK_CMDID:
-                    MatchvsLog.logI("SetFrameSyncRateAck:" + packet.payload);
-                    engine.mRsp.setFrameSyncResponse && engine.mRsp.setFrameSyncResponse(new MsSetChannelFrameSyncRsp(packet.payload.getStatus()));
-                    break;
-                case CMD_SET_FRAME_SYNCRATENOTIFY_CMDID:
-                    //MatchvsLog.logI("SetFrameSyncRateNotify:"+packet.payload);
-                    break;
-                case CMD_FRAME_BROADCASTACK_CMDID:
-                    //MatchvsLog.logI("FrameBroadcastAck:"+packet.payload);
-                    engine.mRsp.sendFrameEventResponse && engine.mRsp.sendFrameEventResponse(new MsSendFrameEventRsp(packet.payload.getStatus()));
-                    break;
-                case CMD_FRAME_DATANOTIFY_CMDID:
-                    //MatchvsLog.logI("FrameDataNotify:"+packet.payload);
-                    frameCache.push(new MsFrameItem(packet.payload.getSrcuid(), utf8ByteArrayToString(packet.payload.getCpproto()), packet.payload.getTimestamp()));
-                    break;
-                case CMD_FRAME_SYNCNOTIFY_CMDID:
-                    //MatchvsLog.logI("FrameSyncNotify:"+packet.payload);
-                    var frameData = [];
-                    while (frameCache.length > 0) {
-                        frameData.push(frameCache.pop());
-                    }
-                    var msFrameData = new MsFrameData(packet.payload.getLastidx(), frameData, frameData.length);
-                    engine.mRsp.frameUpdate && engine.mRsp.frameUpdate(msFrameData);
-                    break;
-                case CMD_GET_ROOM_LIST_EX_RSP:
-                    var roomInfoList = packet.payload.getRoominfoexList();
-                    var roomAttrs = [];
-                    roomInfoList.forEach(function (roominfo) {
-                        var roomAttr = new MsRoomAttribute(roominfo.getRoomid(), roominfo.getRoomname(), roominfo.getMaxplayer(), roominfo.getGameplayer(), roominfo.getWatchplayer(), roominfo.getMode(), roominfo.getCanwatch(), utf8ByteArrayToString(roominfo.getRoomproperty()), roominfo.getOwner(), roominfo.getState(), roominfo.getCreatetime().toString());
-                        roomAttrs.push(roomAttr);
-                    });
-                    var roomListExInfo = new MsGetRoomListExRsp(packet.payload.getStatus(), packet.payload.getTotal(), roomAttrs);
-                    engine.mRsp.getRoomListExResponse && engine.mRsp.getRoomListExResponse(roomListExInfo);
-                    break;
-                case CMD_GET_ROOM_DETAIL_RSP:
-                    if (packet.payload.getStatus() !== 200) {
-                        engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(new MsGetRoomDetailRsp(packet.payload.getStatus()));
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(packet.payload.getStatus(), "Server error");
-                    }
-                    var roomDetail = packet.payload.getRoomdetail();
-                    var userInfos = [];
-                    var playerlist = roomDetail.getPlayerinfosList();
-                    playerlist.forEach(function (player) {
-                        var userinfo = new MsRoomUserInfo(player.getUserid(), utf8ByteArrayToString(player.getUserprofile()));
-                        userInfos.push(userinfo);
-                    });
-                    var roomDetailRsp = new MsGetRoomDetailRsp(packet.payload.getStatus(), roomDetail.getState(), roomDetail.getMaxplayer(), roomDetail.getMode(), roomDetail.getCanwatch(), utf8ByteArrayToString(roomDetail.getRoomproperty()), roomDetail.getOwner(), roomDetail.getCreateflag(), userInfos);
-                    engine.mRsp.getRoomDetailResponse && engine.mRsp.getRoomDetailResponse(roomDetailRsp);
-                    break;
-                case MATCHVS_ROOM_JOIN_OVER_NOTIFY:
-                    var joinoverNotifyInfo = new MsJoinOverNotifyInfo(packet.payload.getRoomid(), packet.payload.getSrcuserid(), utf8ByteArrayToString(packet.payload.getCpproto()));
-                    engine.mRsp.joinOverNotify && engine.mRsp.joinOverNotify(joinoverNotifyInfo);
-                    break;
-                case CMD_SET_ROOM_PROPERTY_RSP:
-                    if (packet.payload.getStatus() !== 200) {
-                        engine.errorResponse && engine.errorResponse(packet.payload.getStatus(), "Server response error");
-                    }
-                    engine.mRsp.setRoomPropertyResponse && engine.mRsp.setRoomPropertyResponse(new MsSetRoomPropertyRspInfo(packet.payload.getStatus(), packet.payload.getRoomid(), packet.payload.getUserid(), utf8ByteArrayToString(packet.payload.getRoomproperty())));
-                    break;
-                case CMD_SET_ROOM_PROPERTY_NOTIFY:
-                    engine.mRsp.setRoomPropertyNotify && engine.mRsp.setRoomPropertyNotify(new MsRoomPropertyNotifyInfo(packet.payload.getRoomid(), packet.payload.getUserid(), utf8ByteArrayToString(packet.payload.getRoomproperty())));
-                    break;
-                case CMD_ROOM_JOIN_OPEN_RSP:
-                    engine.mRsp.joinOpenResponse && engine.mRsp.joinOpenResponse(new MsReopenRoomResponse(packet.payload.getStatus(), utf8ByteArrayToString(packet.payload.getCpproto())));
-                    break;
-                case CMD_ROOM_JOIN_OPEN_NOT:
-                    engine.mRsp.joinOpenNotify && engine.mRsp.joinOpenNotify(new MsReopenRoomNotify(packet.payload.getRoomid(), packet.payload.getUserid(), utf8ByteArrayToString(packet.payload.getCpproto())));
-                    break;
-                default:
-                    break;
-            }
-        };
-        this.onErr = function (errCode, errMsg) {
-            engine.mRsp.errorResponse && engine.mRsp.errorResponse(errCode, errMsg);
-        };
-        this.onConnect = function (host) {
-            engine.mRsp.onConnect && engine.mRsp.onConnect(host);
-            timer = setInterval(engine.heartBeat, HEART_BEAT_INTERVAL);
-        };
-        this.onDisConnect = function (host, event) {
-            engine.mRsp.onDisConnect && engine.mRsp.onDisConnect(host);
-            if (host.endsWith(HttpConf.HOST_GATWAY_ADDR)) {
-                if ((engine.mEngineState & ENGE_STATE.LOGOUTING) !== ENGE_STATE.LOGOUTING) {
-                    //如果gateway 异常断开连接了就返回错误消息
-                    if (event && event.code && (event.code === 1000 || event.code === 1005)) {
-                        MatchvsLog.logI("gateway close is friend");
-                    }
-                    else {
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(1001, "gateway network error");
-                    }
-                }
-                engine.mEngineState = ENGE_STATE.NONE;
-                engine.mEngineState |= ENGE_STATE.HAVE_INIT;
-                MatchvsLog.logI("EngineState", engine.mEngineState);
-                clearInterval(timer);
-            }
-            else if (host.endsWith(HttpConf.HOST_HOTEL_ADDR)) {
-                MatchvsLog.logI("hotel disconnect");
-                if ((engine.mEngineState & ENGE_STATE.LEAVE_ROOMING) !== ENGE_STATE.LEAVE_ROOMING) {
-                    //针对，如果直接退出房间，没有调用 leaveRoom接口
-                    if (event && event.code && (event.code === 1000 || event.code === 1005)) {
-                        MatchvsLog.logI("hotel close is friend");
-                    }
-                    else {
-                        engine.mRsp.errorResponse && engine.mRsp.errorResponse(1001, "hotel network error");
-                    }
-                }
-                //如果房间服务器断开了(包括异常断开情况)就把定时器关掉
-                if (engine.mHotelHeartBeatTimer != null) {
-                    clearInterval(engine.mHotelHeartBeatTimer);
-                    engine.mHotelHeartBeatTimer = null;
-                }
-                //退出房间状态取消
-                engine.mEngineState &= ~ENGE_STATE.LEAVE_ROOMING;
-                engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
-            }
-        };
-    };
     this.init = function (response, channel, platform, gameID) {
         this.mRsp = response;
         this.mChannel = channel;
@@ -20431,6 +20810,20 @@ function MatchvsEngine() {
         this.mEngineState = ENGE_STATE.INITING;
         this.mProtocol.init();
         this.getHostList();
+        return 0;
+    };
+    /**
+     *
+     * @param {MatchvsResponse} response
+     * @param {string} endPoint
+     * @param {number} gameID
+     */
+    this.premiseInit = function (response, endPoint, gameID) {
+        this.mRsp = response;
+        this.mGameID = gameID;
+        HttpConf.HOST_GATWAY_ADDR = "wss://" + endPoint;
+        this.mEngineState = ENGE_STATE.HAVE_INIT;
+        this.mRsp.initResponse(200);
         return 0;
     };
     this.reconnect = function () {
@@ -21292,6 +21685,7 @@ MatchvsEngine.prototype.setRoomProperty = function (roomID, roomProperty) {
         return ret;
     var buf = this.mProtocol.setRoomProperty(this.mGameID, this.mUserID, roomID, roomProperty);
     this.mNetWork.send(buf);
+    return 0;
 };
 /**
  * 断开网络连接

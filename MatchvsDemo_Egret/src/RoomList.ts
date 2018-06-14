@@ -137,6 +137,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
         }else{
             this._messageText.visible = false;
         }
+        this._roomListSprite.removeChildren();
         for(let j = 0; j < this._roomList.length; j++){
             if(this._roomListSprite.contains(this._roomList[j])){
                 //这里一定要移除监听
@@ -144,7 +145,6 @@ class RoomListView  extends egret.DisplayObjectContainer{
                 this._roomListSprite.removeChild(this._roomList[j]);
             }
         }
-        this._roomListSprite.removeChildren();
         this._roomList = [];
         for(let i = 0; i < rsp.roomAttrs.length && i < 3; i++){
             let stateStr:string = rsp.roomAttrs[i].state === 1 ? "开放":"关闭";
