@@ -24,13 +24,21 @@ class LobbyView extends eui.UILayer{
 
         let userid = new eui.Label();
         userid.textColor = 0xffffff;
-        userid.width = 200;
-        userid.textAlign = "center";
-        userid.text = "用户："+GameData.gameUser.id+"["+GameData.gameUser.name+"]";
+        userid.width = 280;
+        userid.textAlign = "left";
+        userid.text = "用户："+GameData.gameUser.id+"\n"+GameData.gameUser.name;
         userid.size = 28;
-        userid.horizontalCenter = -400;
-        userid.verticalCenter = 0-(4*(this._funcButton_H+10));
+        userid.x = 85;
+        userid.y = 40;
         this.addChild(userid);
+
+        let headimg:eui.Image = new eui.Image();
+        headimg.x = 20;
+        headimg.y = 40;
+        headimg.width = 60;
+        headimg.height = 60;
+        headimg.source = GameData.gameUser.avatar;
+        this.addChild(headimg);
 
         let button = new eui.Button();
         button.label = "随机匹配";
