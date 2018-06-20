@@ -105,13 +105,12 @@ module mvs {
 		 */
 		private joinRoomResponse(status:number, roomUserInfoList:Array<MsRoomUserInfo>, roomInfo:MsRoomInfo){
 			if(status == 200){
-				console.info("[joinRoomResponse] status：", status);
-				let users:Array<MsRoomUserInfo> = [];
-				roomUserInfoList.forEach(function(element){
-					let usr:MsRoomUserInfo = new MsRoomUserInfo(element.userId, element.userProfile);
-					users.push(usr);
-				});
-				this.dispatchEvent(new egret.Event(MsEvent.EVENT_JOINROOM_RSP, false, false, {status:status, userList:users, roomInfo:roomInfo}));
+				let data = {
+					status:status,
+					userList:roomUserInfoList,
+					roomInfo:roomInfo
+				}
+				this.dispatchEvent(new egret.Event(MsEvent.EVENT_JOINROOM_RSP, false, false, data));
 				return ;
 			}
 			console.error("[joinRoomResponse error:]", status);

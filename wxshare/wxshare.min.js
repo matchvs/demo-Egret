@@ -1,5 +1,5 @@
 var wxShareConf = {
-    getOpenIDAddr:"http://www.villeboss.com/getOpenID?" //传入code获取微信openID的服务端地址
+    getOpenIDAddr:"http://193.112.47.13/getOpenID?" //传入code获取微信openID的服务端地址
 }
 
 /**

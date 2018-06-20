@@ -115,6 +115,7 @@ class LoginView extends eui.UILayer {
             LoginView.bindOpenIDWithUserID(userInfos);
         },(res)=>{
             //获取微信信息失败，注册游客身份登录
+            console.info("获取信息失败：",res);
             mvs.MsEngine.getInstance.registerUser();
         });
     }
@@ -165,6 +166,7 @@ class LoginView extends eui.UILayer {
                     //获取OpenID
                     getUserOpenID({
                         success:function(openInfos){
+                            console.info("openInfos:",openInfos);
                             if(openInfos.status == 0){
                                 success({userInfo:userInfos, openInfo:openInfos.data});
                                 //console.info("userInfo:",userInfos,"openInfo:",openInfos.data);
