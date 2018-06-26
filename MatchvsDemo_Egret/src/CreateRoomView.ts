@@ -462,7 +462,7 @@ class CreateRoomView extends egret.DisplayObjectContainer{
      */
     private leaveRoomNotify(ev:egret.Event){
         let leaveRoomInfo = ev.data;
-        if(leaveRoomInfo.userId.toString() === this._userID_1.text){
+        if(this._userID_1.text !== "" && this._userID_1.text.indexOf(leaveRoomInfo.userId.toString())>=0){
             //房主退出
             console.log("房主退出房间");
             mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
