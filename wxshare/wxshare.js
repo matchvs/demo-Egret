@@ -86,10 +86,17 @@ function getUserOpenID(obj) {
                     if (callObj.success) {
                         callObj.success(res.data);
                     }
+                },
+                fail:function(res){
+                    console.info("getOpenID failed url:",wxShareConf.getOpenIDAddr);
+                    if (callObj.fail) {
+                        callObj.fail(res);
+                    }
                 }
             });
         },
         fail: function (res) {
+            console.log("get code failed:",res);
             if (callObj.fail) {
                 callObj.fail(res);
             }

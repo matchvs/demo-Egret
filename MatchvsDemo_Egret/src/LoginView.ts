@@ -158,11 +158,12 @@ class LoginView extends eui.UILayer {
     /**
      * 获取微信中的用户信息,这个是支持微信用户绑定的，如果使用微信身份登录，将执行绑定操作，如果是游客身份登录将到 matchvs 生成一个游客身份的userID
      */
-    private getUserFromWeChat(success:Function, fail:Function){
+    private getUserFromWeChat(success:Function, fa:Function){
         //获取微信信息
         try {
             getWxUserInfo({
                 success:(userInfos)=>{
+                    console.log("获取用户信息成功！");
                     //获取OpenID
                     getUserOpenID({
                         success:function(openInfos){
@@ -171,17 +172,20 @@ class LoginView extends eui.UILayer {
                                 success({userInfo:userInfos, openInfo:openInfos.data});
                                 //console.info("userInfo:",userInfos,"openInfo:",openInfos.data);
                             }else{
-                                fail("获取OpenID失败！");
+                                fa("获取OpenID失败！");
                             }
                         },
-                        fail:fail
+                        fail:(res)=>{
+                            console.info("获取openID 失败！:",res);
+                            fa(res);
+                        }
                     });
                 },
-                fail:fail
+                fail:fa
             });
         } catch (error) {
             console.log("不是在微信平台，调用不进行绑定！");
-            fail(error);
+            fa(error);
         }
     }
 
