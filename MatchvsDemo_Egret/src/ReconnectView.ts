@@ -84,13 +84,19 @@ class ReconnectView extends egret.DisplayObjectContainer{
     private timerFunc(event: egret.Event){
         this._msglabel.text = "正在重新连接......"+this._reconnctTimes+"/"+this._totalTimes;
         console.log(this._msglabel.text)
-        mvs.MsEngine.getInstance.reconnect();
+        let res = mvs.MsEngine.getInstance.reconnect();
         this._reconnctTimes++;
         if(this._reconnctTimes > this._totalTimes){
             this._timer.stop();
-            mvs.MsEngine.getInstance.leaveRoom("");
+            if(res === 0){
+                mvs.MsEngine.getInstance.leaveRoom("");
+                GameSceneView._gameScene.lobby();
+            }else{
+                mvs.MsEngine.getInstance.leaveRoom("");
+                GameSceneView._gameScene.login();
+            }
             this.release();
-            GameSceneView._gameScene.lobby();
+            
         }
     }
 

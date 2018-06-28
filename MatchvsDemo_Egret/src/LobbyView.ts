@@ -103,10 +103,9 @@ class LobbyView extends eui.UILayer{
         logOutGame.verticalCenter = 3*(this._funcButton_H+10);
         this.addChild(logOutGame);
         logOutGame.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonClicklogOutGame, this);
-
         
 	}
-
+    
     /**
      * 随机加入房间按钮回调
      */
