@@ -107,7 +107,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
         let roomUserInfoList = data.roomUserInfoList;
         let roomInfo:MsRoomInfo = data.roomInfo;
         this._timer.stop();
-        if(data.status !== 200){
+        if(!data.status || data.status !== 200){
             console.log("重连失败"+this._reconnctTimes);
             this._msglabel.text = "重连失败......"+this._reconnctTimes+"/"+this._totalTimes;
             //mvs.MsEngine.getInstance.leaveRoom("");

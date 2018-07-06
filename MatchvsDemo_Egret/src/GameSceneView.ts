@@ -29,8 +29,8 @@ class GameSceneView extends egret.Sprite
          mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_ERROR_RSP, this.errorResponses, this);
         this.thisContainer = new egret.Sprite();
         this.addChild(this.thisContainer);
-        // this.login();
-        this.startModel();
+        this.login();
+        // this.startModel();
     }
 
     public startModel(){
