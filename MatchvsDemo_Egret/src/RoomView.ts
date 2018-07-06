@@ -6,6 +6,7 @@ class RoomView extends eui.Group {
     private _roomButton_W = this._roomView_W - 50;
     private _parent:RoomListView = null;
     private _roomID:string;
+    private _enterRoom:eui.Button = null;
 
     private _roomIDLabel:eui.Label;
     
@@ -30,7 +31,7 @@ class RoomView extends eui.Group {
         this._roomID = roomID;
 
         //设置默认主题
-        var theme = new eui.Theme(`resource/default.thm.json`, this.stage);
+        //var theme = new eui.Theme(`resource/default.thm.json`, this.stage);
         //创建一个 Group
         let myGroup = new eui.Group();
         myGroup.x = x;
@@ -40,14 +41,14 @@ class RoomView extends eui.Group {
         this.addChild(myGroup);
 
         //创建进入房间按钮
-        let btn1:eui.Button = new eui.Button();
-        btn1.label = "开始进入房间匹配";
-        btn1.width = this._roomButton_W;
-        btn1.height = this._roomButton_H;
-        btn1.x = (this._roomView_W - this._roomButton_W)/3;
-        btn1.y =  myGroup.height - (this._roomButton_H+10);
-        btn1.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);
-        myGroup.addChild(btn1);
+        this._enterRoom = new eui.Button();
+        this._enterRoom.label = "开始进入房间匹配";
+        this._enterRoom.width = this._roomButton_W;
+        this._enterRoom.height = this._roomButton_H;
+        this._enterRoom.x = (this._roomView_W - this._roomButton_W)/3;
+        this._enterRoom.y =  myGroup.height - (this._roomButton_H+10);
+        this._enterRoom.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);
+        myGroup.addChild(this._enterRoom);
 
         // 绘制矩形用于显示 myGroup 的轮廓
         let outline:egret.Shape = new egret.Shape;
@@ -100,8 +101,14 @@ class RoomView extends eui.Group {
         this.getRoomDetail(this._roomID);
     }
 
+    public removeEventListe(){
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
+        this._enterRoom.removeEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);;
+    }
+
     public Release(){
         this._parent.Release();
-        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
+        //mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
+        this.removeEventListe()
     }
 }

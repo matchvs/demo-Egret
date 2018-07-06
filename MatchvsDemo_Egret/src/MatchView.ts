@@ -86,7 +86,7 @@ class MatchView extends eui.UILayer {
         } else if (GameData.matchType == GameData.tagsMatch && tags) {
             //tags {"match1":"12","match2":"match2"} object of key-value 
             let matchinfo: MsMatchInfo = new MsMatchInfo(GameData.maxPlayerNum, 1, 1, tags);
-            mvs.MsEngine.getInstance.joinRoomWithProperties(matchinfo,"tagsMatch");
+            mvs.MsEngine.getInstance.joinRoomWithProperties(matchinfo,infostr);
         }
 
         var checkbox = new eui.CheckBox();
@@ -211,6 +211,7 @@ class MatchView extends eui.UILayer {
         this._isInRoom = true;
         GameData.roomID = roomInfo.roomID;
         this._gameUserList = [];
+        GameData.gameUser.isOwner = false;
         this._gameUserList.push(GameData.gameUser);
         this.showPlayUser(GameData.gameUser);
         var self = this;

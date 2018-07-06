@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="StartModel" width="1136" height="640" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:ns1="*">
+	<w:Config id="163f2f428ed"/>
+	<e:Rect width="1136" height="640" x="0" y="-1.33" fillAlpha="0.5" fillColor="0x000000" strokeColor="0xffffff"/>
+	<e:Image width="277.32" height="21.34" y="572.33" anchorOffsetX="0" anchorOffsetY="0" source="footer_text_png" fillMode="clip" horizontalCenter="0"/>
+	<e:Label text="选择启动方式" y="47.03" size="36" fontFamily="Microsoft YaHei" horizontalCenter="0" textColor="0xffffff"/>
+	<e:Group width="480" height="200" y="98.67" anchorOffsetX="0" horizontalCenter="0">
+		<e:Rect width="480" height="200" x="0" y="0" fillAlpha="0" strokeColor="0xf4e9d0" strokeAlpha="1" strokeWeight="2" locked="true"/>
+		<e:Button id="btn_matchvs" y="29.33" anchorOffsetX="0" width="280" anchorOffsetY="0" height="60" touchChildren="true" horizontalCenter="0" label="MatchVS云托管">
+		</e:Button>
+		<e:Label id="lb_matchvs" text="MatchVS云托管" y="29.66" bold="true" textAlign="center" anchorOffsetX="0" width="241.33" anchorOffsetY="0" height="30" textColor="0x844f23" touchEnabled="true" size="24" horizontalCenter="0" visible="false"/>
+		<e:Label id="lb_desc1" text="* Matchvs云托管：使用Matchvs官网注册的游戏信息" x="99.67" y="104.67" size="14" anchorOffsetX="0" width="280" anchorOffsetY="0" height="77" textAlign="left" verticalAlign="middle" textColor="0xe0a55c"/>
+	</e:Group>
+	<e:Group width="480" height="200" y="317" anchorOffsetX="0" anchorOffsetY="0" horizontalCenter="0">
+		<e:Rect width="480" height="200" x="0" y="0" fillAlpha="0" strokeAlpha="1" strokeWeight="2" fillColor="0x111110" strokeColor="0xffffff"/>
+		<e:Button id="btn_indepen" label="服务独立部署" y="30.33" anchorOffsetX="0" width="280" anchorOffsetY="0" height="60" touchChildren="true" horizontalCenter="0">
+		</e:Button>
+		<e:Label id="lb_indepen" text="服务独立部署" y="25.66" textColor="0x844F23" bold="true" textAlign="center" anchorOffsetX="0" width="241.33" anchorOffsetY="0" height="30" touchEnabled="true" size="24" horizontalCenter="0" visible="false" locked="true"/>
+		<e:Label id="lb_desc2" text="* 独立部署：需要开发者自己准备服务器部署Matchvs所有服务，暂未完全开放，如有需要可以邮件咨询devsupport@matchvs.com" y="103" size="14" anchorOffsetX="0" width="280" anchorOffsetY="0" height="80" horizontalCenter="0" textAlign="left" verticalAlign="middle" textColor="0xd8a756"/>
+	</e:Group>
+</e:Skin>

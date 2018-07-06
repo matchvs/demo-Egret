@@ -52,6 +52,9 @@ class ErrorView extends egret.DisplayObjectContainer{
 
     }
 
+    /**
+     * 显示重连按钮
+     */
     public showReconnect(){
         let recBtn:eui.Button = new eui.Button();
         recBtn.label = "重新连接";
@@ -65,7 +68,7 @@ class ErrorView extends egret.DisplayObjectContainer{
     }
 
     private mbuttonReconnRoom(event:egret.TouchEvent){
-        //重连
+        //重连界面
         GameSceneView._gameScene.reconnectView();
     }
     

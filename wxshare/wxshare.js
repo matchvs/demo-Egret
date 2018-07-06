@@ -1,5 +1,5 @@
-var wxShareConf = {
-    getOpenIDAddr:"http://www.villeboss.com/getOpenID?" //传入code获取微信openID的服务端地址
+﻿var wxShareConf = {
+    getOpenIDAddr:"https://test79open.matchvs.com/getOpenID?" //传入code获取微信openID的服务端地址
 }
 
 /**
@@ -86,10 +86,17 @@ function getUserOpenID(obj) {
                     if (callObj.success) {
                         callObj.success(res.data);
                     }
+                },
+                fail:function(res){
+                    console.info("getOpenID failed url:",wxShareConf.getOpenIDAddr);
+                    if (callObj.fail) {
+                        callObj.fail(res);
+                    }
                 }
             });
         },
         fail: function (res) {
+            console.log("get code failed:",res);
             if (callObj.fail) {
                 callObj.fail(res);
             }

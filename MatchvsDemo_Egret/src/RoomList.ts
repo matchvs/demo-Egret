@@ -6,6 +6,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
     private _parent:egret.DisplayObjectContainer;
     private _getRoomListFlter:MsRoomFilter;
     private _messageText:egret.TextField;
+    private _roomListSprite:egret.Sprite = null;
     private _timer: egret.Timer
 
     private _roomList = new Array<RoomView>();
@@ -20,6 +21,9 @@ class RoomListView  extends egret.DisplayObjectContainer{
     }
 
     private initView(){
+
+        this._roomListSprite = new egret.Sprite();
+        this.addChild(this._roomListSprite);
         
         let colorLabel = new egret.TextField();
         colorLabel.textColor = 0xffffff;
@@ -133,15 +137,19 @@ class RoomListView  extends egret.DisplayObjectContainer{
         }else{
             this._messageText.visible = false;
         }
+        this._roomListSprite.removeChildren();
         for(let j = 0; j < this._roomList.length; j++){
-            if(this.contains(this._roomList[j])){
-                this.removeChild(this._roomList[j]);
+            if(this._roomListSprite.contains(this._roomList[j])){
+                //这里一定要移除监听
+                this._roomList[j].removeEventListe();
+                this._roomListSprite.removeChild(this._roomList[j]);
             }
         }
         this._roomList = [];
         for(let i = 0; i < rsp.roomAttrs.length && i < 3; i++){
             let stateStr:string = rsp.roomAttrs[i].state === 1 ? "开放":"关闭";
             let mapValue:string = rsp.roomAttrs[i].roomProperty === GameData.roomPropertyType.mapA ? "[地图：彩图]":"[地图：灰图]";
+            
             let room1 = new RoomView(this);
             room1.name = "room";
             room1.layContents(this._parent.width*0.3,
@@ -149,7 +157,7 @@ class RoomListView  extends egret.DisplayObjectContainer{
             rsp.roomAttrs[i].roomID,
             "[状态:"+ stateStr + "] [房间人数："+ rsp.roomAttrs[i].gamePlayer +"/"+ rsp.roomAttrs[i].maxPlayer+"] "+ mapValue
             );
-            this.addChild(room1);
+            this._roomListSprite.addChild(room1);
             this._roomList.push(room1);
         }
     }

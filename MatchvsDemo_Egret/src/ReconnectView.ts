@@ -84,13 +84,19 @@ class ReconnectView extends egret.DisplayObjectContainer{
     private timerFunc(event: egret.Event){
         this._msglabel.text = "正在重新连接......"+this._reconnctTimes+"/"+this._totalTimes;
         console.log(this._msglabel.text)
-        mvs.MsEngine.getInstance.reconnect();
+        let res = mvs.MsEngine.getInstance.reconnect();
         this._reconnctTimes++;
         if(this._reconnctTimes > this._totalTimes){
             this._timer.stop();
-            mvs.MsEngine.getInstance.leaveRoom("");
+            if(res === 0){
+                mvs.MsEngine.getInstance.leaveRoom("");
+                GameSceneView._gameScene.lobby();
+            }else{
+                mvs.MsEngine.getInstance.leaveRoom("");
+                GameSceneView._gameScene.login();
+            }
             this.release();
-            GameSceneView._gameScene.lobby();
+            
         }
     }
 
@@ -101,14 +107,14 @@ class ReconnectView extends egret.DisplayObjectContainer{
         let roomUserInfoList = data.roomUserInfoList;
         let roomInfo:MsRoomInfo = data.roomInfo;
         this._timer.stop();
-        if(data.status !== 200){
+        if(!data.status || data.status !== 200){
             console.log("重连失败"+this._reconnctTimes);
             this._msglabel.text = "重连失败......"+this._reconnctTimes+"/"+this._totalTimes;
             //mvs.MsEngine.getInstance.leaveRoom("");
             this.release();
             GameSceneView._gameScene.lobby();
         }else{
-            console.log("重连成功status:"+status+" 重连次数："+this._reconnctTimes);
+            console.log("重连成功status:"+data.status+" 重连次数："+this._reconnctTimes);
              
             //房主判断
             GameData.playerUserIds = [];

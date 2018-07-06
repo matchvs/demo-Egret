@@ -12,16 +12,36 @@ class GameSceneView extends egret.Sprite
         console.log("错误回调：errCode=" + errCode + " errMsg="+errMsg);
         GameSceneView._gameScene.errorView(0,"错误回调：errCode=" + errCode + " errMsg="+errMsg);
     }
+    private errorResponses(event:egret.Event){
+        //mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_ERROR_RSP, this.errorResponse, this);
+        let errcode:number = event.data.errCode;
+        let errmsg:string = event.data.errMsg;
+        if(errcode == 1001){
+            if(errmsg != "" && errmsg.indexOf("hotel") >= 0){
+                GameSceneView._gameScene.errorView(1,"错误回调：errCode=" + errcode + " errMsg="+errmsg);
+            }else{
+                 GameSceneView._gameScene.errorView(0,"错误回调：errCode=" + errcode + " errMsg="+errmsg);
+            }
+        }
+    }
     private initView():void
     {
+         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_ERROR_RSP, this.errorResponses, this);
         this.thisContainer = new egret.Sprite();
         this.addChild(this.thisContainer);
         this.login();
+        // this.startModel();
     }
+
+    public startModel(){
+        this.removeAll();
+        let starting:StartModelUI = new StartModelUI();
+        this.thisContainer.addChild(starting);
+    }
+
     public login():void
     {
         this.removeAll();
-
         var loginview:LoginView = new LoginView();
         loginview.width = this.width;
         loginview.height = this.height;
@@ -106,12 +126,12 @@ class GameSceneView extends egret.Sprite
         let errorView = new ErrorView(this);
         errorView.SetErrorMsg(msg);
         errorView.showReconnect();
-        
+        //登录界面
         if(pageNo === 0){
             errorView.ReturnCallback = ()=>{
                this.login();
             };
-        }else if (pageNo === 2){
+        }else if (pageNo === 2){//登录界面游戏大厅界面
             errorView.ReturnCallback = ()=>{
                 GameSceneView._gameScene.lobby();
             };

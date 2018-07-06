@@ -38,13 +38,6 @@ class Main extends eui.UILayer {
             // custom lifecycle plugin
         })
 
-        // egret.lifecycle.onPause = () => {
-        //     egret.ticker.pause();
-        // }
-
-        // egret.lifecycle.onResume = () => {
-        //     egret.ticker.resume();
-        // }
 
         //inject the custom material parser
         //注入自定义的素材解析器
@@ -64,10 +57,6 @@ class Main extends eui.UILayer {
          * 创建游戏场景，Demo的入口
          */
         this.createGameScene();
-        // const result = await RES.getResAsync("description_json")
-        // await platform.login();
-        // const userInfo = await platform.getUserInfo();
-        // console.log(userInfo);
     }
 
     private async loadResource() {

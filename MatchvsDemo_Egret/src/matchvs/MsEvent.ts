@@ -21,7 +21,7 @@ module mvs {
         public static EVENT_CREATEROOM_RSP = "MATCHVS_CREATEROOM_RSP_EVENT";
 
         //发送消息事件
-        public static EVENT_SENDEVENT_RSP = "MATCHVS_INIT_EVENT";
+        public static EVENT_SENDEVENT_RSP = "MATCHVS_SENDEVENT_RSP_EVENT";
         public static EVENT_SENDEVENT_NTFY = "MATCHVS_SENDEVENT_NOTIFY_EVENT";
 
         //gameServer 消息事件
