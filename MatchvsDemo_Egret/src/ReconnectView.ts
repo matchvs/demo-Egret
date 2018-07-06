@@ -114,7 +114,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
             this.release();
             GameSceneView._gameScene.lobby();
         }else{
-            console.log("重连成功status:"+status+" 重连次数："+this._reconnctTimes);
+            console.log("重连成功status:"+data.status+" 重连次数："+this._reconnctTimes);
              
             //房主判断
             GameData.playerUserIds = [];
