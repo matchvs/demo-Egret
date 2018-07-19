@@ -37,26 +37,40 @@ class GamePlayView extends egret.DisplayObjectContainer{
         }
 
 		// GameData.userScoreAll = [];
+		/**
+		 * 游戏结束标记置空
+		 */
 		GameData.isGameOver = false;
 		this._score = 0;
 		this._receiveCountValue = 0;
 
-		var image = new  eui.Image();
+		/**
+		 * 这里添加地图背景
+		 */
+		let image = new  eui.Image();
 		image.source = "resource/assets/Game/gamebackground.jpg";
 		image.height = GameData.height;
 		image.width = GameData.width;
 		this.addChild(image);
 
+		this.createStar()
+		/**
+		 * 如果是灰色地主，地图颜色改为灰色
+		 */
 		if(GameData.roomPropertyValue === GameData.roomPropertyType.mapB){
-			var colorMatrix = [
+			let colorMatrix = [
 			0.3,0.6,0,0,0,
 			0.3,0.6,0,0,0,
 			0.3,0.6,0,0,0,
 			0,0,0,1,0
 			];
-			var colorFlilter = new egret.ColorMatrixFilter(colorMatrix);
+			let colorFlilter = new egret.ColorMatrixFilter(colorMatrix);
 			image.filters = [colorFlilter];
 		}
+
+		/**
+		 * 顶部显示自己的 用户信息
+		 */
         let userIdLabel = new eui.Label();
         userIdLabel.textColor = 0xffffff;
         userIdLabel.fontFamily = "Tahoma";  //设置字体
@@ -66,6 +80,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
         userIdLabel.y = 20;
         this.addChild(userIdLabel);
 
+		/**
+		 * 房间号显示控件
+		 */
         let roomIdLabel = new eui.Label();
         roomIdLabel.textColor = 0xffffff;
         roomIdLabel.fontFamily = "Tahoma";  //设置字体
@@ -75,6 +92,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
         roomIdLabel.y = 60;
         this.addChild(roomIdLabel);
 
+		/**
+		 * 所有角色的分数显示控件 
+		 */
         let scoreLabel = new eui.Label();
         scoreLabel.textColor = 0xffffff;
         scoreLabel.fontFamily = "Tahoma";  //设置字体
@@ -84,6 +104,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._scoreLabel = scoreLabel;
         this.addChild(this._scoreLabel);
 
+		/**
+		 * 当前延迟显示控件
+		 */
         let delayLabel = new eui.Label();
         delayLabel.textColor = 0xffffff;
         delayLabel.fontFamily = "Tahoma";  //设置字体
@@ -93,6 +116,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._delayLabel = delayLabel;
         this.addChild(this._delayLabel);		
 
+		/**
+		 * 收到消息数量显示控件
+		 */
         let receiveMsgCountLabel = new eui.Label();
         receiveMsgCountLabel.textColor = 0xffffff;
         receiveMsgCountLabel.fontFamily = "Tahoma";  //设置字体
@@ -102,6 +128,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._receiveMsgCountLabel = receiveMsgCountLabel;
         this.addChild(this._receiveMsgCountLabel);		
 
+		/**
+		 * 计时控件
+		 */
         let countDownLabel = new eui.Label();
         countDownLabel.textColor = 0xffffff;
         countDownLabel.fontFamily = "Tahoma";  //设置字体
@@ -112,6 +141,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this._countDownLabel = countDownLabel;
         this.addChild(this._countDownLabel);
 
+		/**
+		 * 有人离开时提示控件
+		 */
 		let netWorkNoticeLabel = new eui.Label();
         netWorkNoticeLabel.textColor = 0xff0000;
         netWorkNoticeLabel.fontFamily = "Tahoma";  //设置字体
@@ -133,26 +165,30 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			this.addChild(fs);
 		}
 
+		/**
+		 * 初始化并且设置分数
+		 */
 		this.initUserScore();
 
 		if (GameData.isRoomOwner == true) {
+			//如果是房主就创建第一个球
 			this.createStarFirst();
 		}
 
-		var loader:egret.ImageLoader = new egret.ImageLoader();
+		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadComplete, this);
-		var url:string = "resource/assets/Game/cartoon-egret_01.png";
+		let url:string = "resource/assets/Game/cartoon-egret_01.png";
 		loader.load(url);
 
-		var loader2:egret.ImageLoader = new egret.ImageLoader();
+		let loader2:egret.ImageLoader = new egret.ImageLoader();
 		loader2.addEventListener(egret.Event.COMPLETE, this.onLoadComplete2, this);
-		var url:string = "resource/assets/Game/cartoon-egret_02.png";
-		loader2.load(url);
+		let url2:string = "resource/assets/Game/cartoon-egret_02.png";
+		loader2.load(url2);
 
-		var loader3:egret.ImageLoader = new egret.ImageLoader();
+		let loader3:egret.ImageLoader = new egret.ImageLoader();
 		loader3.addEventListener(egret.Event.COMPLETE, this.onLoadComplete3, this);
-		var url:string = "resource/assets/Game/cartoon-egret_03.png";
-		loader3.load(url);
+		let url3:string = "resource/assets/Game/cartoon-egret_03.png";
+		loader3.load(url3);
 		
 		//注册matchvs网络监听事件
 		this.addMsResponseListen();
@@ -186,7 +222,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
     }
 
 	private initUserScore() {
-		var i:number = 0;
+		let i:number = 0;
 		for(i = 0; i < GameData.playerUserIds.length; i++) {
 			GameData.playerUserIds[i].pValue = 0;
 		}
@@ -194,8 +230,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	}
 
 	private setUserScore(userID:number, score:number) {
-		var isFind:boolean = false;
-		var i:number = 0;
+		let isFind:boolean = false;
+		let i:number = 0;
 		for(i = 0; i < GameData.playerUserIds.length; i++) {
 			if (GameData.playerUserIds[i].id == userID) {
 				isFind = true;
@@ -215,11 +251,11 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	}
 
     private bubbleSort() {
-        var len = GameData.playerUserIds.length;
-        for (var i = 0; i < len; i++) {
-            for (var j = 0; j < len - 1 - i; j++) {
+        let len = GameData.playerUserIds.length;
+        for (let i = 0; i < len; i++) {
+            for (let j = 0; j < len - 1 - i; j++) {
                 if (GameData.playerUserIds[j].pValue > GameData.playerUserIds[j+1].pValue) {        //相邻元素两两对比
-                    var temp = GameData.playerUserIds[j+1];        //元素交换
+                    let temp = GameData.playerUserIds[j+1];        //元素交换
                     GameData.playerUserIds[j+1] = GameData.playerUserIds[j];
                     GameData.playerUserIds[j] = temp;
                 }
@@ -243,9 +279,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	 * 玩家1 加载完成
 	 */
 	private onLoadComplete(event:egret.Event):void {
-		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
-		var bitmapData:egret.BitmapData = loader.data;
-		var texture = new egret.Texture();
+		let loader:egret.ImageLoader = <egret.ImageLoader>event.target;
+		let bitmapData:egret.BitmapData = loader.data;
+		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
 		this._egretBird0 = new egret.Bitmap(texture);
         this._egretBird0.anchorOffsetX = this._egretBird0.width/2;
@@ -279,7 +315,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		buttonLeave.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonLeaveRoom, this);
 
 		//计时
-		var idCountDown = setInterval(() => {
+		let idCountDown = setInterval(() => {
 			this._countDownLabel.text = (Number(this._countDownLabel.text) - 1).toString();
 			if(this._countDownLabel.text == "0") {
 				this.release();
@@ -301,7 +337,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			 GameData.playerUserIds.forEach((user)=>{
 				 userids.push(user.id);
 			 });
-            var id = setInterval(() => {
+            let id = setInterval(() => {
 				mvs.MsEngine.getInstance.sendEventEx(0, JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,
@@ -315,7 +351,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
             }, 200);
 			GameData.intervalList.push(id);
         } else {
-            var id = setInterval(() => {
+            let id = setInterval(() => {
 				mvs.MsEngine.getInstance.sendFrameEvent(JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,
@@ -344,9 +380,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	 * 玩家2加载完成
 	 */
 	private onLoadComplete2(event:egret.Event):void {
-		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
-		var bitmapData:egret.BitmapData = loader.data;
-		var texture = new egret.Texture();
+		let loader:egret.ImageLoader = <egret.ImageLoader>event.target;
+		let bitmapData:egret.BitmapData = loader.data;
+		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
 		this._egretBird1 = new egret.Bitmap(texture);
         this._egretBird1.anchorOffsetX = this._egretBird1.width/2;
@@ -361,9 +397,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	 * 玩家3加载完成
 	 */
 	private onLoadComplete3(event:egret.Event):void {
-		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
-		var bitmapData:egret.BitmapData = loader.data;
-		var texture = new egret.Texture();
+		let loader:egret.ImageLoader = <egret.ImageLoader>event.target;
+		let bitmapData:egret.BitmapData = loader.data;
+		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
 		this._egretBird2 = new egret.Bitmap(texture);
         this._egretBird2.anchorOffsetX = this._egretBird2.width/2;
@@ -375,26 +411,30 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	}
 
 	private processStar() {
-		var length:number = Math.abs(this._egretBird0.x - this._star.x);
+		let length:number = Math.abs(this._egretBird0.x - this._star.x);
 		console.log("length:" + length);
 		if (length <= (this._star.width + this._egretBird0.width)/2) {
 			this._score++;
 			this.setUserScore(GameData.gameUser.id, this._score);
 
-			var newX:number = 0;
+			let newX:number = 0;
 			newX = Math.random() * this.stage.width;
 			this.changeStarPosition(newX, GameData.defaultHeight);
-			var eventTemp = {
+			let eventTemp = {
 				action: GameData.changeStarEvent,
 				x: this._star.x,
 				y: GameData.defaultHeight,
 				score: this._score,
 			}
-			var result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
+			let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0)
 				return console.log('足球位置变更事件发送失败:' + JSON.stringify(result));			
 		}
 	}
+
+	/**
+	 * 左边移动
+	 */
     private onButtonClickLeft(e: egret.TouchEvent) {
 		//console.log("onButtonClickLeft");
 		if(this._egretBird0.x <= 0){
@@ -405,6 +445,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		
 		this.processStar();
 	}
+	/**
+	 * 右边移动
+	 */
     private onButtonClickRight(e: egret.TouchEvent) {
 		//console.log("onButtonClickRight");
 		if(this._egretBird0.x >= GameData.width){
@@ -424,18 +467,20 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		GameData.syncFrame = false;
 	}
 	private createStar() {
-		var loader:egret.ImageLoader = new egret.ImageLoader();
+		this.deleteStar()
+		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStar, this);
-		var url:string = "resource/assets/Game/star1.png";
+		let url:string = "resource/assets/Game/star1.png";
 		loader.load(url);
 	}
 	/**
 	 * 第一次生成小足球
 	 */
 	private createStarFirst() {
-		var loader:egret.ImageLoader = new egret.ImageLoader();
+		this.deleteStar()
+		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStarFirst, this);
-		var url:string = "resource/assets/Game/star1.png";
+		let url:string = "resource/assets/Game/star1.png";
 		loader.load(url);
 	}	
 
@@ -445,9 +490,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	private onLoadStarFirst(event:egret.Event):void {
 		GameData.starPositionX = Math.random() * this.stage.width;
 		GameData.starPositionY = GameData.defaultHeight;		
-		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
-		var bitmapData:egret.BitmapData = loader.data;
-		var texture = new egret.Texture();
+		let loader:egret.ImageLoader = <egret.ImageLoader>event.target;
+		let bitmapData:egret.BitmapData = loader.data;
+		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
 		this._star = new egret.Bitmap(texture);
         this._star.anchorOffsetX = this._star.width/2;
@@ -456,12 +501,12 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this._star.y = GameData.starPositionY;
         this._starObject = this.addChild(this._star);
 		if (GameData.isRoomOwner === true) {
-			var eventTemp = {
+			let eventTemp = {
 				action: GameData.newStarEvent,
 				x: this._star.x,
 				y: GameData.defaultHeight
 			}
-			var result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
+			let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
 			if (!result || result.result !== 0) {
 				return console.log('创建足球事件发送失败');
 			}
@@ -469,9 +514,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		}
 	}	
 	private onLoadStar(event:egret.Event):void {	
-		var loader:egret.ImageLoader = <egret.ImageLoader>event.target;
-		var bitmapData:egret.BitmapData = loader.data;
-		var texture = new egret.Texture();
+		let loader:egret.ImageLoader = <egret.ImageLoader>event.target;
+		let bitmapData:egret.BitmapData = loader.data;
+		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
 		this._star = new egret.Bitmap(texture);
         this._star.anchorOffsetX = this._star.width/2;
@@ -500,7 +545,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
             if (sdnotify.cpProto.indexOf(GameData.newStarEvent) >= 0) {
 				if(sdnotify.srcUserId != GameData.gameUser.id) {
 					//console.log("new star event");
-					var info = JSON.parse(sdnotify.cpProto);
+					let info = JSON.parse(sdnotify.cpProto);
 					GameData.starPositionX = info.x;
 					GameData.starPositionY = info.y;
 					this.deleteStar();
@@ -510,10 +555,10 @@ class GamePlayView extends egret.DisplayObjectContainer{
                 // 收到其他玩家的位置速度加速度信息，根据消息中的值更新状态
                 this._receiveCountValue++;
 				this._receiveMsgCountLabel.text = "receive msg count: " + this._receiveCountValue;
-                var cpProto = JSON.parse(sdnotify.cpProto);
+                let cpProto = JSON.parse(sdnotify.cpProto);
                 
                 if (sdnotify.srcUserId == GameData.gameUser.id) {
-                    var delayValue = new Date().getTime() - cpProto.ts;
+                    let delayValue = new Date().getTime() - cpProto.ts;
                     if (this._minDelayValue === undefined || delayValue < this._minDelayValue) {
                         this._minDelayValue = delayValue;
                     }
@@ -532,15 +577,14 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					}
                 }
             } else if (sdnotify.cpProto.indexOf(GameData.reconnectStartEvent) >= 0) {
-				var info = JSON.parse(sdnotify.cpProto);
+				let info = JSON.parse(sdnotify.cpProto);
 				if(info.userID === GameData.gameUser.id && GameData.starPositionX === 0) {
 					GameData.starPositionX = info.x;
 					GameData.starPositionY = info.y;
 					GameData.playerUserIds = info.PlayerScoreInfos;
-					let self = this;
-					GameData.playerUserIds.forEach(function(value){
+					GameData.playerUserIds.forEach((value)=>{
 						if(value.id === info.userID){
-							self._score = value.pValue;
+							this._score = value.pValue;
 						}
 					});
 					this._countDownLabel.text = info.timeCount;
@@ -550,13 +594,13 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				}
 			} else if (sdnotify.cpProto.indexOf(GameData.changeStarEvent) >= 0) {
 				if(sdnotify.srcUserId != GameData.gameUser.id) {
-					var info = JSON.parse(sdnotify.cpProto);
+					let info = JSON.parse(sdnotify.cpProto);
 					this.changeStarPosition(info.x, info.y);
 					this.setUserScore(sdnotify.srcUserId, info.score);
 				}
 			}else if(sdnotify.cpProto.indexOf(GameData.reconnectReadyEvent) >= 0){
 				console.log("重新连接收到消息");
-				var eventTemp = {
+				let eventTemp = {
 					action: GameData.reconnectStartEvent,
 					userID: sdnotify.srcUserId,
 					PlayerScoreInfos:GameData.playerUserIds,
@@ -579,16 +623,16 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	 */
 	private frameUpdate(ev:egret.Event) {
 		let data = ev.data;
-		for (var i = 0 ; i < data.frameItems.length; i++) {
-			var info:MsFrameItem = data.frameItems[i];
+		for (let i = 0 ; i < data.frameItems.length; i++) {
+			let info:MsFrameItem = data.frameItems[i];
 			if (info.cpProto.indexOf(GameData.playerPositionEvent) >= 0) {
 					// 收到其他玩家的位置速度加速度信息，根据消息中的值更新状态
 					this._receiveCountValue++;
 					this._receiveMsgCountLabel.text = "receive msg count: " + this._receiveCountValue;
-					var cpProto = JSON.parse(info.cpProto);
+					let cpProto = JSON.parse(info.cpProto);
 					
 					if (info.srcUserID == GameData.gameUser.id) {
-						var delayValue = new Date().getTime() - cpProto.ts;
+						let delayValue = new Date().getTime() - cpProto.ts;
 						if (this._minDelayValue === undefined || delayValue < this._minDelayValue) {
 							this._minDelayValue = delayValue;
 						}

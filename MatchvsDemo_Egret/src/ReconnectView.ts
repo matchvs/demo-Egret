@@ -30,7 +30,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LEAVEROOM_RSP, this.leaveRoomResponse,this);
        
         //获取房间详情
-		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse,this);
+		// mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse,this);
         
         //发送消息
 		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SENDEVENT_RSP, this.sendEventResponse,this);
@@ -46,7 +46,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
 		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SENDEVENT_RSP, this.sendEventResponse,this);
 
         //获取房间详情
-		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse,this);
+		// mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse,this);
         //重新连接
 		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_RECONNECT_RSP, this.reconnectResponse,this);
     }
@@ -96,7 +96,6 @@ class ReconnectView extends egret.DisplayObjectContainer{
                 GameSceneView._gameScene.login();
             }
             this.release();
-            
         }
     }
 
@@ -115,7 +114,6 @@ class ReconnectView extends egret.DisplayObjectContainer{
             GameSceneView._gameScene.lobby();
         }else{
             console.log("重连成功status:"+data.status+" 重连次数："+this._reconnctTimes);
-             
             //房主判断
             GameData.playerUserIds = [];
             GameData.playerUserIds.push(GameData.gameUser);
@@ -137,8 +135,9 @@ class ReconnectView extends egret.DisplayObjectContainer{
             GameData.roomPropertyValue = roomInfo.roomProperty;
             GameData.roomID = roomInfo.roomID;
             GameData.isRoomOwner = false;
-            if(GameData.playerUserIds.length === GameData.maxPlayerNum){
-                mvs.MsEngine.getInstance.getRoomDetail(GameData.roomID);
+            if(GameData.playerUserIds.length === GameData.maxPlayerNum && roomInfo.state === 2){
+                // mvs.MsEngine.getInstance.getRoomDetail(GameData.roomID);
+                this.sendReadyEvent()
             }else{
                 //还没有开始游戏
                 console.log("还没有开始游戏或者游戏结束, 退出到大厅");
@@ -158,6 +157,10 @@ class ReconnectView extends egret.DisplayObjectContainer{
                 this.release();
                 GameSceneView._gameScene.play();
             }
+        }else{
+             this.release();
+            mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
+            GameSceneView._gameScene.lobby();
         }
     }
 
@@ -167,6 +170,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
 
     private mbuttonCancleBtn(event:egret.TouchEvent){
         this._timer.stop();
+        this.release();
         mvs.MsEngine.getInstance.leaveRoom("");
     }
 
@@ -175,25 +179,33 @@ class ReconnectView extends egret.DisplayObjectContainer{
         // this.release();
         // GameSceneView._gameScene.lobby();
     }
-    private getRoomDetailResponse(event:egret.Event){
-        let rsp:MsGetRoomDetailRsp = event.data;
-        console.log("status:"+rsp.status+" 还没有开始游戏或者游戏结束, 退出到大厅：state="+rsp.state);
-        if(rsp.status === 200 && rsp.state === 2){
-            let eventTemp = {
+    // private getRoomDetailResponse(event:egret.Event){
+    //     let rsp:MsGetRoomDetailRsp = event.data;
+    //     // console.log("status:"+rsp.status+" 还没有开始游戏或者游戏结束, 退出到大厅：state="+rsp.state);
+    //     if(rsp.status === 200 && rsp.state === 2){
+    //         this.sendReadyEvent()
+    //     }else{
+    //         this.release();
+    //         mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
+    //         GameSceneView._gameScene.lobby();
+    //     }
+    // }
+
+    private sendReadyEvent(){
+        let eventTemp = {
                 action: GameData.reconnectReadyEvent,
                 userID: GameData.gameUser.id
             }
             let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
             
             if (!result || result.result !== 0) {
-                return console.log('重连发送信息失败');
+                console.log('重连发送信息失败');
+                mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
+                GameSceneView._gameScene.lobby();
+                this.release();
+                return
             }
             GameData.events[result.sequence] = eventTemp;
             console.log('重连发送信息成功');
-        }else{
-            this.release();
-            mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
-            GameSceneView._gameScene.lobby();
-        }
     }
 }
