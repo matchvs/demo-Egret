@@ -39,6 +39,12 @@ class GameSceneView extends egret.Sprite
         this.thisContainer.addChild(starting);
     }
 
+    public premiseLogin(){
+        this.removeAll();
+        var loginview:PremiseLoginUI = new PremiseLoginUI();
+        this.thisContainer.addChild(loginview);
+    }
+
     public login():void
     {
         this.removeAll();
@@ -139,7 +145,6 @@ class GameSceneView extends egret.Sprite
         
         this.thisContainer.addChild(errorView);
     }
-
 
     private removeAll():void
     {

@@ -59,6 +59,7 @@ class StartModelUI extends eui.Component implements eui.UIComponent {
      * Matchvs独立部署服务 按钮事件
      */
     private BtnIndepenTouch(event:egret.TouchEvent){
+        GameSceneView._gameScene.premiseLogin();
     }
 
     /**

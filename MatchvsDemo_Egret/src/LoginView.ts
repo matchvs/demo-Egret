@@ -85,6 +85,19 @@ class LoginView extends eui.UILayer {
             LocalStore_Clear();
         }, this);
 
+
+        let btnSetUp = new eui.Button();
+        btnSetUp.label = "设置";
+        btnSetUp.width = 80;
+        btnSetUp.height = 40;
+        btnSetUp.x = 1060;
+        btnSetUp.y = 600;
+        this.addChild(btnSetUp);
+        btnSetUp.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
+            this.release();
+            GameSceneView._gameScene.premiseLogin();
+        }, this);
+
         var cbx = new eui.CheckBox();
         cbx.label = "启用调试环境";
         cbx.horizontalCenter = 0;

@@ -38,12 +38,26 @@ module mvs {
 		}
 
 		/**
+		 * 独立部署的初始化
+		 */
+		public premiseInit(endPoint:string, gameID:number):number{
+			this._response = MsResponse.getInstance.getResponse();
+			let res = this._engine.premiseInit( MsResponse.getInstance.getResponse(),endPoint, gameID);
+			if (res !== 0){
+				console.info("[MsEngine premiseInit failed] resCode:",res);
+				return res;
+			}
+			console.info("[MsEngine premiseInit seccess] resCode:",res);
+			return res;
+		}
+
+		/**
 		 * 用户登录
-		 * @param {number} userID 用户ID
-		 * @param {string} token 用户token 注册时生成的
-		 * @param {number} gameID 游戏ID
-		 * @param {string} appkey 游戏 appkey
-		 * @param {string} secretkey 游戏 secretkey
+		 * @param {number} userID 		用户ID
+		 * @param {string} token 		用户token 注册时生成的
+		 * @param {number} gameID 		游戏ID
+		 * @param {string} appkey 		游戏 appkey
+		 * @param {string} secretkey 	游戏 secretkey
 		 */
 		public login(userID:number, token:string, gameID:number, appkey:string, secretkey:string):number{
 			let res = this._engine.login(userID,token,gameID,1,appkey,secretkey,"eglejjddg",0);

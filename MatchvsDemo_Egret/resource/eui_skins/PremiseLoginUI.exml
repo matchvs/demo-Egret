@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="PremiseLoginUISkin" width="1136" height="640" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="164f35e6350" ></w:Config>
+	<e:Rect width="1136" height="640" x="0" y="0" locked="true"/>
+	<e:Button id="btn_login" label="登录" y="441" anchorOffsetX="0" width="173.67" anchorOffsetY="0" height="46" x="289"/>
+	<e:Button id="btn_return" label="返回" y="441" anchorOffsetX="0" width="173.67" anchorOffsetY="0" height="46" x="638"/>
+	<e:Group width="572" height="281" y="128.68" anchorOffsetX="285.33" anchorOffsetY="-1.33" horizontalCenter="-35">
+		<e:TextInput id="txt_appKey" width="400" height="36" x="168" y="99" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1"/>
+		<e:TextInput id="txt_gameID" width="400" height="36" x="168" y="53" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1"/>
+		<e:TextInput id="txt_endport" width="400" height="36" x="168" y="6" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1" inputType="^[A-Za-z0-9]+$"/>
+		<e:Label text="服务地址:" x="30.67" y="9.35" scaleX="1" scaleY="1"/>
+		<e:Label text="gameID:" x="45.67" y="55.34" scaleX="1" scaleY="1"/>
+		<e:Label text="appKey:" x="48.67" y="102.34" scaleX="1" scaleY="1"/>
+		<e:Label text="secretKey:" x="17.67" y="150.34" scaleX="1" scaleY="1"/>
+		<e:Label text="userID:" x="62.67" y="196.34" scaleX="1" scaleY="1"/>
+		<e:TextInput id="txt_secretKey" width="400" height="36" x="168" y="146" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1"/>
+		<e:TextInput id="txt_userID" width="400" height="36" x="168" y="192" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1"/>
+		<e:Label text="token:" x="77.67" y="240.04" scaleX="1" scaleY="1"/>
+		<e:TextInput id="txt_token" width="400" height="36" x="168" y="239" anchorOffsetX="0" anchorOffsetY="0" scaleX="1" scaleY="1"/>
+	</e:Group>
+	<e:Label text="Matchvs独立部署" y="43.99" size="44" horizontalCenter="0"/>
+	<e:Image width="292.34" height="24.34" y="548.6" anchorOffsetX="0" anchorOffsetY="0" source="footer_text_png" horizontalCenter="0"/>
+</e:Skin>
