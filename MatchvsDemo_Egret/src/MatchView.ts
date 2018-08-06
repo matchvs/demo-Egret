@@ -299,9 +299,9 @@ class MatchView extends eui.UILayer {
      */
     private joinOverNotify(ev:egret.Event) {
         let notifyInfo = ev.data;
-        console.log("userID:" + notifyInfo.srcUserID + " 关闭房间：" + notifyInfo.roomID + " cpProto:" + notifyInfo.cpProto);
+        console.log("userID:" + notifyInfo.userID + " 关闭房间：" + notifyInfo.roomID + " cpProto:" + notifyInfo.cpProto);
         
-        Toast.show(notifyInfo.srcUserID + " 设置了不允许房间加人");
+        Toast.show(notifyInfo.userID + " 设置了不允许房间加人");
         this._checkbox.selected = false;
     }
 

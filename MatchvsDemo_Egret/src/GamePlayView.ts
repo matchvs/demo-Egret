@@ -467,10 +467,11 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		GameData.syncFrame = false;
 	}
 	private createStar() {
-		this.deleteStar()
+		
 		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStar, this);
 		let url:string = "resource/assets/Game/star1.png";
+		console.log("创建星星");
 		loader.load(url);
 	}
 	/**
@@ -481,6 +482,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStarFirst, this);
 		let url:string = "resource/assets/Game/star1.png";
+		console.log("第一次创建星星");
 		loader.load(url);
 	}	
 
@@ -494,6 +496,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		let bitmapData:egret.BitmapData = loader.data;
 		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
+		this.deleteStar();
 		this._star = new egret.Bitmap(texture);
         this._star.anchorOffsetX = this._star.width/2;
         this._star.anchorOffsetY = this._star.height/2;
@@ -518,6 +521,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		let bitmapData:egret.BitmapData = loader.data;
 		let texture = new egret.Texture();
 		texture.bitmapData = bitmapData;
+		this.deleteStar();
 		this._star = new egret.Bitmap(texture);
         this._star.anchorOffsetX = this._star.width/2;
         this._star.anchorOffsetY = this._star.height/2;
