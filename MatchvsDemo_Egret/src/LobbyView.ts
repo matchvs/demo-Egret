@@ -112,7 +112,7 @@ class LobbyView extends eui.UILayer{
     private onButtonClickRandomMatch(e: egret.TouchEvent) {
         GameData.matchType = GameData.randomMatch;
         GameData.syncFrame = false;
-        GameSceneView._gameScene.match();
+        // GameSceneView._gameScene.match();
 	}
 
     /**
@@ -153,7 +153,7 @@ class LobbyView extends eui.UILayer{
         console.log("onButtonClickFrameSync")
         GameData.matchType = GameData.randomMatch;
         GameData.syncFrame = true;
-        GameSceneView._gameScene.match();
+        // GameSceneView._gameScene.match();
     }
 
     private onButtonClicklogOutGame(e:egret.TouchEvent){

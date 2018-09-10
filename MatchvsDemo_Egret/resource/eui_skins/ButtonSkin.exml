@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<e:Skin class="skins.ButtonSkin" states="up,down,disabled" minHeight="50" minWidth="100" xmlns:e="http://ns.egret.com/eui">
-	<e:Image width="100%" height="100%" scale9Grid="1,3,8,8" alpha.disabled="0.5" source="button_up_png" source.down="button_down_png"/>
+<e:Skin class="skins.ButtonSkin" states="up,down,disabled" minHeight="50" minWidth="100" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">
+	<e:Image width="100%" height="100%" alpha.disabled="0.5" source="button_up_png" source.down="button_down_png" scale9Grid="1,2,8,11" x="0" y="0" visible="false"/>
+	<e:Rect width="100%" height="100%" x="0" y="0" ellipseWidth="15" ellipseHeight="15" fillColor="0x00c1e0" strokeColor="0x00c1e0" includeIn="up,down"/>
+	<e:Rect width="100%" height="100%" x="0" y="0" ellipseWidth="15" ellipseHeight="15" strokeColor="0x00C1E0" includeIn="disabled" fillColor="0xa6a6a6"/>
     <e:Label id="labelDisplay" top="8" bottom="8" left="8" right="8"
              size="24"
              verticalAlign="middle" textAlign="center" fontFamily="Arial" textColor="0xfcfcfc"/>

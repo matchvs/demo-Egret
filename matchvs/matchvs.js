@@ -1,3 +1,127 @@
+/**************************************************************************************************
+ * 								Matchvs SDK														  *
+ *                                                                                     *
+ * 								2018-09-03											        	  *
+ * 								https://www.matchvs.com/home									  *
+ **************************************************************************************************/
+/* ================ MVS.js ================= */
+var MVS = (function (_obj) {
+    var _this;
+    var _game = {
+        id: 0,
+        appkey: "",
+        secret: "",
+    };
+    var MVS = (function () {
+    });
+    MVS.Game = _game;
+    _obj = MVS;
+    return _obj;
+})({}); /* ================ matchvsLog.js ================= */
+var MatchvsLog = {
+    toArray: function (argument) {
+        var args = [];
+        for (var i = 0; i < argument.length; i++) {
+            args.push(argument[i]);
+        }
+        return args;
+    }
+};
+function getNowFormatDate() {
+    var date = new Date();
+    var ___ = "-";
+    var __ = ":";
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if (month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if (strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    return "[" + date.getFullYear() + ___ + month
+        + ___ + strDate + " " + date.getHours() + __
+        + date.getMinutes() + __ + date.getSeconds() + "."
+        + date.getMilliseconds() + "]";
+}
+MatchvsLog.openLog = function () {
+    console.log("---- open log ----");
+    if (typeof (wx) === "undefined") {
+        MatchvsLog.logI = console.log.bind(console, "[INFO][Matchvs] " + " ");
+        MatchvsLog.logE = console.error.bind(console, "[ERROR][Matchvs] " + " ");
+    }
+    else {
+        MatchvsLog.logI = function () {
+            var loc = "";
+            try {
+                throw new Error();
+            }
+            catch (e) {
+                var line = e.stack.split(/\n/)[1];
+                loc = line.slice(line.lastIndexOf("/") + 1, line.lastIndexOf(")"));
+            }
+            console.log("[INFO][Matchvs] " + getNowFormatDate() + " " + this.toArray(arguments) + " " + loc);
+        };
+        MatchvsLog.logE = function () {
+            var loc = "";
+            try {
+                throw new Error();
+            }
+            catch (e) {
+                var line = e.stack.split(/\n/)[1];
+                loc = line.slice(line.lastIndexOf("/") + 1, line.lastIndexOf(")"));
+            }
+            console.error("[ERROR][Matchvs] " + getNowFormatDate() + " " + this.toArray(arguments) + " " + loc);
+        };
+    }
+};
+MatchvsLog.closeLog = function () {
+    console.log("---- close log ----");
+    MatchvsLog.logI = function () {
+    };
+    MatchvsLog.logE = function () {
+    };
+};
+MatchvsLog.openLog(); //default, the log is opening
+/* ================ mvsconfig.js ================= */
+var HEART_BEAT_INTERVAL = 3000; //心跳间隔时间
+var ENGE_STATE = {
+    NONE: 0x0000,
+    INITING: 0x0001,
+    HAVE_INIT: 0x0002,
+    LOGINING: 0x0004,
+    HAVE_LOGIN: 0x0008,
+    IN_ROOM: 0x0010,
+    CREATEROOM: 0x0020,
+    JOIN_ROOMING: 0x0040,
+    LEAVE_ROOMING: 0x0080,
+    LOGOUTING: 0x0100,
+    RECONNECTING: 0x0200 //正在重新连接
+};
+/**
+ * 平台配置值
+ * @type {{MVS_COMMON: number, MVS_EGRET: number, MVS_WX: number}}
+ */
+var ENMU_MVS_PTF = {
+    MVS_COMMON: 0,
+    MVS_EGRET: 1,
+    MVS_WX: 2
+};
+var MVSCONFIG = {
+    MAXPLAYER_LIMIT: 100,
+    MINPLAYER_LIMIT: 2,
+    MVS_PTF_ADATPER: ENMU_MVS_PTF.MVS_COMMON //如果是白鹭适配就需要填 1
+};
+var HttpConf = {
+    HOST_GATWAY_ADDR: "",
+    HOST_HOTEL_ADDR: "",
+    GETHOSTLIST_URL: "http://sdk.matchvs.com",
+    REGISTER_USER_URL: "",
+    CMSNS_URL: "",
+    VS_OPEN_URL: "",
+    VS_PAY_URL: "",
+    VS_PRODUCT_URL: ""
+};
 /* ================ md5.js ================= */
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
@@ -218,16 +342,14 @@ function binl2b64(binarray) {
     return str;
 }
 /* ================ format.js ================= */
-//
-// format - printf-like string formatting for JavaScript
-// github.com/samsonjs/format
-// @_sjs
-//
-// Copyright 2010 - 2013 Sami Samhuri <sami@samhuri.net>
-//
-// MIT License
-// http://sjs.mit-license.org
-//
+/************************************************************************************
+ * format - printf-like string formatting for JavaScript
+ * github.com/samsonjs/format
+ * @_sjs
+ * Copyright 2010 - 2013 Sami Samhuri <sami@samhuri.net>
+ * MIT License
+ * http://sjs.mit-license.org
+ ************************************************************************************/
 var format = function (fmt) {
     var argIndex = 1 // skip initial format argument
     , args = [].slice.call(arguments), i = 0, n = fmt.length, result = "", c, escaped = false, arg, tmp, leadingZero = false, precision, nextArg = function () { return args[argIndex++]; }, slurpNumber = function () {
@@ -301,111 +423,6 @@ var format = function (fmt) {
         }
     }
     return result;
-};
-/* ================ matchvsLog.js ================= */
-var MatchvsLog = {
-    toArray: function (argument) {
-        var args = [];
-        for (var i = 0; i < argument.length; i++) {
-            args.push(argument[i]);
-        }
-        return args;
-    }
-};
-function getNowFormatDate() {
-    var date = new Date();
-    var ___ = "-";
-    var __ = ":";
-    var month = date.getMonth() + 1;
-    var strDate = date.getDate();
-    if (month >= 1 && month <= 9) {
-        month = "0" + month;
-    }
-    if (strDate >= 0 && strDate <= 9) {
-        strDate = "0" + strDate;
-    }
-    return "[" + date.getFullYear() + ___ + month
-        + ___ + strDate + " " + date.getHours() + __
-        + date.getMinutes() + __ + date.getSeconds() + "."
-        + date.getMilliseconds() + "]";
-}
-MatchvsLog.openLog = function () {
-    console.log("---- open log ----");
-    if (typeof (wx) === "undefined") {
-        MatchvsLog.logI = console.log.bind(console, "[INFO][Matchvs] " + " ");
-        MatchvsLog.logE = console.error.bind(console, "[ERROR][Matchvs] " + " ");
-    }
-    else {
-        MatchvsLog.logI = function () {
-            var loc = "";
-            try {
-                throw new Error();
-            }
-            catch (e) {
-                var line = e.stack.split(/\n/)[1];
-                loc = line.slice(line.lastIndexOf("/") + 1, line.lastIndexOf(")"));
-            }
-            console.info("[INFO][Matchvs] " + getNowFormatDate() + " " + this.toArray(arguments) + " " + loc);
-        };
-        MatchvsLog.logE = function () {
-            var loc = "";
-            try {
-                throw new Error();
-            }
-            catch (e) {
-                var line = e.stack.split(/\n/)[1];
-                loc = line.slice(line.lastIndexOf("/") + 1, line.lastIndexOf(")"));
-            }
-            console.error("[ERROR][Matchvs] " + getNowFormatDate() + " " + this.toArray(arguments) + " " + loc);
-        };
-    }
-};
-MatchvsLog.closeLog = function () {
-    console.log("---- close log ----");
-    MatchvsLog.logI = function () {
-    };
-    MatchvsLog.logE = function () {
-    };
-};
-MatchvsLog.openLog(); //default, the log is opening
-/* ================ mvsconfig.js ================= */
-var HEART_BEAT_INTERVAL = 3000; //心跳间隔时间
-var ENGE_STATE = {
-    NONE: 0x0000,
-    INITING: 0x0001,
-    HAVE_INIT: 0x0002,
-    LOGINING: 0x0004,
-    HAVE_LOGIN: 0x0008,
-    IN_ROOM: 0x0010,
-    CREATEROOM: 0x0020,
-    JOIN_ROOMING: 0x0040,
-    LEAVE_ROOMING: 0x0080,
-    LOGOUTING: 0x0100,
-    RECONNECTING: 0x0200 //正在重新连接
-};
-/**
- * 平台配置值
- * @type {{MVS_COMMON: number, MVS_EGRET: number, MVS_WX: number}}
- */
-var ENMU_MVS_PTF = {
-    MVS_COMMON: 0,
-    MVS_EGRET: 1,
-    MVS_WX: 2
-};
-var MVSCONFIG = {
-    MAXPLAYER_LIMIT: 100,
-    MINPLAYER_LIMIT: 2,
-    MVS_PTF_ADATPER: ENMU_MVS_PTF.MVS_COMMON //如果是白鹭适配就需要填 1
-};
-var HttpConf = {
-    HOST_GATWAY_ADDR: "",
-    HOST_HOTEL_ADDR: "",
-    GETHOSTLIST_URL: "http://sdk.matchvs.com",
-    REGISTER_USER_URL: "",
-    CMSNS_URL: "",
-    VS_OPEN_URL: "",
-    VS_PAY_URL: "",
-    VS_PRODUCT_URL: ""
 };
 /* ================ msutil.js ================= */
 if (typeof String.prototype.startsWith !== "function") {
@@ -544,6 +561,9 @@ function LocalStore_Load(key) {
 function isIE() {
     return !!window.ActiveXObject || "ActiveXObject" in window;
 }
+function isNeedUseWSS() {
+    return typeof wx !== "undefined";
+}
 /**
  * 同时在SDK加入房间时mvs在bookInfo中会返回hotel的wssProxy
  * 建立连接时用 wss://proxyAddress/proxy?hotel=hotelAddress
@@ -551,7 +571,8 @@ function isIE() {
  * @returns {string} url
  */
 function getHotelUrl(bookInfo) {
-    return "wss://" + bookInfo.getWssproxy() + "/proxy?hotel=" + bookInfo.getHoteladdr();
+    //TODO isNeedUseWSS;
+    return isNeedUseWSS() ? ("wss://" + bookInfo.getWssproxy() + "/proxy?hotel=" + bookInfo.getHoteladdr()) : ("ws://" + bookInfo.getHoteladdr());
 }
 /**
  * 检测engine状态
@@ -629,10 +650,161 @@ var MvsTicker = (function (obj) {
     }
     return MvsTicker;
 })(MvsTicker);
-var MVS = {
-    ticker: new MvsTicker()
-};
-/* ================ mspb.js ================= */
+var MVS = (function (_obj) {
+    _obj.ticker = new MvsTicker();
+    return _obj;
+})(MVS || {});
+/* ================ MtaDataReport.js ================= */
+var MVS = (function (_obj) {
+    var _mtac = { "performanceMonitor": 1, "senseQuery": 1 };
+    if ("undefined" === typeof wx) {
+        (function () {
+            var mta = document.createElement("script");
+            mta.src = "//pingjs.qq.com/h5/stats.js?v2.0.4";
+            mta.setAttribute("name", "MTAH5");
+            mta.setAttribute("sid", "500626376");
+            mta.setAttribute("cid", "500637108");
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(mta, s);
+        })();
+    }
+    else {
+        if ("undefined" !== typeof mta) {
+            console.log('微信小程序的引用统计初始化......');
+            mta.App.init({
+                "appID": "500637879",
+                "eventID": "500637882",
+            });
+        }
+    }
+    var _tagList = {
+        "test": "1",
+        "201479": "2",
+        "200757": "3",
+    };
+    var EtRspMap = {};
+    EtRspMap[1001] = "GateWaySpeed";
+    EtRspMap[1002] = "GateWaySpeedResponse";
+    EtRspMap[1101] = "Login";
+    EtRspMap[1102] = "LoginResponse";
+    EtRspMap[1105] = "LoginOut";
+    EtRspMap[1106] = "LoginOutResponse";
+    EtRspMap[1122] = "NetworkStateNotify";
+    EtRspMap[1203] = "CreateRoom";
+    EtRspMap[1204] = "CreateRoomResponse";
+    EtRspMap[1201] = "JoinRoom";
+    EtRspMap[1202] = "JoinRoomResponse";
+    EtRspMap[1213] = "JoinOver";
+    EtRspMap[1214] = "JoinOverResponse";
+    EtRspMap[1306] = "JoinOverNotify";
+    EtRspMap[1205] = "LeaveRoom";
+    EtRspMap[1206] = "LeaveRoomResponse";
+    EtRspMap[1301] = "JoinRoomNotify";
+    EtRspMap[1302] = "LeaveRoomNotify";
+    EtRspMap[1401] = "CheckIn";
+    EtRspMap[1402] = "CheckInResponse";
+    EtRspMap[1405] = "SendEvent";
+    EtRspMap[1406] = "SendEventResponse";
+    EtRspMap[1408] = "SendEventNotify";
+    EtRspMap[1410] = "CheckInNotify";
+    EtRspMap[1207] = "GetRoomList";
+    EtRspMap[1208] = "GetRoomListResponse";
+    EtRspMap[1209] = "GetRoomDetail";
+    EtRspMap[1210] = "GetRoomDetailResponse";
+    EtRspMap[1215] = "GetRoomListEx";
+    EtRspMap[1216] = "GetRoomListExResponse";
+    EtRspMap[1219] = "SetRoomProperty";
+    EtRspMap[1220] = "SetRoomPropertyResponse";
+    EtRspMap[1307] = "SetRoomPropertyNotify";
+    EtRspMap[1303] = "KickPlayer";
+    EtRspMap[1304] = "KickPlayerResponse";
+    EtRspMap[1305] = "KickPlayerNotify";
+    EtRspMap[1411] = "SubscribeEventGroup";
+    EtRspMap[1412] = "SubscribeEventGroupResponse";
+    EtRspMap[1413] = "SendEventGroup";
+    EtRspMap[1414] = "SendEventGroupResponse";
+    EtRspMap[1416] = "SendEventGroupNotify";
+    EtRspMap[1419] = "SetFrameSync";
+    EtRspMap[1420] = "SetFrameSyncResponse";
+    EtRspMap[1422] = "SetFrameSyncNotify";
+    EtRspMap[1221] = "JoinOpen";
+    EtRspMap[1222] = "JoinOpenResponse";
+    EtRspMap[1308] = "JoinOpenNotify";
+    EtRspMap["registerUser"] = "registerUser";
+    EtRspMap["registerUserResponse"] = "registerUserResponse";
+    EtRspMap["init"] = "init";
+    EtRspMap["initResponse"] = "initResponse";
+    var MtaDataReport = (function () {
+    });
+    MtaDataReport.prototype.AddTag = function (tagID, tagName) {
+        _tagList[tagName] = tagID;
+        return;
+    };
+    /**
+     * 上报返回值
+     * @param cmd
+     * @constructor
+     */
+    MtaDataReport.prototype.Report = function (cmd) {
+        var et = EtRspMap[cmd];
+        var tg = _tagList[MVS.Game.id];
+        if (et && tg) {
+            console.log("Mta_Event:", MVS.Game.id);
+            console.log("Mta_Args:", cmd);
+            if (undefined === typeof wx) {
+                mta && mta.Event.stat(MVS.Game.id, { cmd: et });
+            }
+            else {
+                if ("undefined" !== typeof MtaH5) {
+                    MtaH5 && MtaH5.clickStat(MVS.Game.id, { cmd: 'true' });
+                }
+            }
+        }
+        return;
+    };
+    _obj.mtaReport = new MtaDataReport();
+    return _obj;
+})(MVS || {}); /* ================ DefaultAppKeyCheck.js ================= */
+/**
+ * DefaultAppKeyCheck.js
+ * 默认 appkey 合法性检测
+ */
+var MVS = (function (_super) {
+    var AppKeyCheck = (function (_obj) {
+        var _tags = ["", "E", "C", "M"];
+        /**
+         * 获取 appkey 里的渠道标记
+         * @param appkey
+         * @returns {string}
+         */
+        var getTag = function (appkey) {
+            var len = appkey.length;
+            // if(len !== 35){
+            //     return "";
+            // }
+            var tags = appkey.split('#');
+            if (tags.length !== 2) {
+                return "";
+            }
+            return tags[1];
+        };
+        var AppkeyCheck = (function () {
+        });
+        AppkeyCheck.prototype.isInvailed = function (appkey) {
+            var tag = getTag(appkey);
+            for (var i = 0; i < _tags.length; i++) {
+                if (tag === _tags[i]) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        _obj = AppkeyCheck;
+        return _obj;
+    })(AppKeyCheck || {});
+    _super.AppKeyCheck = AppKeyCheck;
+    return _super;
+})(MVS || {}); /* ================ mspb.js ================= */
 (function e(t, n, r) {
     function s(o, u) {
         if (!n[o]) {
@@ -1479,7 +1651,8 @@ var MVS = {
                         goog.moduleLoaderState_ = b;
                     }
                 }, goog.loadModuleFromSource_ = function (a) {
-                    eval(a);
+                    //eval(a);
+                    console.log("eval(a) need open");
                     return {};
                 }, goog.writeScriptSrcNode_ = function (a) {
                     goog.global.document.write("<script type=\"text/javascript\" src=\"" + a + "\">\x3c/script>");
@@ -18767,7 +18940,13 @@ var MvsCode = {
     CODE_405: 405,
     CODE_406: 406,
     CODE_500: 500,
+    CODE_502: 502,
+    CODE_503: 503,
+    CODE_504: 504,
+    CODE_507: 507,
     CODE_521: 521,
+    CODE_522: 522,
+    CODE_527: 527,
     CODE_1000: 1000,
     NetWorkErr: 1001,
     CODE_1005: 1005,
@@ -18777,20 +18956,26 @@ var MvsCode = {
  * 错误码描述
  */
 var MvsErrMsg = new (function () {
-    this[MvsCode.NoLogin] = "you are not logined, please reference http://www.matchvs.com/service?page=js";
-    this[MvsCode.NetWorkErr] = "network error, please reference http://www.matchvs.com/service?page=egretGuide";
+    this[MvsCode.NoLogin] = "you are not logined, please reference [http://www.matchvs.com/service?page=js]";
+    this[MvsCode.NetWorkErr] = "network error, please reference [http://www.matchvs.com/service?page=egretGuide]";
     this[MvsCode.CODE_1000] = "netwrk closed normal ";
     this[MvsCode.CODE_1005] = "netwrk closed no status ";
     this[MvsCode.DataParseErr] = "you data parse error ";
     this[MvsCode.CODE_400] = "bad request ";
     this[MvsCode.CODE_401] = "invaild appkey ";
-    this[MvsCode.CODE_402] = "invaild sign http://www.matchvs.com/service?page=js";
+    this[MvsCode.CODE_402] = "invaild sign [http://www.matchvs.com/service?page=js]";
     this[MvsCode.CODE_403] = "forbidden";
-    this[MvsCode.CODE_404] = "not found anything, please reference http://www.matchvs.com/service?page=js";
-    this[MvsCode.CODE_405] = "room have full, please reference http://www.matchvs.com/service?page=js";
-    this[MvsCode.CODE_406] = "room had joinOver, please reference http://www.matchvs.com/service?page=js";
-    this[MvsCode.CODE_500] = "server error, please reference http://www.matchvs.com/service?page=egretGuide";
+    this[MvsCode.CODE_404] = "not found anything, please reference [ http://www.matchvs.com/service?page=js ]";
+    this[MvsCode.CODE_405] = "room have full, please reference [ http://www.matchvs.com/service?page=js ]";
+    this[MvsCode.CODE_406] = "room had joinOver, please reference [ http://www.matchvs.com/service?page=js ]";
+    this[MvsCode.CODE_500] = "server error, please reference [ http://www.matchvs.com/service?page=egretGuide ]";
+    this[MvsCode.CODE_502] = "service stoped,the license expires or the account is in arrears. please reference [ http://www.matchvs.com/price ]";
+    this[MvsCode.CODE_503] = "the ccu exceed the limit. please reference [ http://www.matchvs.com/price ]";
+    this[MvsCode.CODE_504] = "your traffic is running out today,please recharge [ http://www.matchvs.com/price ]";
+    this[MvsCode.CODE_507] = "room does not exist";
     this[MvsCode.CODE_521] = "gameServer not exist, please check your gameserver is ok http://www.matchvs.com/service?page=gameServer";
+    this[MvsCode.CODE_522] = "frame sync is close, please call the api 'setFrameSync' [http://www.matchvs.com/service?page=js]";
+    this[MvsCode.CODE_527] = "sending message too often ,  can't exceed 500 times per second";
     this[MvsCode.CODE_201] = "reconnect not in room http://www.matchvs.com/service?page=js";
 });
 function MsCreateRoomInfo(roomName, maxPlayer, mode, canWatch, visibility, roomProperty) {
@@ -18907,7 +19092,7 @@ function MsRoomInfo(roomID, roomProperty, ownerID, state) {
     this.roomID = roomID; // string
     this.roomProperty = roomProperty; //
     this.ownerId = ownerID;
-    this.ownerID = ownerID;
+    this.owner = ownerID;
     this.state = state;
     MatchvsLog.logI(this + " MsRoomInfo:" + JSON.stringify(this));
 }
@@ -19113,19 +19298,19 @@ function MsKickPlayerRsp(status, owner, userID) {
 }
 /**
  *
- * @param mStatus {Number} 200 is ok
+ * @param status {Number} 200 is ok
  * @constructor
  */
-function MsSetChannelFrameSyncRsp(mStatus) {
-    this.mStatus = mStatus;
+function MsSetChannelFrameSyncRsp(status) {
+    this.status = status;
 }
 /**
  *
- * @param mStatus {Number} 200 is ok
+ * @param status {Number} 200 is ok
  * @constructor
  */
-function MsSendFrameEventRsp(mStatus) {
-    this.mStatus = mStatus;
+function MsSendFrameEventRsp(status) {
+    this.status = status;
 }
 /**
  * message RoomFilter
@@ -19348,6 +19533,7 @@ var MatchvsNetWork;
 var MatchvsHttp;
 try {
     if (typeof (wx) !== "undefined") {
+        console.log("network api->WX");
         MatchvsNetWork = function MatchvsNetWork(host, callback) {
             /**
              * WebSocket 任务，可通过 wx.connectSocket() 接口创建返回。
@@ -19454,6 +19640,7 @@ try {
         };
     }
     else if (typeof (BK) !== "undefined") {
+        console.log("network api->BK");
         MatchvsNetWork = function MatchvsNetWork(host, callback) {
             var mCallBack = callback;
             var mHost = host;
@@ -19524,11 +19711,12 @@ try {
                 http.setHttpHeader("Content-type", "application/x-www-form-urlencoded");
                 http.requestAsync(function (res, code) {
                     if (code === 200) {
-                        call.onMsg(res.readAsString());
-                        MatchvsLog.logI("[HTTP:](" + url + ")+" + res.readAsString());
+                        var dt = res.readAsString(true);
+                        call.onMsg(dt);
+                        MatchvsLog.logI("[HTTP:](" + url + ")+" + dt);
                     }
                     else {
-                        call.onErr(code, res.readAsString());
+                        call.onErr(code, res.readAsString(true));
                     }
                 });
                 if (isPost) {
@@ -19556,6 +19744,7 @@ try {
         };
     }
     else {
+        console.log("network api->browser");
         MatchvsNetWork = function MatchvsNetWork(host, callback) {
             this.socket = null;
             this.mCallBack = callback;
@@ -19582,7 +19771,12 @@ try {
             };
             this.close = function () {
                 if (this.socket) {
-                    this.socket.close(1000, "");
+                    if (typeof cc !== "undefined" && typeof cc.Component !== "undefined") {
+                        this.socket.close();
+                    }
+                    else {
+                        this.socket.close(1000, "");
+                    }
                 }
             };
             if (!window.WebSocket) {
@@ -19593,29 +19787,44 @@ try {
                 this.socket.hashcode = new Date().getMilliseconds();
                 MatchvsLog.logI("try to create a socket:" + this.mHost + " socket is " + this.socket.hashcode);
                 this.socket.onmessage = function (event) {
-                    var reader = new FileReader();
-                    reader.readAsArrayBuffer(event.data);
-                    //  当读取操作成功完成时调用.
-                    reader.onload = function (evt) {
-                        if (evt.target.readyState === FileReader.DONE) {
-                            var dataView = new DataView(reader.result);
-                            this.mCallBack.onMsg(dataView);
-                        }
-                        else {
-                            this.mCallBack.onErr(MvsCode.DataParseErr, "[err]parse fail");
-                        }
-                    }.bind(this);
+                    if (typeof FileReader !== 'undefined' && (event.data instanceof Blob)) {
+                        var reader = new FileReader();
+                        reader.readAsArrayBuffer(event.data);
+                        //  当读取操作成功完成时调用.
+                        reader.onload = function (evt) {
+                            if (evt.target.readyState === FileReader.DONE) {
+                                var dataView = new DataView(reader.result);
+                                this.mCallBack.onMsg(dataView);
+                            }
+                            else {
+                                this.mCallBack.onErr(MvsCode.DataParseErr, "[err]parse fail");
+                            }
+                        }.bind(this);
+                    }
+                    else if (event.data instanceof ArrayBuffer) {
+                        //for CC jsb_websocket.cpp.onMessage()
+                        // console.log("[INFO] event "+event +" json:"+JSON.stringify(event));
+                        var dataView = new DataView(event.data);
+                        this.mCallBack.onMsg(dataView);
+                    }
+                    else {
+                        console.log("[error] unknown event :" + event + " => " + JSON.stringify(event));
+                        this.mCallBack.onErr(MvsCode.DataParseErr, "[err]parse fail");
+                    }
                 }.bind(this);
                 this.socket.onopen = function (event) {
                     MatchvsLog.logI("Create the socket is success :" + this.mHost + " socket is " + this.socket.hashcode);
                     while (bufQueue.length > 0) {
-                        this.socket.send(bufQueue.pop());
+                        this.send(bufQueue.pop());
                     }
                     this.mCallBack.onConnect && this.mCallBack.onConnect(this.mHost);
                 }.bind(this);
                 this.socket.onclose = function (e) {
+                    if (typeof cc !== "undefined" && typeof cc.Component !== "undefined") {
+                        e = { "code": 1000, "reason": "jsb friend close " };
+                    }
+                    MatchvsLog.logI("socket on closed ,code:" + e.code + "(1000:NORMAL,1005:CLOSE_NO_STATUS,1006:RESET,1009:CLOSE_TOO_LARGE) err:" + JSON.stringify(e));
                     this.mCallBack.onDisConnect && this.mCallBack.onDisConnect(this.mHost, e);
-                    MatchvsLog.logI("socket on closed ,code:" + e.code + "(1000:NORMAL,1005:CLOSE_NO_STATUS,1006:RESET,1009:CLOSE_TOO_LARGE) msg:" + e.reason);
                 }.bind(this);
                 this.socket.onerror = function (event) {
                     MatchvsLog.logI("socket on error ,event:" + JSON.stringify(event));
@@ -19810,6 +20019,7 @@ function MatchvsProtocol() {
      * @returns {DataView}
      */
     this.fillHeader = function (dataArray, cmd) {
+        MVS.mtaReport && MVS.mtaReport.Report(cmd);
         var buffer = new ArrayBuffer(FIXED_HEAD_SIZE + dataArray.length);
         var dataView = new DataView(buffer);
         dataView.setInt32(0, buffer.byteLength, true); //size; +4
@@ -20406,6 +20616,7 @@ var NetWorkCallBackImp = function (engine) {
             frameCache: this.frameCache
         };
         var dohandle = this.engineWorkMap[packet.header.cmd];
+        MVS.mtaReport && MVS.mtaReport.Report(packet.header.cmd);
         if (dohandle) {
             dohandle.doSubHandle(event, engine);
         }
@@ -20687,12 +20898,17 @@ function LoginOutRspWork() {
 }
 function GetRoomListRspWork() {
     this.doSubHandle = function (event, engine) {
+        var status = event.payload.getStatus();
+        if (status !== 200) {
+            engine.mRsp.getRoomListResponse && engine.mRsp.getRoomListResponse(event.payload.getStatus(), null);
+            ErrorRspWork(engine.mRsp.errorResponse, event.payload.getStatus(), "get room list error ");
+        }
         var roominfolist = event.payload.getRoominfoList();
         var roomList = [];
         for (var i = 0; i < roominfolist.length; i++) {
             roomList[i] = new MsRoomInfoEx(roominfolist[i].getRoomid(), roominfolist[i].getRoomname(), roominfolist[i].getMaxplayer(), roominfolist[i].getMode(), roominfolist[i].getCanwatch(), utf8ByteArrayToString(roominfolist[i].getRoomproperty()));
         }
-        engine.mRsp.getRoomListResponse && engine.mRsp.getRoomListResponse(event.payload.getStatus(), roomList);
+        engine.mRsp.getRoomListResponse && engine.mRsp.getRoomListResponse(status, roomList);
     };
 }
 function DisConnectRspWork() {
@@ -20702,17 +20918,16 @@ function DisConnectRspWork() {
 }
 function KickPlayerRspWork() {
     this.doSubHandle = function (event, engine) {
+        var status = event.payload.getStatus();
+        if (status != 200) {
+            ErrorRspWork(engine.mRsp.errorResponse, event.payload.getStatus(), "kick player error ");
+        }
         engine.mRsp.kickPlayerResponse && engine.mRsp.kickPlayerResponse(new MsKickPlayerRsp(event.payload.getStatus(), event.payload.getOwner(), event.payload.getUserid()));
     };
 }
 function KickPlayerNotifyWork() {
     this.doSubHandle = function (event, engine) {
         if (event.payload.getUserid().toString() === ("" + engine.mUserID) && event.hotelTimer != null) {
-            // if("undefined" !== typeof (BK)){
-            //     BK.Director.ticker.removeInterval(event.hotelTimer);
-            // }else{
-            //     clearInterval(event.hotelTimer);
-            // }
             MVS.ticker.clearInterval(event.hotelTimer);
             engine.mEngineState &= ~ENGE_STATE.IN_ROOM;
             engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
@@ -20826,6 +21041,8 @@ function MatchvsEngine() {
     this.mHotelNetWork = null; //hotel net
     this.mProtocol = new MatchvsProtocol();
     this.init = function (response, channel, platform, gameID) {
+        MVS.Game.id = gameID;
+        MVS.mtaReport && MVS.mtaReport.Report("init");
         this.mRsp = response;
         this.mChannel = channel;
         this.mPlatform = platform;
@@ -20907,6 +21124,11 @@ function MatchvsEngine() {
             return -6; // 已经登录，请勿重复登录
         if ((this.mEngineState & ENGE_STATE.LOGOUTING) === ENGE_STATE.LOGOUTING)
             return -11; // 正在登出
+        var ak = new MVS.AppKeyCheck();
+        MVS.Game.id = pGameID;
+        if (!ak.isInvailed(pAppKey)) {
+            return -26;
+        }
         if (!(undefined === this.mNetWork || null === this.mNetWork)) {
             this.mNetWork.close();
         }
@@ -20954,7 +21176,7 @@ function MatchvsEngine() {
             return ret;
         if (userProfile.length > 512)
             return -21;
-        if (cinfo.maxPlayer > MVSCONFIG.MAXPLAYER_LIMIT || cinfo.maxPlayer <= MVSCONFIG.MINPLAYER_LIMIT)
+        if (cinfo.maxPlayer > MVSCONFIG.MAXPLAYER_LIMIT || cinfo.maxPlayer < MVSCONFIG.MINPLAYER_LIMIT)
             return -20;
         var roomInfo = new RoomInfo(0, cinfo.roomName, cinfo.maxPlayer, cinfo.mode, cinfo.canWatch, cinfo.visibility, cinfo.roomProperty, 0);
         var playInfo = new PlayerInfo(this.mUserID, userProfile);
@@ -21008,7 +21230,7 @@ function MatchvsEngine() {
         var ret = commEngineStateCheck(this.mEngineState, this.mEngineState, 2);
         if (ret !== 0)
             return ret;
-        if (maxPlayer > MVSCONFIG.MAXPLAYER_LIMIT || maxPlayer <= MVSCONFIG.MINPLAYER_LIMIT)
+        if (maxPlayer > MVSCONFIG.MAXPLAYER_LIMIT || maxPlayer < MVSCONFIG.MINPLAYER_LIMIT)
             return -20;
         if (userProfile.length > 512)
             return -21;
@@ -21034,7 +21256,7 @@ function MatchvsEngine() {
             return -1;
         if (typeof userProfile !== "string")
             return -1;
-        if (matchinfo.maxPlayer > MVSCONFIG.MAXPLAYER_LIMIT || matchinfo.maxPlayer <= MVSCONFIG.MINPLAYER_LIMIT)
+        if (matchinfo.maxPlayer > MVSCONFIG.MAXPLAYER_LIMIT || matchinfo.maxPlayer < MVSCONFIG.MINPLAYER_LIMIT)
             return -20;
         var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinRoomWithProperty, this.mUserID, 1, this.mGameID, matchinfo.maxPlayer, matchinfo.mode, matchinfo.canWatch, userProfile, matchinfo.tags);
         var buf = this.mProtocol.joinRoomWithProperties(roomJoin);
@@ -21196,7 +21418,7 @@ function MatchvsResponse() {
      *
      * @param status
      * @param roomUserInfoList
-     * @param roomInfo
+     * @param roomInfo {MsRoomInfo}
      */
     this.joinRoomResponse = function (status, roomUserInfoList, roomInfo) {
     };
@@ -21603,8 +21825,8 @@ MatchvsEngine.prototype.sendEventGroup = function (data, groups) {
  */
 MatchvsEngine.prototype.hotelHeartBeat = function () {
     var _engine = M_ENGINE;
-    this.mEngineState |= ENGE_STATE.IN_ROOM;
-    this.mEngineState |= ENGE_STATE.HAVE_LOGIN;
+    _engine.mEngineState |= ENGE_STATE.IN_ROOM;
+    _engine.mEngineState |= ENGE_STATE.HAVE_LOGIN;
     var buf = _engine.mProtocol.hotelHeartBeat(_engine.mGameID, _engine.mRoomInfo.getRoomid(), _engine.mUserID);
     _engine.mHotelNetWork.send(buf);
     MatchvsLog.logI("hotel heartBeat");
@@ -21614,6 +21836,7 @@ MatchvsEngine.prototype.hotelHeartBeat = function () {
  * @returns {number}
  */
 MatchvsEngine.prototype.registerUser = function () {
+    MVS.mtaReport && MVS.mtaReport.Report("registerUser");
     if ((this.mEngineState & ENGE_STATE.HAVE_INIT) !== ENGE_STATE.HAVE_INIT)
         return -2; //未初始化
     var deviceid = "javascript";
@@ -21638,11 +21861,13 @@ MatchvsEngine.prototype.registerUser = function () {
             this.rsp(new MsRegistRsp(obj.status, obj.data.userid, obj.data.token, obj.data.nickname, obj.data.avatar));
         }
         else {
-            this.rsp(new MsRegistRsp(obj.status, 0, "0", buf, ""));
+            this.rsp(new MsRegistRsp(obj.status, 0, "err", buf, "err"));
         }
+        MVS.mtaReport && MVS.mtaReport.Report("registerUserResponse");
     };
     rep.onErr = function (errCode, errMsg) {
-        this.rsp(new MsRegistRsp(errCode, 0, "0", errMsg, ""));
+        //err code is 0 on weixin game platform
+        this.rsp(new MsRegistRsp(errCode === 0 ? -1 : errCode, 0, "err", errMsg, "err"));
     };
     new MatchvsHttp(rep).get(url);
     return 0;
@@ -21656,7 +21881,8 @@ MatchvsEngine.prototype.getHostList = function () {
     var channel = this.mChannel;
     var platform = this.mPlatform;
     var uri = "/v1/gateway/query";
-    var url = "https://sdk.matchvs.com" + uri + "?mac=0" + "&gameid=" + gameId + "&channel=" + channel + "&platform=" + platform + "&useWSSProxy=1";
+    var isUseWSS = isNeedUseWSS();
+    var url = "https://sdk.matchvs.com" + uri + "?mac=0" + "&gameid=" + gameId + "&channel=" + channel + "&platform=" + platform + (isUseWSS ? "&useWSSProxy=1" : "");
     var rep = new MatchvsNetWorkCallBack();
     var engine = this;
     rep.onMsg = function (buf) {
@@ -21667,14 +21893,13 @@ MatchvsEngine.prototype.getHostList = function () {
             var http = "https://";
             var port = "";
             HttpConf.REGISTER_USER_URL = http + obj.data.vsuser;
-            var websocket = "wss://";
-            // var wss = (obj.data.wssProxy == "192.168.8.7")?"ws://":"wss://";
-            HttpConf.HOST_GATWAY_ADDR = websocket + obj.data.wssProxy;
+            HttpConf.HOST_GATWAY_ADDR = (isUseWSS ? "wss://" : "ws://") + (isUseWSS ? obj.data.wssProxy : (obj.data.engine + ":7001"));
             HttpConf.CMSNS_URL = http + obj.data.cmsns;
             HttpConf.VS_OPEN_URL = http + obj.data.vsopen;
             HttpConf.VS_PAY_URL = http + obj.data.vspay;
             HttpConf.VS_PRODUCT_URL = http + obj.data.VS_PRODUCT_URL;
         }
+        MVS.mtaReport && MVS.mtaReport.Report("initResponse");
         engine.mRsp.initResponse(obj.status);
     };
     rep.onErr = function (errCode, errMsg) {

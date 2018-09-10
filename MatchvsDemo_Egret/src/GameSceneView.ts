@@ -48,28 +48,29 @@ class GameSceneView extends egret.Sprite
     public login():void
     {
         this.removeAll();
-        var loginview:LoginView = new LoginView();
-        loginview.width = this.width;
-        loginview.height = this.height;
+        var loginview:Login = new Login();
         this.thisContainer.addChild(loginview);
     }
     public lobby():void
     {
         this.removeAll();
-        var lobbyView:LobbyView = new LobbyView();
+        var lobbyView:Lobby = new Lobby();
         this.thisContainer.addChild(lobbyView);
     }
-    public match(tags ? :any):void{
+    public match(tags:number, info?:any):void{
         this.removeAll();
-        if(tags){
-            var matchView:MatchView = new MatchView(tags);
-            this.thisContainer.addChild(matchView);
-        }else{
-            var matchView:MatchView = new MatchView();
-            this.thisContainer.addChild(matchView);
-        }
-        
+        // if(tags){
+        //     var matchView:MatchView = new MatchView(tags);
+        //     this.thisContainer.addChild(matchView);
+        // }else{
+        //     var matchView:MatchView = new MatchView();
+        //     this.thisContainer.addChild(matchView);
+        // }
+        let match:MatchUI = new MatchUI();
+        match.setJoinParame(MatchUI.JOINFLAG.RANDROOM, info);
+        this.thisContainer.addChild(match);
     }
+
 	public play():void{
 		this.removeAll();
         var gamePlay:GamePlayView = new GamePlayView();

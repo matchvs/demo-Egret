@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="LobbySkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="165c252e38f" ></w:Config>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat" locked="true"/>
+	<e:Rect width="64" height="64" x="955.67" y="52.97" fillColor="0x000000" strokeWeight="2" strokeColor="0x00e2ed" fillAlpha="0" locked="true"/>
+	<e:Button id="btn_return" label="" x="61" y="63" anchorOffsetY="0" height="36" width="36">
+		<e:skinName>
+			<e:Skin states="up,down,disabled">
+			<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
+			<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+			</e:Skin>
+		</e:skinName>
+	</e:Button>
+	<e:Label id="lab_lobby" text="游戏大厅" x="120" y="56" size="36" width="144" height="50" verticalAlign="middle"/>
+	<e:Label id="lab_userID" text="用户ID：235699" x="1028" y="63" size="24" textColor="0x999999" textAlign="left"/>
+	<e:Image id="img_header" width="60" height="60" x="957" y="55.33" locked="true"/>
+	<e:Rect width="2" height="320" x="639" y="175" strokeWeight="1" strokeColor="0x5d5d5d" locked="true"/>
+	<e:Label id="lab_joinRandRoom" text="随机匹配" x="309" y="205" size="48" height="67" verticalAlign="middle" textAlign="left"/>
+	<e:Image width="30" height="40" x="250" y="219" source="arrow_left_png" locked="true"/>
+	<e:Label id="lab_createRoom" text="创建房间" x="812" y="205" size="48" height="67" verticalAlign="middle" textAlign="left" locked="true"/>
+	<e:Image width="30" height="40" x="756" y="219" source="arrow_left_png" locked="true"/>
+	<e:Label id="lab_joinWithPro" text="自定义属性匹配" x="309" y="330" width="196" height="40" verticalAlign="middle" size="28" locked="true"/>
+	<e:Label id="lab_frameSync" text="帧同步匹配" x="309" y="426" width="196" height="40" verticalAlign="middle" size="28" locked="true"/>
+	<e:Label id="lab_joinRoom" text="加入指定房间" x="812" y="426" width="196" height="40" verticalAlign="middle" size="28" locked="true"/>
+	<e:Label id="lab_roomList" text="查看房间列表" x="812" y="330" width="196" height="40" verticalAlign="middle" size="28" locked="true"/>
+</e:Skin>

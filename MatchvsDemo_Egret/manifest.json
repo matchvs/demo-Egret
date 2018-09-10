@@ -25,9 +25,9 @@
 		"bin-debug/MatchView.js",
 		"bin-debug/Platform.js",
 		"bin-debug/ReconnectView.js",
-		"bin-debug/util/Toast.js",
+		"bin-debug/ResultView.js",
 		"bin-debug/RoomList.js",
-		"bin-debug/RoomView.js",
+		"bin-debug/util/Toast.js",
 		"bin-debug/TagsMatch.js",
 		"bin-debug/ThemeAdapter.js",
 		"bin-debug/Game/GameData.js",
@@ -35,9 +35,12 @@
 		"bin-debug/matchvs/MsEngine.js",
 		"bin-debug/matchvs/MsEvent.js",
 		"bin-debug/matchvs/MsResponse.js",
+		"bin-debug/screen/Lobby.js",
+		"bin-debug/screen/Login.js",
+		"bin-debug/screen/MatchUI.js",
 		"bin-debug/screen/PremiseLoginUI.js",
 		"bin-debug/screen/StartModelUI.js",
 		"bin-debug/util/MD5.js",
-		"bin-debug/ResultView.js"
+		"bin-debug/RoomView.js"
 	]
 }

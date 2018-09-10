@@ -3,6 +3,17 @@
  */
 module mvs {
 	export class MsResponse extends egret.EventDispatcher{
+		//
+		private reframe:Array<number> = [];
+		private startTime = 0;
+		private endTime = 0;
+		private frist = 0;
+		private re100 = 0;
+		private re70 = 0;
+		private re200 = 0;
+		private re60 = 0;
+		private re40 = 0;
+		//
 		private static _instance:MsResponse = null;
 		private _response:MatchvsResponse = null; //Matchvs 引擎
 		public constructor() {
@@ -254,7 +265,6 @@ module mvs {
 		 * 更新帧数据
 		 */
 		private frameUpdate(fd:MsFrameData){
-			//console.info("[setFrameSyncResponse] "+JSON.stringify(fd));
 			let data = {
 				frameIndex:fd.frameIndex,
 				frameItems:fd.frameItems,
@@ -419,6 +429,54 @@ module mvs {
 				roomInfo : roomInfo
 			};
 			this.dispatchEvent(new egret.Event(MsEvent.EVENT_RECONNECT_RSP, false, false, data));
+		}
+
+		/**
+		 * 帧同步质量检查函数，与 matchvs 接口无关，自定义用来查看 帧同步稳定性的。
+		 */
+		private frameUpdatequality(){
+			let timestamp = (new Date()).valueOf();
+			if(this.startTime == 0 ){
+				this.startTime = timestamp;
+				this.frist = timestamp;
+			}else{
+				this.endTime = timestamp;
+			}
+
+			if((this.endTime - this.startTime) >= 500000){
+				let sum = 0;
+				for(let i = 0; i < this.reframe.length; i++){
+					sum += this.reframe[i];
+				}
+				console.log("收到总次数：",this.reframe.length );
+				console.log("发送间隔时间：", 40 );
+				console.log("设置的帧率：", GameData.frameRate );
+				console.log("总耗时：",this.endTime - this.startTime );
+				console.log("预计收到间隔时间：", 1000/GameData.frameRate );
+				console.log("平均收到间隔时间：",sum/this.reframe.length );
+				console.log("正常次数：",this.re60 );
+				console.log("小于 40 次数：",this.re40 );
+				console.log("60 ~ 100 次数：",this.re70 );
+				console.log("100 ~ 200 次数：",this.re100 );
+				console.log("大于 200 次数：",this.re200);
+				
+			}else{
+				let sub = timestamp - this.frist;
+				console.log("收到帧间隔时间：",sub);
+				this.frist !==0 && this.reframe.push(sub);
+				if( sub >= 40 && sub <= 60 ){
+					this.re60++;
+				}else if(sub < 40 ){
+					this.re40 ++;
+				}else if(sub > 60 && sub < 100 ){
+					this.re70++;
+				}else if(sub > 100 && sub < 200 ){
+					this.re100++;
+				}else if(sub > 200  ){
+					this.re200++;
+				}
+			}
+			this.frist = timestamp;
 		}
 
 	}

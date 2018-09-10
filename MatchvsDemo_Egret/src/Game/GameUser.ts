@@ -5,6 +5,7 @@ class GameUser {
 	public avatar:string = "http://pic.vszone.cn/upload/avatar/1464079970.png";
 	public token:string = "";			//校验值
 	public pValue:number = 0;			//积分
+	public tableID:number = 0;
 	public isOwner = false;				//房主标记
 
 	public constructor() {

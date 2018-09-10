@@ -1,7 +1,7 @@
 {
 	"groups": [
 		{
-			"keys": "checkbox_select_disabled_png,checkbox_select_down_png,checkbox_select_up_png,checkbox_unselect_png,selected_png,border_png,header_png,radiobutton_select_disabled_png,radiobutton_select_down_png,radiobutton_select_up_png,radiobutton_unselect_png,roundthumb_png,thumb_png,track_png,tracklight_png,handle_png,off_png,on_png,button_down_png,button_up_png,thumb_pb_png,track_pb_png,track_sb_png,description_json,cartoon-egret_01_png,cartoon-egret_02_png,cartoon-egret_03_png,star1_png,gamebackground_jpg,toast-bg_png,footer_text_png,button_png,setup_png",
+			"keys": "checkbox_select_disabled_png,checkbox_select_down_png,checkbox_select_up_png,checkbox_unselect_png,selected_png,border_png,header_png,radiobutton_select_disabled_png,radiobutton_select_down_png,radiobutton_select_up_png,radiobutton_unselect_png,roundthumb_png,thumb_png,track_png,tracklight_png,handle_png,off_png,on_png,button_down_png,button_up_png,thumb_pb_png,track_pb_png,track_sb_png,description_json,cartoon-egret_01_png,cartoon-egret_02_png,cartoon-egret_03_png,star1_png,gamebackground_jpg,toast-bg_png,footer_text_png,button_png,setup_png,bg_jpg,bg_srowll_png,turn_point_png,owner_png,nocheck_png,checked_png,arrow_left_png,back_png",
 			"name": "preload"
 		}
 	],
@@ -170,6 +170,46 @@
 			"name": "setup_png",
 			"type": "image",
 			"url": "loading/setup.png"
+		},
+		{
+			"name": "bg_jpg",
+			"type": "image",
+			"url": "new_skin/bg.jpg"
+		},
+		{
+			"name": "bg_srowll_png",
+			"type": "image",
+			"url": "new_skin/bg_srowll.png"
+		},
+		{
+			"name": "turn_point_png",
+			"type": "image",
+			"url": "new_skin/turn_point.png"
+		},
+		{
+			"name": "owner_png",
+			"type": "image",
+			"url": "new_skin/owner.png"
+		},
+		{
+			"name": "nocheck_png",
+			"type": "image",
+			"url": "new_skin/nocheck.png"
+		},
+		{
+			"name": "checked_png",
+			"type": "image",
+			"url": "new_skin/checked.png"
+		},
+		{
+			"name": "arrow_left_png",
+			"type": "image",
+			"url": "new_skin/arrow_left.png"
+		},
+		{
+			"name": "back_png",
+			"type": "image",
+			"url": "new_skin/back.png"
 		}
 	]
 }

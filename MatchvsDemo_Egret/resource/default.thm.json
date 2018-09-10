@@ -14,7 +14,10 @@
 		"eui.VSlider": "resource/eui_skins/VSliderSkin.exml",
 		"eui.ItemRenderer": "resource/eui_skins/ItemRendererSkin.exml",
 		"StartModelUI": "resource/screen/StartModel.exml",
-		"PremiseLoginUI": "resource/eui_skins/PremiseLoginUI.exml"
+		"PremiseLoginUI": "resource/eui_skins/PremiseLoginUI.exml",
+		"Login": "resource/eui_skins/Login.exml",
+		"Lobby": "resource/eui_skins/Lobby.exml",
+		"MatchUI": "resource/eui_skins/MatchUI.exml"
 	},
 	"autoGenerateExmlsList": true,
 	"exmls": [
@@ -23,6 +26,9 @@
 		"resource/eui_skins/HScrollBarSkin.exml",
 		"resource/eui_skins/HSliderSkin.exml",
 		"resource/eui_skins/ItemRendererSkin.exml",
+		"resource/eui_skins/Lobby.exml",
+		"resource/eui_skins/Login.exml",
+		"resource/eui_skins/MatchUI.exml",
 		"resource/eui_skins/PanelSkin.exml",
 		"resource/eui_skins/PremiseLoginUI.exml",
 		"resource/eui_skins/ProgressBarSkin.exml",

@@ -1,129 +1,62 @@
-class LoginView extends eui.UILayer {
-    private _gameidInput: eui.TextInput;
+class Login extends eui.Component implements  eui.UIComponent {
 
-    private _inputBox_W = 400;
-    private _inputBox_H = 40;
-    private _inputBox_Fsize = 24;
-    private _inputBox_Fcolor = 0x000000;
+	private txt_gameID:eui.TextInput;
+	private txt_appKey:eui.TextInput;
+	private txt_secretKey:eui.TextInput;
 
-    public constructor() {
-        super();
-        this.initView();
-    }
-
-    private addBackground(){
-        let image = new eui.Image();
-        image.source = "bg_jpg";
-        image.fillMode = egret.BitmapFillMode.REPEAT;
-        image.width = 1136;
-        image.height = 640;
-        this.addChild(image);
-    }
+	private btn_enter:eui.Button;
+	private rect_clear:eui.Rect;
+	private lab_clear:eui.Label;
 
 
-    private initView(): void {
-        this.addBackground();
-        this.addMsResponseListen();
-        let colorLabel = new eui.Label();
-        colorLabel.textColor = 0xffffff;
-        colorLabel.fontFamily = "Tahoma";  //设置字体
-        colorLabel.text = "MatchVSDemo-Egret";
-        colorLabel.textAlign = "center";//设置水平对齐方式
-        colorLabel.width = 400;
-        colorLabel.size = 35;
-        colorLabel.horizontalCenter = 0;
-        colorLabel.verticalCenter = -250;
-        this.addChild(colorLabel);
+	public constructor() {
+		super();
+		this.addMsResponseListen();
+	}
 
-        var input = new eui.TextInput();
-        input.text = GameData.CHANNEL;
-        input.prompt = input.text;
-        input.horizontalCenter = 0;
-        input.width = this._inputBox_W;
-        input.height = this._inputBox_H;
-        input.verticalCenter = -200;
-        input.textColor = this._inputBox_Fcolor;
-        this.addChild(input);
+	private getMyChilds(partName:string,instance:any){
+		if("txt_gameID" == partName){
+			this.txt_gameID = instance;
+		}else if("txt_appKey" == partName){
+			this.txt_appKey = instance;
+		}else if("txt_secretKey" == partName){
+			this.txt_secretKey = instance;
+		}else if("btn_enter" == partName){
+			this.btn_enter = instance;
+			this.btn_enter.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
+				console.log(" environment=" + GameData.DEFAULT_ENV + " gameid=" + GameData.gameID);
+				let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
+			}, this);
+		}else if("rect_clear" == partName){
+			this.rect_clear = instance;
+			this.rect_clear.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
+            	LocalStore_Clear();
+        	}, this);
+		}else if("lab_clear" == partName){
+			this.lab_clear = instance;
+			this.lab_clear.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
+            	LocalStore_Clear();
+        	}, this);
+		}
+	}
 
-        let gameidInput = new eui.TextInput();
-        gameidInput.prompt = GameData.gameID + "";
-        gameidInput.text = GameData.gameID + "";
-        gameidInput.horizontalCenter = 0;
-        gameidInput.width = this._inputBox_W;
-        gameidInput.height = this._inputBox_H;
-        gameidInput.verticalCenter = -150;
-        gameidInput.textColor = this._inputBox_Fcolor;
-        this._gameidInput = gameidInput;
-        this.addChild(this._gameidInput);
-
-        let appkeyInput = new eui.TextInput();
-        appkeyInput.prompt = GameData.appkey;
-        appkeyInput.width = this._inputBox_W;
-        appkeyInput.height = this._inputBox_H;
-        appkeyInput.textColor = this._inputBox_Fcolor;
-        appkeyInput.horizontalCenter = 0;
-        appkeyInput.verticalCenter = -100
-        this.addChild(appkeyInput);
-
-        let appSecretInput = new eui.TextInput();
-        appSecretInput.prompt = GameData.secretKey;
-        appSecretInput.width = this._inputBox_W;
-        appSecretInput.height = this._inputBox_H;
-        appSecretInput.textColor = this._inputBox_Fcolor;
-        appSecretInput.horizontalCenter = 0;
-        appSecretInput.verticalCenter = -50;
-        this.addChild(appSecretInput);
-
-        let button = new eui.Button();
-        button.label = "确定";
-        button.width = 315;
-        button.height = 70;
-        button.x = 370;
-        button.y = 442;
-        // button.horizontalCenter = 0;
-        // button.verticalCenter = 0 + 50;
-        this.addChild(button);
-        button.addEventListener(egret.TouchEvent.TOUCH_TAP, e => {
-            GameData.configEnvir(input.text, cbx.selected);
-            console.log(" environment=" + GameData.DEFAULT_ENV + " gameid=" + GameData.gameID);
-            let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
-        }, this);
-
-        let clearCachebtn = new eui.Button();
-        clearCachebtn.label = "清除缓存";
-        clearCachebtn.width = 200;
-        clearCachebtn.height = 70;
-        clearCachebtn.x = 710;
-        clearCachebtn.y = 442;
-        this.addChild(clearCachebtn);
-        clearCachebtn.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
-            LocalStore_Clear();
-        }, this);
+	protected partAdded(partName:string,instance:any):void
+	{
+		this.getMyChilds(partName,instance);
+		super.partAdded(partName,instance);
+	}
 
 
-        let btnSetUp = new eui.Button();
-        btnSetUp.label = "设置";
-        btnSetUp.width = 80;
-        btnSetUp.height = 40;
-        btnSetUp.x = 1060;
-        btnSetUp.y = 600;
-        this.addChild(btnSetUp);
-        btnSetUp.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
-            this.release();
-            GameSceneView._gameScene.premiseLogin();
-        }, this);
-
-        var cbx = new eui.CheckBox();
-        cbx.label = "启用调试环境";
-        cbx.horizontalCenter = 0;
-        cbx.verticalCenter = 0;
-        cbx.height = 20;
-        cbx.selected = true;
-        this.addChild(cbx);
-    }
+	protected childrenCreated():void
+	{
+		super.childrenCreated();
+		this.txt_gameID.text = GameData.gameID.toString();
+		this.txt_appKey.text = GameData.appkey;
+		this.txt_secretKey.text = GameData.secretKey;
+	}
 
 
-    private addMsResponseListen(){
+	private addMsResponseListen(){
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_INIT_RSP, this.initResponse,this);
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_REGISTERUSER_RSP, this.registerUserResponse,this);
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
@@ -140,7 +73,7 @@ class LoginView extends eui.UILayer {
         //获取微信信息
         this.getUserFromWeChat((userInfos)=>{
             //绑定 微信 openID 成功 生成一个 专用 userID 登录
-            LoginView.bindOpenIDWithUserID(userInfos);
+            Login.bindOpenIDWithUserID(userInfos);
         },(res)=>{
             //获取微信信息失败，注册游客身份登录
             console.info("获取信息失败：",res);
@@ -267,4 +200,5 @@ class LoginView extends eui.UILayer {
              console.log("bindOpenIDWithUserID get error : " + event);
         },this);
     }
+	
 }

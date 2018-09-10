@@ -467,22 +467,18 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		GameData.syncFrame = false;
 	}
 	private createStar() {
-		
 		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStar, this);
 		let url:string = "resource/assets/Game/star1.png";
-		console.log("创建星星");
 		loader.load(url);
 	}
 	/**
 	 * 第一次生成小足球
 	 */
 	private createStarFirst() {
-		this.deleteStar()
 		let loader:egret.ImageLoader = new egret.ImageLoader();
 		loader.addEventListener(egret.Event.COMPLETE, this.onLoadStarFirst, this);
 		let url:string = "resource/assets/Game/star1.png";
-		console.log("第一次创建星星");
 		loader.load(url);
 	}	
 

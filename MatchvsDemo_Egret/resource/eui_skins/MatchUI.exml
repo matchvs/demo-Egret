@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MatchUISkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="165c2967199" ></w:Config>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat" locked="true"/>
+	<e:Label id="lab_userID1" text="待加入" x="219.32" y="445" size="28" verticalAlign="middle" textAlign="center" anchorOffsetY="0" anchorOffsetX="0" width="200"/>
+	<e:Label id="lab_userID" text="用户ID：235699" x="1028" y="69" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
+	<e:Button id="btn_return" label="" x="71" y="65" anchorOffsetY="0" height="32" width="32">
+		<e:skinName>
+		<e:Skin states="up,down,disabled">
+			<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
+			<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+		</e:Skin>
+		</e:skinName>
+	</e:Button>
+	<e:Label id="lab_lobby" text="等待玩家加入" x="120" y="56" size="36" textAlign="left" height="50" verticalAlign="middle"/>
+	<e:Rect id="rect_player1" width="200" height="200" x="220" y="232" ellipseWidth="200" ellipseHeight="200" fillColor="0x8bd7e0"/>
+	<e:Rect id="rect_player2" width="200" height="200" x="540" y="232" ellipseWidth="200" ellipseHeight="200" fillColor="0x555555"/>
+	<e:Rect id="rect_player3" width="200" height="200" x="860" y="232" ellipseWidth="200" ellipseHeight="200" fillColor="0x555555"/>
+	<e:Label id="lab_matchmode" text="（随机匹配）" x="336" y="69" width="144" height="33" size="24"/>
+	<e:Button id="btn_start" label="开始游戏" x="520" y="570" width="240" height="70" touchEnabled="true" enabled="true"/>
+	<e:Label id="lab_player1" text="0" x="280" y="276" size="80" height="112" verticalAlign="middle" width="80" textAlign="center"/>
+	<e:Label id="lab_player2" text="1" x="600" y="276" size="80" height="112" verticalAlign="middle" width="80" textAlign="center" textColor="0x757575"/>
+	<e:Label id="lab_player3" text="2" x="920" y="276" size="80" height="112" verticalAlign="middle" textAlign="center" width="80" textColor="0x757575"/>
+	<e:Label id="lab_roomID" text="房间号：183829939101299392" x="120" y="125" size="24"/>
+	<e:Label id="lab_userID2" text="待加入" x="541.74" y="445" size="28" textColor="0x999999" verticalAlign="middle" textAlign="center" width="200"/>
+	<e:Label text="提示：需要满3个玩家才能开始游戏" x="484" y="666" size="20" id="lab_userID0" textColor="0x999999"/>
+	<e:Label id="lab_userID3" text="待加入" x="861.01" y="445" size="28" textColor="0x999999" verticalAlign="middle" textAlign="center" width="200"/>
+	<e:Image id="img_owner" width="90" height="32" x="275" y="405" source="owner_png"/>
+	<e:CheckBox id="check_open" label="允许加入" x="586" y="530.77"/>
+</e:Skin>
