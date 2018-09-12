@@ -318,7 +318,7 @@ module mvs {
 				userID:info.userID,
 				cpProto:info.cpProto,
 			};
-			this.dispatchEvent(new egret.Event(MsEvent.EVENT_JOINOPEN_RSP, false, false, data));
+			this.dispatchEvent(new egret.Event(MsEvent.EVENT_JOINOPEN_NTFY, false, false, data));
 		}
 
 		private kickPlayerNotify(knotify:MsKickPlayerNotify){

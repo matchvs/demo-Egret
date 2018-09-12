@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="RoomItemSkin" width="800" height="129" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="165c7bc6f35" ></w:Config>
+	<e:Group x="0" y="14" locked="true">
+		<e:Button id="btn_enter" label="进入房间" x="627" y="0" width="160" height="70" locked="true"/>
+		<e:Label id="lab_roomID" text="房间ID：" x="0" y="0" height="33" size="24" verticalAlign="middle" textAlign="left" locked="true"/>
+		<e:Label id="lab_roomNum" text="房间人数：" x="0" y="45" size="24" height="33" verticalAlign="middle"/>
+		<e:Label id="lab_state" text="房间状态：" x="188" y="45" size="24" height="33" verticalAlign="middle"/>
+		<e:Label id="lab_map" text="地图：" x="405" y="45" size="24" height="33" verticalAlign="middle"/>
+		<e:Rect width="800" height="1" x="0" y="101" fillColor="0x545454"/>
+	</e:Group>
+</e:Skin>

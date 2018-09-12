@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="MatchRoomIDSkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="165cb8672b5" ></w:Config>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
+	<e:Label text="请输入房间号" x="240" y="170" height="33" verticalAlign="middle"/>
+	<e:Group x="71" y="56">
+		<e:Label id="lab_userID" text="用户ID：" x="957" y="9.01" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
+		<e:Button id="btn_return" label="" x="0" y="9" anchorOffsetY="0" height="32" width="32">
+		<e:skinName>
+			<e:Skin states="up,down,disabled">
+			<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
+			<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+			</e:Skin>
+		</e:skinName>
+		</e:Button>
+		<e:Label id="lab_title" text="房间列表" x="49" y="0" size="36" textAlign="left" height="50" verticalAlign="middle"/>
+		<e:Image id="img_header" width="60" height="60" x="896" y="0"/>
+		<e:Rect width="60" height="60" x="896" y="0" fillColor="0x000000" strokeWeight="2" strokeColor="0x00E2ED" fillAlpha="0"/>
+	</e:Group>
+	<e:Button id="btn_start" label="进入房间" x="520" y="570" width="240" height="70"/>
+	<e:Group x="240" y="220">
+		<e:Rect id="rect_roomID" width="800" height="92" x="0" y="0" ellipseWidth="20" ellipseHeight="20" strokeWeight="2" strokeColor="0xffffff" fillColor="0xffffff"/>
+		<e:EditableText id="edt_roomID" width="776" height="61.33" text="" x="11.67" y="15.67" anchorOffsetX="0" anchorOffsetY="0" size="48" textColor="0x000000" verticalAlign="middle"/>
+	</e:Group>
+	<e:Label id="lab_note" text="提示：" x="240" y="334" size="24" textColor="0xff5959"/>
+</e:Skin>

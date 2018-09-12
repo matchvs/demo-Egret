@@ -2,9 +2,9 @@ class GameData {
     public static CHANNEL = "MatchVS";
     public static DEFAULT_ENV = "alpha";
     public static ENVIRONMENT = { "dev": "alpha", "pro": "release" }
-    public static gameID: number = 200757;//200757;
-    public static appkey: string = "6783e7d174ef41b98a91957c561cf305";//6783e7d174ef41b98a91957c561cf305
-    public static secretKey: string = "da47754579fa47e4affab5785451622c";//da47754579fa47e4affab5785451622c
+    public static gameID: number = 201489;//200757;
+    public static appkey: string = "4fb6406305f44f1aad0c40e5946ffe3d";//6783e7d174ef41b98a91957c561cf305
+    public static secretKey: string = "5035d62b75bd4941b182579f2b8fc12c";//da47754579fa47e4affab5785451622c
 
     public static gameUser: GameUser = new GameUser();
     public static playerUserIds: Array<GameUser> = [];

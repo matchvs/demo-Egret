@@ -59,15 +59,8 @@ class GameSceneView extends egret.Sprite
     }
     public match(tags:number, info?:any):void{
         this.removeAll();
-        // if(tags){
-        //     var matchView:MatchView = new MatchView(tags);
-        //     this.thisContainer.addChild(matchView);
-        // }else{
-        //     var matchView:MatchView = new MatchView();
-        //     this.thisContainer.addChild(matchView);
-        // }
         let match:MatchUI = new MatchUI();
-        match.setJoinParame(MatchUI.JOINFLAG.RANDROOM, info);
+        match.setJoinParame(tags, info);
         this.thisContainer.addChild(match);
     }
 
@@ -85,14 +78,14 @@ class GameSceneView extends egret.Sprite
 
     public showRoomList(){
         this.removeAll();
-        let roomlist:RoomListView = new RoomListView(this);
+        let roomlist:RoomListUI = new RoomListUI();
         this.thisContainer.addChild(roomlist);
         
     }
 
     public tagsMatchView(){
         this.removeAll();
-        let tagsmatchvs = new TagsMatchView(this);
+        let tagsmatchvs = new MatchProperty();
         this.thisContainer.addChild(tagsmatchvs);
         
     }
@@ -102,14 +95,15 @@ class GameSceneView extends egret.Sprite
      */
     public createRoom(roomID ? :string, userPropery ?:string){
         this.removeAll();
-        let containt:CreateRoomView = new CreateRoomView(this);
-        if(!roomID){
-            //创建房间
-            containt.doCreateRoom();
-        }else{
-            //加入指定房间
-            containt.doJoinRoomSpecial(roomID,userPropery);
-        }
+        let containt:MatchUI = new MatchUI();
+        // if(!roomID){
+        //     //创建房间
+        //     containt.doCreateRoom();
+        // }else{
+        //     //加入指定房间
+        //     containt.doJoinRoomSpecial(roomID,userPropery);
+        // }
+        containt.setJoinParame(MatchUI.JOINFLAG.CREATEROOM);
         this.thisContainer.addChild(containt);
     }
 
@@ -118,7 +112,7 @@ class GameSceneView extends egret.Sprite
      */
     public joinRoomSpecial(){
         this.removeAll();
-        let joinroom = new JoinRoomSpecialView(this);
+        let joinroom = new MatchRoomID();
         this.thisContainer.addChild(joinroom);
     }
 

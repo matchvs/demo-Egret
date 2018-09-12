@@ -15,6 +15,7 @@ class Lobby extends eui.Component implements  eui.UIComponent {
 
 	public constructor() {
 		super();
+		GameData.syncFrame = false;
 	}
 
 	private moveToChange(item:any){
@@ -115,7 +116,6 @@ class Lobby extends eui.Component implements  eui.UIComponent {
      */
     private onButtonClickJoinWithProperty(e:egret.TouchEvent){
         GameSceneView._gameScene.tagsMatchView();
-        
     }
 
     /**
@@ -139,7 +139,7 @@ class Lobby extends eui.Component implements  eui.UIComponent {
         console.log("onButtonClickFrameSync")
         GameData.matchType = GameData.randomMatch;
         GameData.syncFrame = true;
-        // GameSceneView._gameScene.match();
+        GameSceneView._gameScene.match(MatchUI.JOINFLAG.WITHPROPERTY);
     }
 
     private onButtonClicklogOutGame(e:egret.TouchEvent){

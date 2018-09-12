@@ -611,7 +611,6 @@ class CreateRoomView extends egret.DisplayObjectContainer{
     private notifyGameStart(){
         //设置房主标记，到游戏界面要用到，如果是房主要第一个 创建球的位置
         GameData.isRoomOwner = this._isOwner;
-
         let arrs = [];
         this._playerList.forEach((element)=>{
             arrs.push({id:element.id,name:element.name,avatar:element.avatar});

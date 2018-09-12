@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="RoomListUISkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="165c7fbef78" ></w:Config>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
+	<e:Group x="71" y="56">
+		<e:Label id="lab_userID" text="用户ID：" x="957" y="13" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
+		<e:Button id="btn_return" label="" x="0" y="9" anchorOffsetY="0" height="32" width="32">
+		<e:skinName>
+			<e:Skin states="up,down,disabled">
+			<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
+			<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+			</e:Skin>
+		</e:skinName>
+		</e:Button>
+		<e:Label id="lab_title" text="房间列表" x="49" y="0" size="36" textAlign="left" height="50" verticalAlign="middle"/>
+		<e:Image id="img_header" width="60" height="60" x="896" y="0"/>
+		<e:Rect width="60" height="60" x="896" y="0" fillColor="0x000000" strokeWeight="2" strokeColor="0x00E2ED" fillAlpha="0"/>
+		<e:Label id="lab_getInfo" text="正在获取......" x="226" y="17" size="20"/>
+	</e:Group>
+	<e:Scroller width="800" height="400" x="240" y="188" anchorOffsetX="0" anchorOffsetY="0">
+		<e:DataGroup id="data_roomList" width="800" height="400"/>
+	</e:Scroller>
+</e:Skin>

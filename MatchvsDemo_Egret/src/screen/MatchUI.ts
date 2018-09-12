@@ -25,26 +25,34 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 
 	private lab_roomID:eui.Label;
 
-	private check_open:eui.CheckBox;
 	private img_owner:eui.Image;
 
 
 	private btn_return:eui.Button;
 	private btn_start:eui.Button;
+    private check_closeRoom:eui.CheckBox;
 
 	private joinFlag:number = 1;
 	private joinInfo:any;
 	private _isInRoom:boolean = false;
 	private isOwner:boolean = false;
+    private canStartGame:boolean = false;
 	public  _playerList:Array<GameUser> = [];
 	private _roomID:string = "";
+
+
 	private default_name = "待加入";
 	private default_rect_color = 0x555555;
 	
 	public constructor() {
 		super();
-		this.addMsResponseListen();
+        this.initView();
 	}
+
+    private initView(){
+        this.addMsResponseListen();
+        GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
+    }
 
 	private getChilds(partName:string,instance:any){
 		switch(partName){
@@ -88,9 +96,6 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 			case "rect_player3":
 			this.rect_player3 = instance;
 			break;
-			case "check_open":
-			this.check_open = instance;
-			break;
 			case "img_owner":
 			this.img_owner = instance;
 			this.img_owner.visible = false;
@@ -102,6 +107,12 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 			case "btn_return":
 			this.btn_return = instance;
 			this.btn_return.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
+            case "check_closeRoom":
+			this.check_closeRoom = instance;
+            this.check_closeRoom.addEventListener(egret.Event.CHANGE, ()=>{
+                this.check_closeRoom.label = this.check_closeRoom.selected ? "允许加入":"禁止加入";
+                this.check_closeRoom.selected ? mvs.MsEngine.getInstance.joinOpen("x") : mvs.MsEngine.getInstance.joinOver("x");
+            }, this);
 			break;
 			default:
 				break;
@@ -144,6 +155,9 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         //离开房间
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LEAVEROOM_RSP, this.leaveRoomResponse,this);
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
+
+        //创建房间事件
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_CREATEROOM_RSP,this.createRoomResponse, this);
     }
 
     /**
@@ -178,17 +192,25 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 	public joinRoom(flag:number, info:any){
         this.joinFlag = flag;
         if(flag == 1){
+            this.lab_matchmode.text = "（随机匹配）";
             this.joinRandRoom();
         }else if(flag == 2){
             this.createRoom();
         }else if(flag == 3){
             this.joinWithRoomID(info);
+            this.lab_matchmode.text = "";
         }else if(flag == 4){
+            if(GameData.syncFrame){
+                this.lab_matchmode.text = "（帧同步匹配）";
+                info = {"match":"frameSync"}
+            }else{
+                this.lab_matchmode.text = "（自定义属性匹配）";
+            }
             this.joinRoomWithPro(info);
         }
     }
 
- /**
+    /**
      * 随机加入房间
      */
     private joinRandRoom(){
@@ -279,6 +301,8 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         }else{
 			this.btn_start.visible = false;
 		}
+
+        this.check_closeRoom.enabled = this.isOwner;
 
 		this["lab_player"+tableID].text = tableID.toString();
 		this["lab_player"+tableID].textColor = 0xffffff;
@@ -429,6 +453,30 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 
 
     /**
+     * 创建房间回调
+     */
+    private createRoomResponse(e:egret.Event){
+        let data = e.data;
+        if(data.status == 200){
+            let tableID:number = 1;
+            //房主
+            if(data.owner == GameData.gameUser.id){
+                this.isOwner = true;
+            }else{
+                this.isOwner = false;
+            }
+            //显示我自己的信息
+            this.addPlayerList(GameData.gameUser.id, GameData.gameUser.name, GameData.gameUser.avatar, tableID, this.isOwner);
+            this.lab_roomID.text = "房间号:" + data.roomID;
+            this._roomID = data.roomID;
+            this._isInRoom = true;
+
+        }else{
+            console.info("加入房间失败",data);
+        }
+    }
+
+    /**
      * 加入房间回调
      * @param {egret.Event} event
      */
@@ -437,19 +485,21 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         if(data.status == 200){
 			this.lab_roomID.text = "房间号:" + data.roomInfo.roomID;
 			this._roomID = data.roomInfo.roomID;
+            GameData.roomID = data.roomInfo.roomID;
 			this._isInRoom = true;
-            let tableID:number = this._playerList.length+1;
+            
+            GameData.gameUser.isOwner = false;
             //房主
             if(data.roomInfo.ownerId == GameData.gameUser.id){
                 this.isOwner = true;
             }else{
                 this.isOwner = false;
             }
-			
+
+			let tableID:number =  1;
             //显示我自己的信息
             this.addPlayerList(GameData.gameUser.id, GameData.gameUser.name, GameData.gameUser.avatar, tableID, this.isOwner);
 
-            
             //如果房间有其他人就显示别人信息
             let userList:Array<any> = data.userList;
             for(let i = 0; i < userList.length; i++){
@@ -457,7 +507,6 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
                 this.otherJoinShowInfo(userList[i].userId, tableID, userList[i].userProfile, data.roomInfo.ownerId == userList[i].userId);
             }
             this.checkStart();
-
         }else{
             console.info("加入房间失败",data);
         }
@@ -467,7 +516,17 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         console.info("房间人数："+this._playerList.length);
         if(this._playerList.length == GameData.maxPlayerNum){
             console.info("可以开始游戏");
-            //Laya.timer.loop(1000, this, this.countDown);
+            this.canStartGame = true;
+            if(this.joinFlag == MatchUI.JOINFLAG.CREATEROOM && this.joinFlag == MatchUI.JOINFLAG.WITHROOMID){
+                this.btn_start.visible = true;
+            }else{
+                if(this.isOwner){
+                    mvs.MsEngine.getInstance.joinOver("人满开始游戏");
+                }
+                this.btn_start.visible = false;
+            }
+        }else{
+            this.canStartGame = false;
         }
     }
 
@@ -502,47 +561,16 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         let userID = data.userId;
         let tableID = this._playerList.length + 1;
         this.otherJoinShowInfo(data.userId, tableID, data.userProfile, data.userId == data.owner);
-        //this.checkStart();
+        this.checkStart();
     }
 
-    /**
-     * 关闭房间回调事件
-     */
-    private joinOverResponse(ev:egret.Event) {
-        // let rsp = ev.data;
-        // if (rsp.status === 200) {
-        //     console.log("关闭房间成功");
-        //     if(this._canStartGame){
-        //         //开始游戏
-        //         this.notifyGameStart();
-        //     }
-        // } else {
-        //     console.log("关闭房间失败，回调通知错误码：", rsp.status);
-        // }
-        // Toast.show(" 设置不允许房间加人 " + (rsp.status == 200 ? "success" : "fail"));
-        // this._checkbox.selected = ((rsp.status == 200)?false:this._checkbox.selected);
-    }
-
-    /**
-     * 关闭房间异步回调
-     */
-    private joinOverNotify(ev:egret.Event) {
-        // let notifyInfo = ev.data;
-        // console.log("userID:" + notifyInfo.userID + " 关闭房间：" + notifyInfo.roomID + " cpProto:" + notifyInfo.cpProto);
-        
-        // Toast.show(notifyInfo.userID + " 设置了不允许房间加人");
-        // this._checkbox.selected = false;
-    }
+    
 
     /**
      * 开始游戏
      */
     private notifyGameStart() {
         GameData.isRoomOwner = true;
-        // let event = {
-        //     action: GameData.gameStartEvent,
-        //     userIds: GameData.playerUserIds
-        // };
         let arrs = [];
         this._playerList.forEach((element)=>{
             arrs.push({id:element.id,name:element.name,avatar:element.avatar});
@@ -606,21 +634,53 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
     }
 
     /**
+     * 关闭房间回调事件
+     */
+    private joinOverResponse(ev:egret.Event) {
+        let rsp = ev.data;
+        if (rsp.status === 200) {
+            console.log("关闭房间成功");
+            if(this.canStartGame){
+                //开始游戏
+                this.notifyGameStart();
+                GameData.playerUserIds = this._playerList;
+                return;
+            }
+        } else {
+            console.log("关闭房间失败，回调通知错误码：", rsp.status);
+        }
+        Toast.show(" 设置不允许房间加人 " + (rsp.status == 200 ? "success" : "fail"));
+        this.check_closeRoom.selected = ((rsp.status == 200)?false:this.check_closeRoom.selected);
+    }
+
+    /**
+     * 关闭房间异步回调
+     */
+    private joinOverNotify(ev:egret.Event) {
+        let notifyInfo = ev.data;
+        console.log("userID:" + notifyInfo.userID + " 关闭房间：" + notifyInfo.roomID + " cpProto:" + notifyInfo.cpProto);
+        Toast.show(notifyInfo.userID + " 设置了不允许房间加人");
+        this.check_closeRoom.selected = false;
+        this.check_closeRoom.label = "禁止加入";
+    }
+
+    /**
      * 自己重新打开房间回调
      */
     private joinOpenResponse(ev:egret.Event){
-        // let d = ev.data;
-        // Toast.show(" 设置允许房间加人 " + (d.status == 200 ? "success" : "fail"));
-        // this._checkbox.selected = ((d.status == 200)?true:this._checkbox.selected);
+        let d = ev.data;
+        Toast.show(" 设置允许房间加人 " + (d.status == 200 ? "success" : "fail"));
+        this.check_closeRoom.selected = ((d.status == 200)?true:this.check_closeRoom.selected);
     }
 
     /**
      * 他人重新打开房间异步
      */
     private joinOpenNotify(ev:egret.Event){
-        // let d = ev.data;
-        // Toast.show(d.userID + " 设置了允许房间加人");
-        // this._checkbox.selected = true;
+        let d = ev.data;
+        Toast.show(d.userID + " 设置了允许房间加人");
+        this.check_closeRoom.selected = true;
+        this.check_closeRoom.label = "允许加入";
     }
 	
 }
