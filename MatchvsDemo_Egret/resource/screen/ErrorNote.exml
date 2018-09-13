@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="ErrorNoteSkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="165d1cc6d2c" ></w:Config>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
+	<e:Group x="71" y="56">
+		<e:Label id="lab_userID" text="用户ID：" x="957" y="13" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
+		<e:Button id="btn_return" label="" x="0" y="9" anchorOffsetY="0" height="32" width="32">
+		<e:skinName>
+			<e:Skin states="up,down,disabled">
+			<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
+			<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+			</e:Skin>
+		</e:skinName>
+		</e:Button>
+		<e:Label id="lab_title" text="错误" x="49" y="0" size="36" textAlign="left" height="50" verticalAlign="middle" textColor="0xffffff"/>
+	</e:Group>
+	<e:Group x="370" y="200">
+		<e:Rect width="540" height="320" x="0" y="0" fillColor="0xffffff" ellipseWidth="20" ellipseHeight="20" fillAlpha="1" strokeColor="0x00c1e0" strokeAlpha="1" strokeWeight="2"/>
+		<e:Label id="lab_content" text="error" x="20.84" y="20" size="24" width="500" textColor="0xfc2a00"/>
+	</e:Group>
+	<e:Button id="btn_reconnect" label="重连" x="520" y="585" width="240" height="70"/>
+</e:Skin>

@@ -1,23 +1,38 @@
-class ReconnectView extends egret.DisplayObjectContainer{
-    
-    private _timer:egret.Timer;
-    private _msglabel:eui.Label = new eui.Label();
+class ReconnectUI extends eui.Component implements  eui.UIComponent {
+	
+	private btn_return:eui.Button;
+	private lab_note:eui.Label;
+
+
+	private _timer:egret.Timer;
     private _reconnctTimes:number = 1;
     private _totalTimes:number = 5;
+	
+	public constructor() {
+		super();
+		this.addMsResponseListen();
+	}
 
-    public _parent:egret.DisplayObjectContainer;
-    constructor(par?:egret.DisplayObjectContainer){
-        super();
-        if(par){
-            this._parent = par;
-        }else{
-            par = this;
-        }
-        this.initView();
-    }
+	protected partAdded(partName:string,instance:any):void
+	{
+		super.partAdded(partName,instance);
+		if("btn_return" == partName){
+			this.btn_return = instance;
+			this.btn_return.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
+		}
+	}
 
 
-    /**
+	protected childrenCreated():void
+	{
+		super.childrenCreated();
+        this.lab_note.text = "重连中..."+this._reconnctTimes+"/"+this._totalTimes;
+		this._timer = new egret.Timer(1000, 5);
+        this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
+        this._timer.start();
+	}
+
+	/**
 	 * 注册 matchvs 组件监听事件
 	 */
 	private addMsResponseListen(){
@@ -51,39 +66,16 @@ class ReconnectView extends egret.DisplayObjectContainer{
 		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_RECONNECT_RSP, this.reconnectResponse,this);
     }
 
-    public initView(){
-        this.addMsResponseListen();
-        let spt = new egret.Sprite();
-        spt.graphics.beginFill(0x555555, 0);
-        spt.graphics.drawRect( 0, 0, this._parent.width, this._parent.height );
-        spt.graphics.endFill();
-        this.addChild( spt ); 
 
-        this._msglabel = new eui.Label();
-        this._msglabel.text = "正在重新连接......"+this._reconnctTimes+"/"+this._totalTimes;
-        this._msglabel.x = this._parent.width*0.4;
-        this._msglabel.y = this._parent.height*0.2;
-        this._msglabel.size = 22;
-        spt.addChild(this._msglabel);
 
-        let cancleBtn = new eui.Button();
-        cancleBtn.label = "取消";
-        cancleBtn.x = this._parent.width*0.4;
-        cancleBtn.y = this._parent.height*0.8;
-        cancleBtn.width = this._parent.width*0.2;
-        cancleBtn.height = 40;
-        cancleBtn.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonCancleBtn, this);
-        spt.addChild(cancleBtn);
-
-        this._timer = new egret.Timer(1000, 5);
-        this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
-        this._timer.start();
-
+	private mbuttonExitRoom(event:egret.TouchEvent){
+        GameSceneView._gameScene.login();
     }
 
-    private timerFunc(event: egret.Event){
-        this._msglabel.text = "正在重新连接......"+this._reconnctTimes+"/"+this._totalTimes;
-        console.log(this._msglabel.text)
+
+	private timerFunc(event: egret.Event){
+        this.lab_note.text = "重连中..."+this._reconnctTimes+"/"+this._totalTimes;
+        console.log(this.lab_note.text)
         let res = mvs.MsEngine.getInstance.reconnect();
         this._reconnctTimes++;
         if(this._reconnctTimes > this._totalTimes){
@@ -108,7 +100,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
         this._timer.stop();
         if(!data.status || data.status !== 200){
             console.log("重连失败"+this._reconnctTimes);
-            this._msglabel.text = "重连失败......"+this._reconnctTimes+"/"+this._totalTimes;
+            this.lab_note.text = "重连失败......"+this._reconnctTimes+"/"+this._totalTimes;
             //mvs.MsEngine.getInstance.leaveRoom("");
             this.release();
             GameSceneView._gameScene.lobby();
@@ -165,6 +157,7 @@ class ReconnectView extends egret.DisplayObjectContainer{
     }
 
     private errorResponse(event:egret.Event){
+		this.lab_note.text = "重连失败！";
         this._timer.stop();
     }
 
@@ -179,17 +172,6 @@ class ReconnectView extends egret.DisplayObjectContainer{
         // this.release();
         // GameSceneView._gameScene.lobby();
     }
-    // private getRoomDetailResponse(event:egret.Event){
-    //     let rsp:MsGetRoomDetailRsp = event.data;
-    //     // console.log("status:"+rsp.status+" 还没有开始游戏或者游戏结束, 退出到大厅：state="+rsp.state);
-    //     if(rsp.status === 200 && rsp.state === 2){
-    //         this.sendReadyEvent()
-    //     }else{
-    //         this.release();
-    //         mvs.MsEngine.getInstance.leaveRoom("leaveRoom");
-    //         GameSceneView._gameScene.lobby();
-    //     }
-    // }
 
     private sendReadyEvent(){
         let eventTemp = {
@@ -208,4 +190,5 @@ class ReconnectView extends egret.DisplayObjectContainer{
             GameData.events[result.sequence] = eventTemp;
             console.log('重连发送信息成功');
     }
+	
 }

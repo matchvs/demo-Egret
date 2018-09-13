@@ -70,9 +70,10 @@ class GameSceneView extends egret.Sprite
         this.thisContainer.addChild(gamePlay);
 	}
 
-	public showResult():void{
+	public showResult(users:Array<GameUser>, roomID:string):void{
 		this.removeAll();
-        var resultView:ResultView = new ResultView();
+        let resultView:GameResult = new GameResult();
+        resultView.setResult(users, roomID);
         this.thisContainer.addChild(resultView);
 	}    
 
@@ -118,24 +119,24 @@ class GameSceneView extends egret.Sprite
 
     public reconnectView(){
         this.removeAll();
-        let reconnect = new ReconnectView(this);
+        let reconnect = new ReconnectUI();
         this.thisContainer.addChild(reconnect);
     }
 
     public errorView(pageNo:number,msg:string):void{
         this.removeAll();
-        let errorView = new ErrorView(this);
+        let errorView = new ErrorNote();
         errorView.SetErrorMsg(msg);
-        errorView.showReconnect();
+        // errorView.showReconnect();
         //登录界面
         if(pageNo === 0){
-            errorView.ReturnCallback = ()=>{
-               this.login();
-            };
+            // errorView.ReturnCallback = ()=>{
+            //    this.login();
+            // };
         }else if (pageNo === 2){//登录界面游戏大厅界面
-            errorView.ReturnCallback = ()=>{
-                GameSceneView._gameScene.lobby();
-            };
+            // errorView.ReturnCallback = ()=>{
+            //     GameSceneView._gameScene.lobby();
+            // };
         }
         
         this.thisContainer.addChild(errorView);

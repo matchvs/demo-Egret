@@ -13,8 +13,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	private _receiveMsgCountLabel:eui.Label;
 	private _countDownLabel:eui.Label;
 	private _netWorkNoticeLabel:eui.Label;
-
+	private _roomID:string;
 	private _fontSize = 22;
+	
 	constructor() {
 		super();
 		this.addEventListener(egret.Event.ADDED_TO_STAGE,this.onAddToStage,this);
@@ -87,6 +88,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         roomIdLabel.textColor = 0xffffff;
         roomIdLabel.fontFamily = "Tahoma";  //设置字体
 		roomIdLabel.text = "房间号:" + GameData.roomID;
+		this._roomID = GameData.roomID;
 		roomIdLabel.size = this._fontSize;
         roomIdLabel.x = 20;
         roomIdLabel.y = 60;
@@ -320,7 +322,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			if(this._countDownLabel.text == "0") {
 				this.release();
 				GameData.isGameOver = true;
-				GameSceneView._gameScene.showResult();
+				console.log("1结束房间ID：",  GameData.roomID,GameData.playerUserIds);
+				GameSceneView._gameScene.showResult(GameData.playerUserIds, this._roomID);
 			}
 			if (GameData.isGameOver === true) {
 				clearInterval(idCountDown);
@@ -373,7 +376,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	private leaveRoomNotify(ev:egret.Event) {
 		GameData.isGameOver = true;
 		this.release();
-		GameSceneView._gameScene.showResult();
+		console.log("2结束房间ID：",  GameData.roomID, GameData.playerUserIds);
+		GameSceneView._gameScene.showResult(GameData.playerUserIds,this._roomID);
 	}
 
 	/**

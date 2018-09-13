@@ -8,11 +8,15 @@
 	<e:TextInput id="txt_appKey" width="540" height="70" x="370" y="250"/>
 	<e:TextInput id="txt_secretKey" width="540" height="70" x="370" y="344"/>
 	<e:Label x="249" y="606" size="20" fontFamily="Arial" text="提示：此Demo需要分别在三个不同的浏览器（如Chrome、火狐、360）里打开进行体验" width="782" height="28"/>
-	<e:Label x="308" y="644" size="20" fontFamily="Arial" text="如需在一个浏览器里完成体验，则每次需要先“清楚缓存”" width="500" height="28" textAlign="left"/>
+	<e:Label x="308" y="644" size="20" fontFamily="Arial" text="如需在一个浏览器里完成体验，则每次需要先“清除缓存”" width="500" height="28" textAlign="left"/>
 	<e:Rect id="rect_clear" width="200" height="70" x="710" y="440" strokeAlpha="1" strokeColor="0x00c1e0" strokeWeight="2" fillColor="0x282828" ellipseWidth="15" ellipseHeight="15"/>
 	<e:Label id="lab_clear" text="清除缓存" x="762" y="461" size="24" fontFamily="Arial" textColor="0x00c1e0"/>
 	<e:Label text="gameID" x="242" y="175" size="24"/>
 	<e:Label text="appKey" x="242" y="267" size="24"/>
 	<e:Label text="secretKey" x="242" y="361" size="24"/>
-	<e:Label text="独立部署Demo" x="1108.02" y="675" size="24" textColor="0x00c1e0"/>
+	<e:Label id="lab_premise" text="独立部署Demo" x="1108.02" y="675" size="24" textColor="0x00c1e0"/>
+	<e:Group id="lab_clearNote" x="540" y="536" visible="false">
+		<e:Rect width="200" height="44" x="0" y="0" fillColor="0x606060" ellipseWidth="15" ellipseHeight="15"/>
+		<e:Label text="缓存清除成功" x="40" y="8" size="20" height="28" verticalAlign="middle"/>
+	</e:Group>
 </e:Skin>

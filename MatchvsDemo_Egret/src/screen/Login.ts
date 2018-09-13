@@ -8,6 +8,10 @@ class Login extends eui.Component implements  eui.UIComponent {
 	private rect_clear:eui.Rect;
 	private lab_clear:eui.Label;
 
+    private lab_clearNote:eui.Group;
+
+    private lab_premise:eui.Label;
+
 
 	public constructor() {
 		super();
@@ -29,16 +33,26 @@ class Login extends eui.Component implements  eui.UIComponent {
 			}, this);
 		}else if("rect_clear" == partName){
 			this.rect_clear = instance;
-			this.rect_clear.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
-            	LocalStore_Clear();
-        	}, this);
+			this.rect_clear.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clearTween, this);
 		}else if("lab_clear" == partName){
 			this.lab_clear = instance;
-			this.lab_clear.addEventListener(egret.TouchEvent.TOUCH_TAP, (event: egret.TouchEvent) => {
-            	LocalStore_Clear();
-        	}, this);
-		}
+			this.lab_clear.addEventListener(egret.TouchEvent.TOUCH_TAP, this.clearTween, this);
+		}else if("lab_premise" == partName){
+            this.lab_premise = instance;
+            this.lab_premise.addEventListener(egret.TouchEvent.TOUCH_END, (event: egret.TouchEvent)=>{
+                GameSceneView._gameScene.premiseLogin();
+            }, this);
+        }
 	}
+
+    private clearTween(event: egret.TouchEvent){
+        LocalStore_Clear();
+        egret.Tween.get( this.lab_clearNote ).to({alpha:1},500).call(()=>{
+                    this.lab_clearNote.visible = true;
+                }).wait(500).to({alpha:0},500).call(()=>{
+                    this.lab_clearNote.visible = false;
+                });
+    }
 
 	protected partAdded(partName:string,instance:any):void
 	{
@@ -200,5 +214,4 @@ class Login extends eui.Component implements  eui.UIComponent {
              console.log("bindOpenIDWithUserID get error : " + event);
         },this);
     }
-	
 }

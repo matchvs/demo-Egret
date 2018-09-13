@@ -23,6 +23,12 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 	private rect_player2:eui.Rect;
 	private rect_player3:eui.Rect;
 
+    private group_map:eui.Group;
+    private rad_mapA:eui.RadioButton;
+    private rad_mapB:eui.RadioButton;
+    private btn_kick2:eui.Button;
+    private btn_kick3:eui.Button;
+
 	private lab_roomID:eui.Label;
 
 	private img_owner:eui.Image;
@@ -58,6 +64,10 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 		switch(partName){
 			case "lab_roomID":
 			this.lab_roomID = instance;
+			break;
+            case "group_map":
+			this.group_map = instance;
+            this.group_map.visible = false;
 			break;
 			case "lab_userID":
 			this.lab_userID = instance;
@@ -97,22 +107,44 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 			this.rect_player3 = instance;
 			break;
 			case "img_owner":
-			this.img_owner = instance;
-			this.img_owner.visible = false;
+                this.img_owner = instance;
+                this.img_owner.visible = false;
 			break;
 			case "btn_start":
-			this.btn_start = instance;
-			this.btn_start.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonStartGameBtn, this);
+                this.btn_start = instance;
+                this.btn_start.enabled = false;
+                this.btn_start.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonStartGameBtn, this);
 			break;
 			case "btn_return":
-			this.btn_return = instance;
-			this.btn_return.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
+                this.btn_return = instance;
+                this.btn_return.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonLeaveRoom, this);
+            break;
+            case "rad_mapA":
+                this.rad_mapA = instance;
+                this.rad_mapA.enabled = false;
+                this.rad_mapA.addEventListener(egret.TouchEvent.TOUCH_TAP, this.radioChangeHandler, this);
+            break;
+            case "rad_mapB":
+                this.rad_mapB = instance;
+                this.rad_mapB.enabled = false;
+                this.rad_mapB.addEventListener(egret.TouchEvent.TOUCH_TAP, this.radioChangeHandler, this);
+            break;
+            case "btn_kick2":
+                this.btn_kick2 = instance;
+                this.btn_kick2.visible = false;
+                this.btn_kick2.addEventListener(egret.TouchEvent.TOUCH_TAP, this.btnKickPlayerClick, this);
+            break;
+            case "btn_kick3":
+                this.btn_kick3 = instance;
+                this.btn_kick3.visible = false;
+                this.btn_kick3.addEventListener(egret.TouchEvent.TOUCH_TAP, this.btnKickPlayerClick, this);
+            break;
             case "check_closeRoom":
-			this.check_closeRoom = instance;
-            this.check_closeRoom.addEventListener(egret.Event.CHANGE, ()=>{
-                this.check_closeRoom.label = this.check_closeRoom.selected ? "允许加入":"禁止加入";
-                this.check_closeRoom.selected ? mvs.MsEngine.getInstance.joinOpen("x") : mvs.MsEngine.getInstance.joinOver("x");
-            }, this);
+                this.check_closeRoom = instance;
+                this.check_closeRoom.addEventListener(egret.Event.CHANGE, ()=>{
+                    this.check_closeRoom.label = this.check_closeRoom.selected ? "允许加入":"禁止加入";
+                    this.check_closeRoom.selected ? mvs.MsEngine.getInstance.joinOpen("x") : mvs.MsEngine.getInstance.joinOver("x");
+                }, this);
 			break;
 			default:
 				break;
@@ -158,6 +190,17 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 
         //创建房间事件
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_CREATEROOM_RSP,this.createRoomResponse, this);
+
+        //踢人事件
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_KICKPLAYER_RSP, this.kickPlayerResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_KICKPLAYER_NTFY, this.kickPlayerNotify,this);
+
+        //设置帧同步
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_NETWORKSTATE_NTFY,  this.networkStateNotify,this);
+
+        //设置房间属性
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_RSP, this.setRoomPropertyResponse,this);
+        mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_NTFY, this.setRoomPropertynotify,this);
     }
 
     /**
@@ -179,6 +222,20 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         //离开房间
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LEAVEROOM_RSP, this.leaveRoomResponse,this);
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
+
+        //创建房间事件
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_CREATEROOM_RSP,this.createRoomResponse, this);
+
+        //踢人事件
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_KICKPLAYER_RSP, this.kickPlayerResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_KICKPLAYER_NTFY, this.kickPlayerNotify,this);
+
+        //设置帧同步
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_NETWORKSTATE_NTFY,  this.networkStateNotify,this);
+
+        //设置房间属性
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_RSP, this.setRoomPropertyResponse,this);
+        mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SETROOMPROPERTY_NTFY, this.setRoomPropertynotify,this);
     }
 
 	public setJoinParame(flag:number, info?:any){
@@ -289,19 +346,25 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
      * @param player 
      */
     private showPlayer(player:GameUser){
+        
         let tableID:number = player.tableID;
-        // this.chk_FrameSysc.visible = this.isOwner;
         if(this.joinFlag == MatchUI.JOINFLAG.CREATEROOM || this.joinFlag == MatchUI.JOINFLAG.WITHROOMID){
-            // this.loadMatch.visible = false;
+            this.group_map.visible = true;
+            this.rad_mapA.enabled = this.isOwner;
+            this.rad_mapB.enabled = this.isOwner;
+            console.log("mapValue:",this.rad_mapA.value);
+            console.log("mapValue:",this.rad_mapB.value);
+            this.btn_start.visible = this.isOwner;
             this.img_owner.visible = this.isOwner;
             if(tableID == 2 || tableID == 3){
-				//踢人按钮
-                //this["btn_kick"+tableID].visible = this.isOwner;
+                this["btn_kick"+tableID].visible = this.isOwner;
             }
         }else{
 			this.btn_start.visible = false;
+            this.group_map.visible = false;
 		}
 
+        this.check_closeRoom.visible = !this.canStartGame;
         this.check_closeRoom.enabled = this.isOwner;
 
 		this["lab_player"+tableID].text = tableID.toString();
@@ -345,8 +408,8 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 			this.lab_player3.textColor = 0x757575;
 			
             // this.btn_kick1.visible = false;
-            // this.btn_kick2.visible = false;
-            // this.btn_kick3.visible = false;
+            this.btn_kick2.visible = false;
+            this.btn_kick3.visible = false;
             
         }else if(tableID == 2){
             this.lab_userID2.text = this.default_name;
@@ -358,15 +421,55 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 			this.rect_player3.fillColor = this.default_rect_color;
 			this.lab_player3.text = "3";
 			this.lab_player3.textColor = 0x757575;
+
+            this.btn_kick2.visible = false;
+            this.btn_kick3.visible = false;
         }else if(tableID == 3){
             this.lab_userID3.text = this.default_name ;
 			this.rect_player3.fillColor = this.default_rect_color;
 			this.lab_player3.text = "3";
 			this.lab_player3.textColor = 0x757575;
+
+            this.btn_kick3.visible = false;
         }
         this.img_owner.visible = false;
 		
 		
+    }
+
+    /**
+     * 擦除用户，再次显示用户
+     * @param userID 
+     * @param owner 
+     */
+    private wipePlayerLocation(userID:number, owner:number){
+        this.delPlayerList(userID);
+        for(let i = 0; i < this._playerList.length; i++){
+            if(owner == this._playerList[i].id){
+                this._playerList[i].isOwner = true;
+            }else{
+                this._playerList[i].isOwner = false;
+            }
+            //重置用户位置并重新显示
+            this._playerList[i].tableID = i+1;
+            this.showPlayer(this._playerList[i]);
+        }
+    }
+
+    /**
+     * 地图改变事件
+     */
+    private radioChangeHandler(evt:eui.UIEvent):void {
+        if(evt.target.value == 0){
+            //地图A
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
+            mvs.MsEngine.getInstance.setRoomProperty(this._roomID,GameData.roomPropertyType.mapA);
+        }else {
+            //地图B
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapB;
+            mvs.MsEngine.getInstance.setRoomProperty(this._roomID,GameData.roomPropertyType.mapB);
+        }
+        console.log("日志选择：", GameData.roomPropertyValue);
     }
 
 	/**
@@ -397,19 +500,36 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 
     }
 
+    
+    private btnKickPlayerClick(e:egret.TouchEvent){
+        let tableid = 0;
+        if(e.target.name == "btn_kick2"){
+            tableid = 2;
+        }else if(e.target.name == "btn_kick3"){
+            tableid = 3;
+        }
+        let user:GameUser = this.getUserForTableID(tableid);
+        if(user == null){
+            console.info("用户不存在");
+            return;
+        }
+        mvs.MsEngine.getInstance.kickPlayer(user.id, "我们不能一起好好的玩游戏");
+    }
+
+    private getUserForTableID(tableid:number):GameUser{
+        let user:GameUser = null;
+        this._playerList.forEach((p)=>{
+            if(p.tableID == tableid){
+                user = p;
+            }
+        });
+        return user;
+    }
 
     /**
      * 他人离开房间回调
      */
     private leaveRoomNotify(ev:egret.Event) {
-        // let leaveRoomInfo = ev.data;
-        // if (this._player0.text === leaveRoomInfo.userId.toString()) {
-        //     this._player0.text = '';
-        // } else if (this._player1.text === leaveRoomInfo.userId.toString()) {
-        //     this._player1.text = '';
-        // } else if (this._player2.text === leaveRoomInfo.userId.toString()) {
-        //     this._player2.text = '';
-        // }
 		let data = ev.data;
         console.info("玩家离开",data)
         let userID:number = data.userId;
@@ -425,6 +545,7 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
 
         //删除该用户
         this.delPlayerList(userID);
+        this.canStartGame = false;
         for(let i = 0; i < this._playerList.length; i++){
             if(data.owner == this._playerList[i].id){
                 this._playerList[i].isOwner = true;
@@ -469,8 +590,8 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
             this.addPlayerList(GameData.gameUser.id, GameData.gameUser.name, GameData.gameUser.avatar, tableID, this.isOwner);
             this.lab_roomID.text = "房间号:" + data.roomID;
             this._roomID = data.roomID;
+            GameData.roomID =  data.roomID;
             this._isInRoom = true;
-
         }else{
             console.info("加入房间失败",data);
         }
@@ -496,6 +617,16 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
                 this.isOwner = false;
             }
 
+            //地图
+            if(data.roomInfo.roomProperty === GameData.roomPropertyType.mapB){
+                GameData.roomPropertyValue = GameData.roomPropertyType.mapB
+                this.rad_mapB.selected = true;
+            }else{
+                GameData.roomPropertyValue = GameData.roomPropertyType.mapA
+                this.rad_mapA.selected = true;
+            }
+
+
 			let tableID:number =  1;
             //显示我自己的信息
             this.addPlayerList(GameData.gameUser.id, GameData.gameUser.name, GameData.gameUser.avatar, tableID, this.isOwner);
@@ -517,16 +648,22 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         if(this._playerList.length == GameData.maxPlayerNum){
             console.info("可以开始游戏");
             this.canStartGame = true;
-            if(this.joinFlag == MatchUI.JOINFLAG.CREATEROOM && this.joinFlag == MatchUI.JOINFLAG.WITHROOMID){
-                this.btn_start.visible = true;
+            this.check_closeRoom.visible = false;
+            if(this.joinFlag == MatchUI.JOINFLAG.CREATEROOM || this.joinFlag == MatchUI.JOINFLAG.WITHROOMID){
+                this.btn_start.visible = this.isOwner;
+                this.btn_start.enabled = this.isOwner;
             }else{
                 if(this.isOwner){
                     mvs.MsEngine.getInstance.joinOver("人满开始游戏");
                 }
                 this.btn_start.visible = false;
+                this.btn_start.enabled = false;
+                
             }
         }else{
             this.canStartGame = false;
+            this.btn_start.enabled = false;
+            this.check_closeRoom.visible = true;
         }
     }
 
@@ -614,19 +751,6 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         if (sdnotify
             && sdnotify.cpProto
             && sdnotify.cpProto.indexOf(GameData.gameStartEvent) >= 0) {
-            this._playerList = [];
-            this._playerList .push(GameData.gameUser);
-            // 通过游戏开始的玩家会把userIds传过来，这里找出所有除本玩家之外的用户ID，
-            // 添加到全局变量playerUserIds中
-            JSON.parse(sdnotify.cpProto).userIds.forEach((element)=> {
-                let gUser:GameUser = new GameUser;
-                gUser.avatar = element.avatar;
-                gUser.name = element.name;
-                gUser.id = element.id;
-                if(gUser.id !==GameData.gameUser.id ){
-                    this._playerList.push(gUser);
-                }
-            });
             GameData.playerUserIds = this._playerList;
             this.release();
             GameSceneView._gameScene.play();
@@ -682,5 +806,77 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         this.check_closeRoom.selected = true;
         this.check_closeRoom.label = "允许加入";
     }
-	
+
+
+    private cancelStart(userID:number, roomID:string){
+        this.btn_start.enabled = false ;
+        this.btn_start.visible = this.isOwner ;
+        this.canStartGame = false;
+        this.check_closeRoom.visible = true;
+    }
+
+    /**
+     * 剔除指定房间成功
+     * @param e 
+     */
+    private kickPlayerResponse(ev:egret.Event){
+        let data = ev.data;
+        this.cancelStart(data.userID, this._roomID);
+        this.wipePlayerLocation(data.userID, data.owner);
+    }
+
+    /**
+     * 有玩家被剔除
+     * @param e 
+     */
+    private kickPlayerNotify(e:egret.Event){
+        let data = e.data;
+        console.info("玩家离开",data);
+        if(data.userID == GameData.gameUser.id){
+            this.release();
+            GameSceneView._gameScene.lobby();
+        }else{
+            this.cancelStart(data.userID, this._roomID);
+            this.wipePlayerLocation(data.userID, data.owner);
+        }
+    }
+
+    /**
+     * 有人断开
+     */
+    private networkStateNotify(e:egret.Event){
+        let data = e.data;
+        let userID = data.userID;
+        this.cancelStart(userID, data.roomID);
+        if(data.state = 1){
+            console.info("玩家断开:"+userID);
+            mvs.MsEngine.getInstance.kickPlayer(userID, "玩家断线踢掉");
+        }else if( data.state == 2){
+            console.info("玩家正在从新连接..."+userID);
+        }else{
+            console.info("玩家离开"+userID);
+            this.wipePlayerLocation(data.userID, data.owner);
+        }
+    }
+	/**
+     * 他人设置房间属性回调事件
+     */
+    private setRoomPropertynotify(ev:egret.Event):void{
+        let notify = ev.data;
+        console.log("roomProperty = "+notify.roomProperty);
+        if(notify.roomProperty === GameData.roomPropertyType.mapB){
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapB;
+            this.rad_mapB.selected = true;
+        }else{
+            GameData.roomPropertyValue = GameData.roomPropertyType.mapA;
+            this.rad_mapA.selected = true;
+        }
+    }
+
+    /**
+     * 自己设置房间数据回调事件
+     */
+    private setRoomPropertyResponse(ev:egret.Event):void{
+        console.log("roomProperty = "+ev.data.roomProperty);
+    }
 }

@@ -45,7 +45,7 @@ class RoomListUI extends eui.Component implements  eui.UIComponent {
 		super.childrenCreated();
 		this._roomListSprite = new egret.Sprite();
         this.addChild(this._roomListSprite);
-		
+		this.getRoomListEx();
 		this._timer = new egret.Timer(2000, 0);
         this._timer.addEventListener(egret.TimerEvent.TIMER, this.timerFunc, this);
         //监听获取房间列表事件

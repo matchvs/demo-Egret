@@ -22,7 +22,9 @@
 		"RoomItem": "resource/eui_skins/RoomItem.exml",
 		"RoomListUI": "resource/eui_skins/RoomListUI.exml",
 		"MatchRoomID": "resource/eui_skins/MatchRoomID.exml",
-		"GameResult": "resource/eui_skins/GameResult.exml"
+		"GameResult": "resource/eui_skins/GameResult.exml",
+		"ErrorNote": "resource/screen/ErrorNote.exml",
+		"ReconnectUI": "resource/screen/ReconnectUI.exml"
 	},
 	"autoGenerateExmlsList": true,
 	"exmls": [
@@ -48,6 +50,8 @@
 		"resource/eui_skins/ToggleSwitchSkin.exml",
 		"resource/eui_skins/VScrollBarSkin.exml",
 		"resource/eui_skins/VSliderSkin.exml",
+		"resource/screen/ErrorNote.exml",
+		"resource/screen/ReconnectUI.exml",
 		"resource/screen/StartModel.exml"
 	],
 	"path": "resource/default.thm.json"

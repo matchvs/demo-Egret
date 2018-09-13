@@ -2,16 +2,17 @@
 <e:Skin class="GameResultSkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
 	<w:Config id="165ccbbf705" ></w:Config>
 	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
-	<e:Button label="离开游戏" x="520" y="570" width="240" height="70"/>
+	<e:Button id="btn_leave" label="离开游戏" x="520" y="570" width="240" height="70"/>
 	<e:Label text="游戏结果" x="568" y="56" anchorOffsetX="0" anchorOffsetY="0" size="36"/>
 	<e:Label id="lab_roomID" text="房间号：" x="388.17" y="115" size="24" anchorOffsetX="0" anchorOffsetY="0" width="492.97" height="33" textAlign="center" verticalAlign="middle"/>
 	<e:Rect width="480" height="1" x="400" y="285" fillColor="0x545454"/>
 	<e:Rect width="480" height="1" x="400" y="457" fillColor="0x545454"/>
 	<e:Rect width="480" height="1" x="400" y="371" fillColor="0x545454"/>
-	<e:Label id="lab_userID1" text="userID1" x="400" y="217" size="36" textColor="0x00c1e0"/>
-	<e:Label id="lab_userID2" text="userID2" x="400" y="303" size="36"/>
-	<e:Label id="lab_userID3" text="userID3" x="400" y="389" size="36"/>"36"/>
-	<e:Label id="lab_score1" text="score1" x="670.48" y="217" size="36" textAlign="right" anchorOffsetX="0" width="200" verticalAlign="middle" textColor="0x00c1e0"/>
-	<e:Label id="lab_score2" text="score1" x="670.48" y="303" size="36" textAlign="right" anchorOffsetX="0" width="200"/>
-	<e:Label id="lab_score3" text="score1" x="670.48" y="389" size="36" anchorOffsetX="0" width="200" textAlign="right"/>
+	<e:Label id="lab_userID1" text="userID1" x="400" y="217" size="36" textColor="0x00c1e0" verticalAlign="middle" height="50"/>
+	<e:Label id="lab_userID2" text="userID2" x="400" y="303" size="36" height="50" verticalAlign="middle"/>
+	<e:Label id="lab_userID3" text="userID3" x="400" y="389" size="36" height="50" verticalAlign="middle"/>"36"/>
+	<e:Label id="lab_score1" text="score1" x="670.48" y="217" size="36" textAlign="right" anchorOffsetX="0" width="200" verticalAlign="middle" textColor="0x00c1e0" height="50"/>
+	<e:Label id="lab_score2" text="score1" x="670.48" y="303" size="36" textAlign="right" anchorOffsetX="0" width="200" height="50" verticalAlign="middle"/>
+	<e:Label id="lab_score3" text="score1" x="670.48" y="389" size="36" anchorOffsetX="0" width="200" textAlign="right" height="50" verticalAlign="middle"/>
+	<e:Image width="90" height="32" x="288" y="226.52" anchorOffsetX="0" anchorOffsetY="0" source="owner_png"/>
 </e:Skin>

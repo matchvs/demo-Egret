@@ -3,16 +3,18 @@
 	<w:Config id="165c2967199" ></w:Config>
 	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat" locked="true"/>
 	<e:Label id="lab_userID1" text="待加入" x="219.32" y="445" size="24" verticalAlign="middle" textAlign="center" anchorOffsetY="0" anchorOffsetX="0" width="200"/>
-	<e:Label id="lab_userID" text="用户ID：" x="1028" y="69" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
-	<e:Button id="btn_return" label="" x="71" y="65" anchorOffsetY="0" height="32" width="32">
-		<e:skinName>
-		<e:Skin states="up,down,disabled">
-			<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
-			<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
-		</e:Skin>
-		</e:skinName>
-	</e:Button>
-	<e:Label id="lab_lobby" text="等待玩家加入" x="120" y="56" size="36" textAlign="left" height="50" verticalAlign="middle"/>
+	<e:Group x="71" y="56">
+		<e:Label id="lab_userID" text="用户ID：" x="957" y="13" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
+		<e:Button id="btn_return" label="" x="0" y="9" anchorOffsetY="0" height="32" width="32">
+			<e:skinName>
+			<e:Skin states="up,down,disabled">
+				<e:Image width="100%" height="100%" source="back_png" source.down="back_png" source.disabled="back_png"/>
+				<e:Label id="labelDisplay" horizontalCenter="0" verticalCenter="0"/>
+			</e:Skin>
+			</e:skinName>
+		</e:Button>
+		<e:Label id="lab_lobby" text="等待玩家加入" x="49" y="0" size="36" textAlign="left" height="50" verticalAlign="middle"/>
+	</e:Group>
 	<e:Rect id="rect_player1" width="200" height="200" x="220" y="232" ellipseWidth="200" ellipseHeight="200" fillColor="0x555555"/>
 	<e:Rect id="rect_player2" width="200" height="200" x="540" y="232" ellipseWidth="200" ellipseHeight="200" fillColor="0x555555"/>
 	<e:Rect id="rect_player3" width="200" height="200" x="860" y="232" ellipseWidth="200" ellipseHeight="200" fillColor="0x555555"/>
@@ -34,5 +36,5 @@
 		<e:RadioButton id="rad_mapB" label="灰图" x="543.32" y="12" value="1"/>
 	</e:Group>
 	<e:Button id="btn_kick2" label="踢掉" x="595" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32"/>
-	<e:Button id="btn_kidk3" label="踢掉" x="915" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32"/>
+	<e:Button id="btn_kick3" label="踢掉" x="915" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32"/>
 </e:Skin>
