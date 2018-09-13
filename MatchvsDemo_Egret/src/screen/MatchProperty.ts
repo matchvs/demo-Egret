@@ -6,10 +6,15 @@ class MatchProperty extends eui.Component implements  eui.UIComponent {
 	private btn_start:eui.Button;
 	private btn_return:eui.Button;
 	private lab_userID:eui.Label;
+	private lab_A:eui.Label;
+	private lab_B:eui.Label;
 
 	private img_header:eui.Image;
 
 	private _tagsType:any={"match":"tagsA"};
+
+	private rect_proA:eui.Rect;
+	private rect_proB:eui.Rect;
 
 	public constructor() {
 		super();
@@ -18,10 +23,10 @@ class MatchProperty extends eui.Component implements  eui.UIComponent {
 	private getChild(partName:string,instance:any){
 		if("rad_A" == partName){
 			this.rad_A = instance;
-			this.rad_A.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
+			this.rad_A.addEventListener(egret.Event.CHANGE, this.radioChangeHandler, this);
 		}else if("rad_B" == partName){
 			this.rad_B = instance;
-			this.rad_B.addEventListener(eui.UIEvent.CHANGE, this.radioChangeHandler, this);
+			this.rad_B.addEventListener(egret.Event.CHANGE, this.radioChangeHandler, this);
 		}else if("btn_start" == partName){
 			this.btn_start = instance;
 			this.btn_start.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mButtonMatchTouch, this);
@@ -34,6 +39,12 @@ class MatchProperty extends eui.Component implements  eui.UIComponent {
 		}else if("btn_return" == partName){
 			this.btn_return = instance;
 			this.btn_return.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonExitRoom, this);
+		}else if("rect_proA" == partName){
+			this.rect_proA = instance;
+			this.rect_proA.addEventListener(egret.TouchEvent.TOUCH_TAP, (e)=>{	this.rad_A.selected = true; this.changeInfo(0);	}, this);
+		}else if("rect_proB" == partName){
+			this.rect_proB = instance;
+			this.rect_proB.addEventListener(egret.TouchEvent.TOUCH_TAP, (e)=>{	this.rad_B.selected = true;	this.changeInfo(1);}, this);
 		}
 	}
 
@@ -54,15 +65,32 @@ class MatchProperty extends eui.Component implements  eui.UIComponent {
         GameSceneView._gameScene.lobby();
     }
 
-	private radioChangeHandler(evt:eui.UIEvent):void {
-        if(evt.target.value === 0){
+	private changeInfo(value){
+		if(value == 0){
+			this.rect_proA.fillColor = 0x354244;
+			this.rect_proA.strokeWeight = 2;
+			this.rect_proB.fillColor = 0x555555;
+			this.rect_proB.strokeWeight = 0;
+			this.lab_A.textColor = 0x00C1E0;
+			this.lab_B.textColor = 0xCFCFCF;
             //属性A
             this._tagsType = {"match":"tagsA"};
         }else {
+			this.rect_proB.fillColor = 0x354244;
+			this.rect_proB.strokeWeight = 2;
+			this.rect_proA.fillColor = 0x555555;
+			this.rect_proA.strokeWeight = 0;
+			this.lab_B.textColor = 0x00C1E0;
+			this.lab_A.textColor = 0xCFCFCF;
             //属性B
             this._tagsType = {"match":"tagsB"};
         }
         console.log("tags ="+this._tagsType["match"]);
+	}
+
+	private radioChangeHandler(evt:eui.UIEvent):void {
+        this.changeInfo(evt.target.value);
+        
     }
 
 	private mButtonMatchTouch(evt:egret.TouchEvent){

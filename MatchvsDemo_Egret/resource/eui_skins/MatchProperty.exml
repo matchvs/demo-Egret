@@ -18,10 +18,10 @@
 	</e:Group>
 	<e:Button id="btn_start" label="开始匹配" x="520" y="563.92" width="240" height="70" locked="true"/>
 	<e:Group x="320" y="233">
-		<e:Rect width="640" height="92" x="0" y="0" ellipseWidth="20" ellipseHeight="20" strokeWeight="2" strokeColor="0x00c1e0" fillColor="0x354244"/>
-		<e:Rect width="640" height="92" x="0" y="123" ellipseWidth="20" ellipseHeight="20" fillColor="0x555555"/>
-		<e:Label text="属性A" x="283" y="26" size="28" textColor="0x00c1e0"/>
-		<e:Label text="属性B" x="283" y="149" size="28" textColor="0xcfcfcf"/>
+		<e:Rect id="rect_proA" width="640" height="92" x="0" y="0" ellipseWidth="20" ellipseHeight="20" strokeWeight="2" fillColor="0x354244" strokeColor="0x00c1e0"/>
+		<e:Rect id="rect_proB" width="640" height="92" x="0" y="123" ellipseWidth="20" ellipseHeight="20" fillColor="0x555555" strokeColor="0x00c1e0"/>
+		<e:Label id="lab_A" text="属性A" x="283" y="26" size="28" textColor="0x00c1e0"/>
+		<e:Label id="lab_B" text="属性B" x="283" y="149" size="28" textColor="0xcfcfcf"/>
 		<e:RadioButton id="rad_B" label="" x="32" y="156" value="1"/>
 		<e:RadioButton id="rad_A" label="" x="32" y="33" selected="true" value="0"/>
 	</e:Group>
