@@ -1,5 +1,5 @@
 ﻿var wxShareConf = {
-    getOpenIDAddr:"https://test79open.matchvs.com/getOpenID?" //传入code获取微信openID的服务端地址
+    getOpenIDAddr:"http://test79open.matchvs.com/getOpenID?" //传入code获取微信openID的服务端地址
 }
 
 /**

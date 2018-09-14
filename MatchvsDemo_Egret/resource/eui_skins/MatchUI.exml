@@ -35,6 +35,6 @@
 		<e:RadioButton id="rad_mapA" label="彩图" x="203.97" y="12" value="0" selected="true"/>
 		<e:RadioButton id="rad_mapB" label="灰图" x="543.32" y="12" value="1"/>
 	</e:Group>
-	<e:Button id="btn_kick2" label="踢掉" x="595" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32"/>
-	<e:Button id="btn_kick3" label="踢掉" x="915" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32"/>
+	<e:Button id="btn_kick2" label="踢掉" x="595" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32" name="btn_kick2"/>
+	<e:Button id="btn_kick3" label="踢掉" x="915" y="405" anchorOffsetX="0" width="90" anchorOffsetY="0" height="32" name="btn_kick3"/>
 </e:Skin>

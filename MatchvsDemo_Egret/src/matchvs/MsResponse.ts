@@ -327,7 +327,7 @@ module mvs {
 				cpProto:knotify.cpProto,
 				owner:knotify.owner,
 				srcUserId:knotify.srcUserId,
-				userId:knotify.userId
+				userID:knotify.userID
 			};
 			this.dispatchEvent(new egret.Event(MsEvent.EVENT_KICKPLAYER_NTFY, false, false, data));
 		}
