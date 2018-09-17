@@ -447,6 +447,7 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
         for(let i = 0; i < this._playerList.length; i++){
             if(owner == this._playerList[i].id){
                 this._playerList[i].isOwner = true;
+                this.isOwner = true;
             }else{
                 this._playerList[i].isOwner = false;
             }

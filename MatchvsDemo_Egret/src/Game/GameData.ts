@@ -38,10 +38,23 @@ class GameData {
     public static number3: string = "";
     public static width: number;
     public static height: number;
-    public static playerTime: number = 180;
+    public static playerTime: number = 60;
     public static roomPropertyType = { "mapA": "mapA", "mapB": "mapB" };
     public static roomPropertyValue = "mapA";
     public static createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret", 3, 0, 0, 1, "mapA");
+
+    public static init(){
+        this.isGameOver = false;
+        this.isRoomOwner = false;
+        this.syncFrame = false;
+        this.number1 = "";
+        this.number2 = "";
+        this.number3 = "";
+        this.roomID = "";
+        this.intervalList = [];
+        this.playerUserIds = [];
+        this.roomPropertyValue = this.roomPropertyType.mapA;
+    }
 
     public static configEnvir(channel, isdebug) {
         GameData.CHANNEL = channel;

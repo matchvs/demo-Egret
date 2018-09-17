@@ -125,6 +125,7 @@ class GameSceneView extends egret.Sprite
 
     public errorView(pageNo:number,msg:string):void{
         this.removeAll();
+        GameData.init();
         let errorView = new ErrorNote();
         errorView.SetErrorMsg(msg);
         // errorView.showReconnect();

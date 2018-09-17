@@ -13,7 +13,7 @@
 	],
 	"game": [
 		"bin-debug/Game/GameUser.js",
-		"bin-debug/GamePlayView.js",
+		"bin-debug/screen/GameResult.js",
 		"bin-debug/GameSceneView.js",
 		"bin-debug/LoadingUI.js",
 		"bin-debug/Main.js",
@@ -25,7 +25,7 @@
 		"bin-debug/matchvs/MsEvent.js",
 		"bin-debug/matchvs/MsResponse.js",
 		"bin-debug/screen/ErrorNote.js",
-		"bin-debug/util/Toast.js",
+		"bin-debug/GamePlayView.js",
 		"bin-debug/screen/Lobby.js",
 		"bin-debug/screen/Login.js",
 		"bin-debug/screen/MatchProperty.js",
@@ -37,6 +37,6 @@
 		"bin-debug/screen/RoomListUI.js",
 		"bin-debug/screen/StartModelUI.js",
 		"bin-debug/util/MD5.js",
-		"bin-debug/screen/GameResult.js"
+		"bin-debug/util/Toast.js"
 	]
 }
