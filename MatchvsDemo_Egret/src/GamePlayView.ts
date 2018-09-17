@@ -15,6 +15,11 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	private _netWorkNoticeLabel:eui.Label;
 	private _roomID:string;
 	private _fontSize = 22;
+
+	private _gameTime:number;
+
+	private moveTimeer:egret.Timer = new egret.Timer(100, 0);
+	private moveDire:number = 0; // 0-left  1-rgith
 	
 	constructor() {
 		super();
@@ -42,6 +47,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		 * 游戏结束标记置空
 		 */
 		GameData.isGameOver = false;
+		this._gameTime = GameData.playerTime;
 		this._score = 0;
 		this._receiveCountValue = 0;
 
@@ -139,7 +145,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		countDownLabel.size = this._fontSize;
         countDownLabel.x = GameData.width/2;
         countDownLabel.y = 20;
-		countDownLabel.text = GameData.playerTime.toString();
+		countDownLabel.text = this._gameTime.toString();
 		this._countDownLabel = countDownLabel;
         this.addChild(this._countDownLabel);
 
@@ -200,6 +206,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	 * 注册 matchvs 组件监听事件
 	 */
 	private addMsResponseListen(){
+		this.moveTimeer.addEventListener(egret.TimerEvent.TIMER,this.RoleMoveFun,this);
         //发送消息
         mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SENDEVENT_NTFY, this.sendEventNotify,this);
         //离开房间
@@ -212,7 +219,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
     }
 
     public release(){
-
+		this.moveTimeer.removeEventListener(egret.TimerEvent.TIMER,this.RoleMoveFun,this);
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SENDEVENT_NTFY, this.sendEventNotify,this);
 
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LEAVEROOM_NTFY, this.leaveRoomNotify,this);
@@ -265,6 +272,36 @@ class GamePlayView extends egret.DisplayObjectContainer{
         }
     }
 
+	// 左边移动
+	private moveLeft(){
+		if(this._egretBird0.x <= 0){
+			this._egretBird0.x = 0;
+		}else{
+			this._egretBird0.x -= 20;
+		}
+		
+		this.processStar();
+	}
+
+	// 右边移动
+	private moveRight(){
+		if(this._egretBird0.x >= GameData.width){
+			this._egretBird0.x = GameData.width;
+		}else{
+			this._egretBird0.x += 20;
+		}
+		
+		this.processStar();
+	}
+
+	private RoleMoveFun(){
+		if(this.moveDire == 0){
+			this.moveLeft();
+		}else if(this.moveDire == 1){
+			this.moveRight();
+		}
+	}
+
 	/**
 	 * 设置帧同步
 	 */
@@ -294,20 +331,26 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this.addChild(this._egretBird0);		
 
         let buttonLeft = new eui.Button();
-        buttonLeft.label = "按住滑动往左跑";
+        buttonLeft.label = "按住向左";
         buttonLeft.x = 300;
         buttonLeft.y = this.stage.stageHeight - 100;
 		buttonLeft.width = 350;
         this.addChild(buttonLeft);
-		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickLeft, this);	
+		//buttonLeft.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickLeft, this);
+		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onButtonClickLeftBegin, this);
+		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_END, this.onButtonClickLeftEnd, this);
+		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, this.onButtonClickLeftEnd, this);
 
         let buttonRight = new eui.Button();
-        buttonRight.label = "按住滑动往右跑";
+        buttonRight.label = "按住向右";
         buttonRight.x = this.stage.stageWidth- 450;
         buttonRight.y = this.stage.stageHeight - 100;
 		buttonRight.width = 350;
         this.addChild(buttonRight);
-		buttonRight.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickRight, this);
+		// buttonRight.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickRight, this);
+		buttonRight.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onButtonClickRightBegin, this);
+		buttonRight.addEventListener(egret.TouchEvent.TOUCH_END, this.onButtonClickRightEnd, this);
+		buttonRight.addEventListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, this.onButtonClickRightEnd, this);
 
         let buttonLeave = new eui.Button();
         buttonLeave.label = "离开游戏";
@@ -318,8 +361,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 
 		//计时
 		let idCountDown = setInterval(() => {
-			this._countDownLabel.text = (Number(this._countDownLabel.text) - 1).toString();
-			if(this._countDownLabel.text == "0") {
+			this._countDownLabel.text = (this._gameTime--).toString();
+			if(this._gameTime == 0) {
 				this.release();
 				GameData.isGameOver = true;
 				console.log("1结束房间ID：",  GameData.roomID,GameData.playerUserIds);
@@ -439,29 +482,62 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	/**
 	 * 左边移动
 	 */
-    private onButtonClickLeft(e: egret.TouchEvent) {
-		//console.log("onButtonClickLeft");
-		if(this._egretBird0.x <= 0){
-			this._egretBird0.x = 0;
+    private onButtonClickLeftBegin(e: egret.TouchEvent) {
+		// //console.log("onButtonClickLeft");
+		// if(this._egretBird0.x <= 0){
+		// 	this._egretBird0.x = 0;
+		// }else{
+		// 	this._egretBird0.x -= 20;
+		// }
+		
+		// this.processStar();
+		console.log("按钮事件：",e.target.currentState);
+		if(e.target.currentState == "down"){
+			this.moveDire = 0;
+			console.log("开始移动");
+			this.moveTimeer.start();
 		}else{
-			this._egretBird0.x -= 20;
+			console.log("结束移动");
+			this.moveDire = 3;
+			this.moveTimeer.stop();
 		}
 		
-		this.processStar();
 	}
+	/**
+	 * 左边移动
+	 */
+    private onButtonClickLeftEnd(e: egret.TouchEvent) {
+		console.log("按钮事件：",e.target.currentState);
+		console.log("结束移动");
+		this.moveDire = 3;
+		this.moveTimeer.stop();
+	}
+
+
 	/**
 	 * 右边移动
 	 */
-    private onButtonClickRight(e: egret.TouchEvent) {
-		//console.log("onButtonClickRight");
-		if(this._egretBird0.x >= GameData.width){
-			this._egretBird0.x = GameData.width;
+    private onButtonClickRightBegin(e: egret.TouchEvent) {
+		if(e.target.currentState == "down"){
+			console.log("开始移动");
+			this.moveDire = 1;
+			this.moveTimeer.start();
 		}else{
-			this._egretBird0.x += 20;
+			console.log("结束移动");
+			this.moveDire = 3;
+			this.moveTimeer.stop();
 		}
-		
-		this.processStar();
 	}
+
+	/**
+	 * 右边移动
+	 */
+    private onButtonClickRightEnd(e: egret.TouchEvent) {
+		console.log("结束移动");
+		this.moveDire = 3;
+		this.moveTimeer.stop();
+	}
+
 	private onButtonLeaveRoom(e: egret.TouchEvent) {
 		this.release();
 		mvs.MsEngine.getInstance.leaveRoom("踢球好累");
@@ -591,7 +667,9 @@ class GamePlayView extends egret.DisplayObjectContainer{
 							this._score = value.pValue;
 						}
 					});
-					this._countDownLabel.text = info.timeCount;
+
+					this._gameTime = info.timeCount;
+					console.log("重连倒计时时间：", info.timeCount);
 					this.deleteStar();
 					this.createStar();
 					this.setScoreLabel();
@@ -603,12 +681,12 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					this.setUserScore(sdnotify.srcUserId, info.score);
 				}
 			}else if(sdnotify.cpProto.indexOf(GameData.reconnectReadyEvent) >= 0){
-				console.log("重新连接收到消息");
+				console.log("重新连接收到消息 this._countDownLabel.text",this._gameTime);
 				let eventTemp = {
 					action: GameData.reconnectStartEvent,
 					userID: sdnotify.srcUserId,
 					PlayerScoreInfos:GameData.playerUserIds,
-					timeCount:Number(this._countDownLabel.text),
+					timeCount:Number(this._gameTime),
 					x: this._star.x,
 					y: GameData.defaultHeight
 				}
