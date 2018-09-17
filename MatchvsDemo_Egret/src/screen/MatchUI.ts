@@ -443,14 +443,12 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
      * @param owner 
      */
     private wipePlayerLocation(userID:number, owner:number){
+
+        this.isOwner = owner == GameData.gameUser.id;
         this.delPlayerList(userID);
         for(let i = 0; i < this._playerList.length; i++){
-            if(owner == this._playerList[i].id){
-                this._playerList[i].isOwner = true;
-                this.isOwner = true;
-            }else{
-                this._playerList[i].isOwner = false;
-            }
+            
+            this._playerList[i].isOwner = owner == this._playerList[i].id
             //重置用户位置并重新显示
             this._playerList[i].tableID = i+1;
             this.showPlayer(this._playerList[i]);

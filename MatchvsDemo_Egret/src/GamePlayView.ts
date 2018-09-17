@@ -334,7 +334,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         buttonLeft.label = "按住向左";
         buttonLeft.x = 300;
         buttonLeft.y = this.stage.stageHeight - 100;
-		buttonLeft.width = 350;
+		buttonLeft.width = 200;
         this.addChild(buttonLeft);
 		//buttonLeft.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickLeft, this);
 		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onButtonClickLeftBegin, this);
@@ -345,7 +345,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         buttonRight.label = "按住向右";
         buttonRight.x = this.stage.stageWidth- 450;
         buttonRight.y = this.stage.stageHeight - 100;
-		buttonRight.width = 350;
+		buttonRight.width = 200;
         this.addChild(buttonRight);
 		// buttonRight.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickRight, this);
 		buttonRight.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onButtonClickRightBegin, this);
@@ -483,14 +483,6 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	 * 左边移动
 	 */
     private onButtonClickLeftBegin(e: egret.TouchEvent) {
-		// //console.log("onButtonClickLeft");
-		// if(this._egretBird0.x <= 0){
-		// 	this._egretBird0.x = 0;
-		// }else{
-		// 	this._egretBird0.x -= 20;
-		// }
-		
-		// this.processStar();
 		console.log("按钮事件：",e.target.currentState);
 		if(e.target.currentState == "down"){
 			this.moveDire = 0;
