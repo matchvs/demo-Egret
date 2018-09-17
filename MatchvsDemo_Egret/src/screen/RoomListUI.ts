@@ -7,6 +7,8 @@ class RoomListUI extends eui.Component implements  eui.UIComponent {
 	
 	private lab_getInfo:eui.Label;
 
+	private roomItemA:eui.ArrayCollection = new eui.ArrayCollection([]);
+
 	// private _roomList = new Array<RoomItem>();
 	private _getRoomListFlter:MsRoomFilter;
 	private _roomListSprite:egret.Sprite = null;
@@ -90,18 +92,8 @@ class RoomListUI extends eui.Component implements  eui.UIComponent {
             return;
         }
 		this.lab_getInfo.text = "";
-        // this._roomListSprite.removeChildren();
-        // for(let j = 0; j < this._roomList.length; j++){
-        //     if(this._roomListSprite.contains(this._roomList[j])){
-        //         //这里一定要移除监听
-        //         this._roomList[j].removeEventListe();
-        //         this._roomListSprite.removeChild(this._roomList[j]);
-        //     }
-        // }
-        // this._roomList = [];
 
-		let list:Array<Object> = [];
-
+		this.roomItemA.removeAll();
         for(let i = 0; i < rsp.roomAttrs.length ; i++){
 			console.log("房间数据量：",rsp.roomAttrs.length);
 			let it = {
@@ -112,12 +104,10 @@ class RoomListUI extends eui.Component implements  eui.UIComponent {
 				_map:rsp.roomAttrs[i].roomProperty,
 				_max:rsp.roomAttrs[i].maxPlayer,
 			}
-			list.push(it);
+			this.roomItemA.addItem(it);
         }
-
-		this.data_roomList.dataProvider = new eui.ArrayCollection(list);
+		this.data_roomList.dataProvider = this.roomItemA;
 		this.data_roomList.itemRenderer = RoomItem;
-
     }
     public Release(){
         this._timer.stop();

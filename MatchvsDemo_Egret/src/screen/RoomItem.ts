@@ -1,4 +1,4 @@
-class RoomItem extends eui.ItemRenderer implements  eui.UIComponent {
+class RoomItem extends eui.ItemRenderer {
 
 	private _roomID:string;
 	private _state:number;
@@ -8,52 +8,44 @@ class RoomItem extends eui.ItemRenderer implements  eui.UIComponent {
 
 	private _parent:RoomListUI = null;
 
-	private _btn_enter:eui.Button;
-	private _lab_roomID:eui.Label;
-	private _lab_roomNum:eui.Label;
-	private _lab_state:eui.Label;
-	private _lab_map:eui.Label;
+	private btn_enter:eui.Button;
+	private lab_roomID:eui.Label;
+	private lab_roomNum:eui.Label;
+	private lab_state:eui.Label;
+	private lab_map:eui.Label;
+
+	private isme:boolean = false;
 
 	public constructor(pt ?:RoomListUI){
         super();
         this._parent = pt;
+		this.skinName = "RoomItemSkin";
     }
 
 	protected partAdded(partName:string,instance:any):void
 	{
 		super.partAdded(partName,instance);
-		if("btn_enter" == partName){
-			this._btn_enter = instance;
-			this._btn_enter.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);
-		}else if( "lab_roomID" == partName){
-			this._lab_roomID = instance;
-		}else if( "lab_roomNum" == partName){
-			this._lab_roomNum = instance;
-		}else if( "lab_state" == partName){
-			this._lab_state = instance;
-		}else if( "lab_map" == partName){
-			this._lab_map = instance;
-		}
 	}
 
 	private showInfo(roomID:string, state:number, num:number, maxNum:number, map:string){
 		
-		this._lab_roomID.text = "房间号：" + roomID;
+		this.lab_roomID.text = "房间号：" + roomID;
 
 		let stateStr:string = state == 1 ? "待加入":"已关闭";
-		this._lab_state.text = "房间状态：" + stateStr;
+		this.lab_state.text = "房间状态：" + stateStr;
 
 		let mapValue:string = map === GameData.roomPropertyType.mapA ? "彩图":"灰图";
-		this._lab_map.text = "地图：" + mapValue;
+		this.lab_map.text = "地图：" + mapValue;
 
-		this._lab_roomNum.text = "房间人数：" + num + "/"+ maxNum;
-
-		 mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
+		this.lab_roomNum.text = "房间人数：" + num + "/"+ maxNum;
+		 mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
+		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
 	}
 
 	protected childrenCreated():void
 	{
 		super.childrenCreated();
+		this.btn_enter.addEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);
 	}
 
 	protected dataChanged():void {
@@ -87,26 +79,28 @@ class RoomItem extends eui.ItemRenderer implements  eui.UIComponent {
         
         if(rsp.state === 1){
             console.log("检查房间状态为：开放状态可以进入");
-            this.Release();
-            
-			GameSceneView._gameScene.match(MatchUI.JOINFLAG.WITHROOMID,this._roomID);
+			this.Release();
+			if(this.isme){
+				GameSceneView._gameScene.match(MatchUI.JOINFLAG.WITHROOMID,this._roomID);
+			}
         }else{
             console.log("检查房间状态为：关闭状态不可以进入，请刷新房间列表");
         }
     }
 
     private mbuttonEnterRoom(event:egret.TouchEvent){
+		console.log("点击按钮加入房间号：",this._roomID);
+		this.isme = true;
         this.getRoomDetail(this._roomID);
     }
 
     public removeEventListe(){
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
-        this._btn_enter.removeEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);
+        this.btn_enter.removeEventListener(egret.TouchEvent.TOUCH_TAP, this.mbuttonEnterRoom, this);
     }
 
     public Release(){
         this._parent.Release();
-        //mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_GETROOMDETAIL_RSP, this.getRoomDetailResponse, this);
         this.removeEventListe()
     }
 	
