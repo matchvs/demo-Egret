@@ -2,6 +2,7 @@ class GameSceneView extends egret.Sprite
 {
     public static _gameScene:GameSceneView;
     private thisContainer:egret.Sprite;
+    private cuntPage:any;
     constructor()
     {
         super();
@@ -66,7 +67,8 @@ class GameSceneView extends egret.Sprite
 
 	public play():void{
 		this.removeAll();
-        var gamePlay:GamePlayView = new GamePlayView();
+        let gamePlay:GamePlayView = new GamePlayView();
+        this.cuntPage = gamePlay;
         this.thisContainer.addChild(gamePlay);
 	}
 
@@ -145,6 +147,11 @@ class GameSceneView extends egret.Sprite
 
     private removeAll():void
     {
+        if(this.cuntPage && this.cuntPage.release){
+            console.log("释放");
+            this.cuntPage.release();
+            this.cuntPage = null;
+        }
         this.thisContainer.removeChildren();
     }
 

@@ -44,7 +44,7 @@ class GameData {
     public static createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret", 3, 0, 0, 1, "mapA");
 
     public static init(){
-        this.isGameOver = false;
+        this.isGameOver = true;
         this.isRoomOwner = false;
         this.syncFrame = false;
         this.number1 = "";

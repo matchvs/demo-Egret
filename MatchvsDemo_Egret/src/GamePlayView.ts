@@ -336,7 +336,6 @@ class GamePlayView extends egret.DisplayObjectContainer{
         buttonLeft.y = this.stage.stageHeight - 100;
 		buttonLeft.width = 200;
         this.addChild(buttonLeft);
-		//buttonLeft.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickLeft, this);
 		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onButtonClickLeftBegin, this);
 		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_END, this.onButtonClickLeftEnd, this);
 		buttonLeft.addEventListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, this.onButtonClickLeftEnd, this);
@@ -347,7 +346,6 @@ class GamePlayView extends egret.DisplayObjectContainer{
         buttonRight.y = this.stage.stageHeight - 100;
 		buttonRight.width = 200;
         this.addChild(buttonRight);
-		// buttonRight.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onButtonClickRight, this);
 		buttonRight.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onButtonClickRightBegin, this);
 		buttonRight.addEventListener(egret.TouchEvent.TOUCH_END, this.onButtonClickRightEnd, this);
 		buttonRight.addEventListener(egret.TouchEvent.TOUCH_RELEASE_OUTSIDE, this.onButtonClickRightEnd, this);
@@ -383,7 +381,11 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			 GameData.playerUserIds.forEach((user)=>{
 				 userids.push(user.id);
 			 });
+
+			
+
             let id = setInterval(() => {
+				console.log("当前位置：", this._egretBird0.x);
 				mvs.MsEngine.getInstance.sendEventEx(0, JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,
@@ -570,6 +572,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this._star.anchorOffsetY = this._star.height/2;
 		this._star.x = GameData.starPositionX;
         this._star.y = GameData.starPositionY;
+		console.log("球创建的位置：", GameData.starPositionX, GameData.starPositionY);
         this._starObject = this.addChild(this._star);
 		if (GameData.isRoomOwner === true) {
 			let eventTemp = {
@@ -600,6 +603,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 	}
 	private deleteStar() {
 		if(this.contains(this._star)){
+			console.log("删除原有的 boll");
 			this.removeChild(this._star);
 		}
 	}
@@ -628,7 +632,6 @@ class GamePlayView extends egret.DisplayObjectContainer{
                 this._receiveCountValue++;
 				this._receiveMsgCountLabel.text = "receive msg count: " + this._receiveCountValue;
                 let cpProto = JSON.parse(sdnotify.cpProto);
-                
                 if (sdnotify.srcUserId == GameData.gameUser.id) {
                     let delayValue = new Date().getTime() - cpProto.ts;
                     if (this._minDelayValue === undefined || delayValue < this._minDelayValue) {
@@ -650,18 +653,19 @@ class GamePlayView extends egret.DisplayObjectContainer{
                 }
             } else if (sdnotify.cpProto.indexOf(GameData.reconnectStartEvent) >= 0) {
 				let info = JSON.parse(sdnotify.cpProto);
-				if(info.userID === GameData.gameUser.id && GameData.starPositionX === 0) {
+				if(info.userID === GameData.gameUser.id && GameData.starPositionX == 0) {
 					GameData.starPositionX = info.x;
 					GameData.starPositionY = info.y;
 					GameData.playerUserIds = info.PlayerScoreInfos;
-					GameData.playerUserIds.forEach((value)=>{
+					info.PlayerScoreInfos.forEach((value)=>{
+						//取出我自己原来的分数
 						if(value.id === info.userID){
 							this._score = value.pValue;
 						}
 					});
 
 					this._gameTime = info.timeCount;
-					console.log("重连倒计时时间：", info.timeCount);
+					console.log("重连倒计时时间：", sdnotify.cpProto);
 					this.deleteStar();
 					this.createStar();
 					this.setScoreLabel();
@@ -674,6 +678,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				}
 			}else if(sdnotify.cpProto.indexOf(GameData.reconnectReadyEvent) >= 0){
 				console.log("重新连接收到消息 this._countDownLabel.text",this._gameTime);
+
 				let eventTemp = {
 					action: GameData.reconnectStartEvent,
 					userID: sdnotify.srcUserId,
@@ -682,12 +687,14 @@ class GamePlayView extends egret.DisplayObjectContainer{
 					x: this._star.x,
 					y: GameData.defaultHeight
 				}
-				//发送游戏数据
-				let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
-				if (!result || result.result !== 0) {
-					return console.log('重连创建足球事件发送失败');
-				}
-				console.log('重连创建足球事件发送成功');
+				setTimeout(()=>{
+					//发送游戏数据
+					let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
+					if (!result || result.result !== 0) {
+						return console.log('重连创建足球事件发送失败');
+					}
+					console.log('重连创建足球事件发送成功');
+				},1000);
 			}
         }
 	}

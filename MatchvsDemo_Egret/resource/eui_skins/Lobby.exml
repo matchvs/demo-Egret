@@ -11,7 +11,7 @@
 			</e:Skin>
 		</e:skinName>
 	</e:Button>
-	<e:Label id="lab_lobby" text="游戏大厅" x="120" y="56" size="36" width="144" height="50" verticalAlign="middle"/>
+	<e:Label id="lab_lobby" text="游戏大厅" x="120" y="56" size="36" width="165" height="50" verticalAlign="middle" anchorOffsetX="0"/>
 	<e:Label id="lab_userID" text="用户ID：235699" x="1028" y="63" size="24" textColor="0x999999" textAlign="left"/>
 	<e:Image id="img_header" width="60" height="60" x="957" y="55.33"/>
 	<e:Rect width="2" height="320" x="639" y="175" strokeWeight="1" strokeColor="0x5d5d5d" locked="true"/>

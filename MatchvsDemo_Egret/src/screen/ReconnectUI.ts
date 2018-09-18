@@ -110,8 +110,8 @@ class ReconnectUI extends eui.Component implements  eui.UIComponent {
             GameData.playerUserIds = [];
             GameData.playerUserIds.push(GameData.gameUser);
             roomUserInfoList.forEach((value)=>{
-                 console.log("用户ID："+value.userId);
-                if (GameData.gameUser.id !== value.userId) {
+                 console.log("用户ID："+value.userID);
+                if (GameData.gameUser.id !== value.userID) {
                     //先默认为空的
                     let userPro = {name:"",avatar:""};
                     if(value.userProfile !== ""){
@@ -120,7 +120,8 @@ class ReconnectUI extends eui.Component implements  eui.UIComponent {
                     let gUser:GameUser = new GameUser;
                     gUser.avatar = userPro.avatar;
                     gUser.name = userPro.name;
-                    gUser.id = value.userId;
+                    gUser.id = value.userID;
+                    gUser.isOwner = value.userID == roomInfo.ownerId;
                     GameData.playerUserIds.push(gUser);
                 }
             });
@@ -128,7 +129,6 @@ class ReconnectUI extends eui.Component implements  eui.UIComponent {
             GameData.roomID = roomInfo.roomID;
             GameData.isRoomOwner = false;
             if(GameData.playerUserIds.length === GameData.maxPlayerNum && roomInfo.state === 2){
-                // mvs.MsEngine.getInstance.getRoomDetail(GameData.roomID);
                 this.sendReadyEvent()
             }else{
                 //还没有开始游戏
