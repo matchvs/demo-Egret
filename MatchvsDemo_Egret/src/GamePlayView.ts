@@ -679,15 +679,16 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			}else if(sdnotify.cpProto.indexOf(GameData.reconnectReadyEvent) >= 0){
 				console.log("重新连接收到消息 this._countDownLabel.text",this._gameTime);
 
-				let eventTemp = {
-					action: GameData.reconnectStartEvent,
-					userID: sdnotify.srcUserId,
-					PlayerScoreInfos:GameData.playerUserIds,
-					timeCount:Number(this._gameTime),
-					x: this._star.x,
-					y: GameData.defaultHeight
-				}
+				
 				setTimeout(()=>{
+						let eventTemp = {
+						action: GameData.reconnectStartEvent,
+						userID: sdnotify.srcUserId,
+						PlayerScoreInfos:GameData.playerUserIds,
+						timeCount:Number(this._gameTime),
+						x: this._star.x,
+						y: GameData.defaultHeight
+					}
 					//发送游戏数据
 					let result = mvs.MsEngine.getInstance.sendEvent(JSON.stringify(eventTemp));
 					if (!result || result.result !== 0) {
