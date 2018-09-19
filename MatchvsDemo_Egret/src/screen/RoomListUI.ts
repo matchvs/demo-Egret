@@ -73,7 +73,7 @@ class RoomListUI extends eui.Component implements  eui.UIComponent {
         let filter = new MsRoomFilterEx(GameData.createRoomInfo.maxPlayer,
         GameData.createRoomInfo.mode,
         GameData.createRoomInfo.canWatch,
-        GameData.createRoomInfo.roomProperty, 0, 1, 1, 0, 0, 3);
+        "", 0, 1, 1, 0, 0, 3);
         mvs.MsEngine.getInstance.getRoomListEx(filter);
     }
 
