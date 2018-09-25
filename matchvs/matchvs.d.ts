@@ -1,12 +1,23 @@
 /************************************************************************************************************
- *
  * Describe :   Matchvs skd .d.ts define files for typescrip
- * Version  :   Develop v3.7.3.1
- *
- * CHANGE   :   2018.07.12
- *
- *
+ * Version  :   Develop v3.7.4.0
+ * CHANGE   :   2018.09.01
  ************************************************************************************************************/
+
+declare namespace MVS{
+
+    /**
+     * 设置帧同步异步回调参数结构
+     */
+    class MsSetFrameSyncNotify {
+        public frameRate:number;
+        public startIndex:number;
+        public timestamp:string;
+        public enableGS:number;
+        constructor(frameRate:number, startIndex:number, timestamp:string,enableGS:number);
+    }
+}
+
 
 /**
  * 清除缓存信息
@@ -759,6 +770,12 @@ declare class MatchvsResponse {
     setFrameSyncResponse(rsp:MsSetChannelFrameSyncRsp);
 
     /**
+     * 设置帧同步异步回调
+     * @param notify {MVS.MsSetFrameSyncNotify}
+     */
+    setFrameSyncNotify(notify:MVS.MsSetFrameSyncNotify);
+
+    /**
      * 发送帧同步回调，目前没有是走
      * @param {MsSendFrameEventRsp} rsp
      */
@@ -990,17 +1007,20 @@ declare class MatchvsEngine {
     /**
      * 发送帧同步消息
      * @param {string} cpProto
+     * @param {MVS.FrameOpt} op  0-只发送客户端 1-只发送GS 2-客户端和GS
      * @returns {number}
      */
-    sendFrameEvent(cpProto:string):number
+    sendFrameEvent(cpProto:string, op?:number):number
 
     /**
      * 设置帧同步接口
      * frameRate ex:10/s . = 0 is off,>0 is on.
      * @param {number} frameRate
+     * @param {number} enableGS 0-gs不参与帧同步 1-gs参与帧同步
      * @returns {number}
      */
-    setFrameSync(frameRate:number):number
+    setFrameSync(frameRate:number, enableGS?:number ):number
+
 
     /**
      * 注册用户

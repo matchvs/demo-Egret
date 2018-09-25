@@ -45,6 +45,7 @@ class Login extends eui.Component implements  eui.UIComponent {
         }
 	}
 
+
     private clearTween(event: egret.TouchEvent){
         LocalStore_Clear();
         egret.Tween.get( this.lab_clearNote ).to({alpha:1},500).call(()=>{
