@@ -60,7 +60,7 @@ module mvs {
 		 * @param {string} secretkey 	游戏 secretkey
 		 */
 		public login(userID:number, token:string, gameID:number, appkey:string, secretkey:string):number{
-			let res = this._engine.login(userID,token,gameID,1,appkey,secretkey,"eglejjddg",0);
+			let res = this._engine.login(userID,token,gameID,1,appkey,"eglejjddg");
 			console.info("[MsEngine login] resCode:",res);
 			return res;
 		}
@@ -188,7 +188,7 @@ module mvs {
 		 * @returns {number}
 		 */
 		public sendFrameEvent(cpProto:string):number{
-			let res = this._engine.sendFrameEvent(cpProto);
+			let res = this._engine.sendFrameEvent(cpProto,0);
 			console.info("[MsEngine sendFrameEvent ] resCode:",res);
 			return res;
 		}

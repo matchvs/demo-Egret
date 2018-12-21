@@ -1,12 +1,180 @@
-/************************************************************************************************************
- *
- * Describe :   Matchvs skd .d.ts define files for typescrip
- * Version  :   Develop v3.7.3.1
- *
- * CHANGE   :   2018.07.12
- *
- *
- ************************************************************************************************************/
+/*
+ * @Company: Matchvs
+ * @Author: Ville
+ * @Date: 2018-04-17 17:46:35
+ * @LastEditors: Ville
+ * @LastEditTime: 2018-12-21 16:37:21
+ * @Version: Develop v3.7.5.+
+ * @Description: Matchvs skd .d.ts define files for typescrip
+ */
+
+declare namespace MVS{
+
+    /**
+     * 设置帧同步异步回调参数结构
+     */
+    class MsSetFrameSyncNotify {
+        public frameRate:number;
+        public startIndex:number;
+        public timestamp:string;
+        public enableGS:number;
+        constructor(frameRate:number, startIndex:number, timestamp:string,enableGS:number);
+    }
+
+    /**
+     * 创建房间的时候如果要设置房间为可观战，那么就要设置这个观战数据
+     */
+    class MsWatchSet{
+        public cacheMS:number;   //缓存多久的数据
+        public maxWatch:number; // 最大人数
+        public delayMS:number;   //观看延迟多久后的数据
+        public persistent:boolean; //是否持久缓存
+        constructor(cacheMS:number,maxWatch:number,delayMS:number,persistent:boolean);
+    }
+
+    /**
+     * 观战者信息
+     */
+    class MsLiveAudience{
+        public userID:number;
+        public profile:string;
+        public enterTime:string;
+        constructor(userID:number, profile:string, enterTime:string);
+    }
+
+    /**
+     * 加入观战回调参数结构观战信息
+     */
+    class MsLiveWatchInfo{
+        public roomID :string;                          //房间ID
+        public startTS :string;                         //开始时间
+        public delayMS :number;                         //延迟时间
+        public cacheMS :number;                         //缓存时间
+        public maxAudiences :number;                    //最大观战数
+        public curAudiences :number;                    //当前观战数
+        public peakAudiences :number;
+        public lastAudiences :Array<MVS.MsLiveAudience>;    //观战者信息
+        constructor(roomID:string,startTS:string,delayMS:number, cacheMS:number,maxAudiences:number,curAudiences:number,peakAudiences:number, lastAudiences:Array<MsLiveAudience>);
+    }
+
+    /**
+     * 加入房间回调参数
+     */
+    class MsJoinWatchRoomRsp {
+        public status :number;              //接口请求状态
+        public roomStatus :number;          //当前房间状态
+        public reserved :string;            //
+        public wathchInfo :MVS.MsLiveWatchInfo; //观战者信息
+        constructor(status:number, roomStatus:number, reserved:string, wathchInfo:MVS.MsLiveWatchInfo);
+    }
+
+    /**
+     * 玩家退出房间回调
+     */
+    class MsExitLiveRoomNotify{
+        public userID:number;
+        public userProfile:string;
+        constructor(userID:number, userProfile:string);
+    }
+
+    /**
+     * 观战结束回调
+     */
+    class MsLiveOverNotify {
+        public gameID:number;
+        public roomID:string;
+        constructor(gameID:number, roomID:string);
+    }
+
+    /**
+     * 切换观战模式和游戏模式接口回调参数类型
+     */
+    class MsChangeRoleRsp{
+        public status:number;
+        //当前的模式  0-游戏模式，1-观战模式
+        public targetRoomType:number;
+        constructor(status:number, targetRoomType:number);
+    }
+
+    class MsCreateTeamInfo{
+        public password:string;
+        public capacity:number;
+        public mode:number;
+        public visibility:number;
+        public userProfile:string;
+        /**
+         * Creates an instance of MsCreateTeamInfo.
+         * @param {string} [password] 队伍密码
+         * @param {number} [capacity] 队伍人数容量
+         * @param {number} [mode] 模式-由开发者自己定义
+         * @param {number} [visibility] 0-不可见 1-可见
+         * @param {string} [userProfile] 用户自定义信息
+         * @memberof MsCreateTeamInfo
+         */
+        constructor(password?:string, capacity?:number, mode?:number, visibility?:number, userProfile?:string);
+    }
+
+    class MsTeamMatchCond{
+        public teamNum:number;
+        public teamMemberNum:number;
+        public timeout:number;
+        public weight:number;
+        public weightRange:number;
+        public weightRule:number;
+        public full:number;
+        /**
+         *Creates an instance of MsTeamMatchCond.
+         * @param {number} [teamNum] 匹配的队伍数
+         * @param {number} [teamMemberNum] 每个队伍的人数加满多少人
+         * @param {number} [timeout] 匹配多久视为超时
+         * @param {number} [weight] 匹配的权重值   比如：10
+         * @param {number} [weightRange] 权重值范围 比如：5  则匹配范围是 5-15
+         * @param {number} [weightRule] 权值匹配规则，默认 0-平均值
+         * @param {number} [full] 是否人满匹配，0-人不满也可以匹配，1-人满匹配 (人不满匹配不到会超时报422错误码)
+         * @memberof MsTeamMatchCond
+         */
+        constructor(teamNum?:number, teamMemberNum?: number, timeout?: number, weight?: number, weightRange?: number, weightRule?: number, full?:number);
+    }
+
+    class MsTeamMatchInfo{
+        public roomName: string;
+        public maxPlayer: number;
+        public canWatch: number;
+        public mode: number;
+        public visibility: number;
+        public roomProperty: string;
+        public watchSet:MsWatchSet;
+        public cond:MsTeamMatchCond;
+        /**
+         *Creates an instance of MsTeamMatchInfo.
+         * @param {string} roomName 房间名称
+         * @param {number} maxPlayer 最大人数，如果
+         * @param {number} canWatch 是否打开观战 1-可以 2-不可以，配合 watchSet 参数使用
+         * @param {number} mode 模式-由开发者自己定义
+         * @param {number} visibility 0-不可见 1-可见
+         * @param {string} roomProperty 自定义房间信息
+         * @param {MsWatchSet} watchSet 观战信息， canWatch 为 1的时候有效
+         * @param {MsTeamMatchCond} cond 队伍匹配参数设置
+         * @memberof MsTeamMatchInfo
+         */
+        constructor(roomName: string, maxPlayer: number, canWatch: number, mode: number, visibility: number, roomProperty: string, watchSet: MsWatchSet, cond: MsTeamMatchCond);
+    }
+
+    class MsJoinTeamInfo{
+        public teamID:string;
+        public password:string;
+        public userProfile:string;
+        /**
+         *Creates an instance of MsJoinTeamInfo.
+         * @param {string} teamID      队伍ID号
+         * @param {string} password    队伍密码
+         * @param {string} userProfile 自定义队伍信息
+         * @memberof MsJoinTeamInfo
+         */
+        constructor(teamID: string, password: string, userProfile: string);
+    }
+}
+
 
 /**
  * 清除缓存信息
@@ -94,13 +262,17 @@ declare class MsJoinOverNotifyInfo{
  * @param {number} mode         房间模式，由cp自己定义
  * @param {number} canWatch     可观战人数 1-可以 2-不可以
  * @param tags                  实际为 object 使用属性匹配时定义的协议，为 key-value 对象{key:value,key:value}
+ * @param {number} visibility   0-房间不可见，1-房间可见
+ * @param {string} roomProperty 房间自定义属性值
  */
 declare class MsMatchInfo{
     public maxPlayer:number;
     public mode:number;
     public canWatch:number;
     public tags:any;
-    constructor(maxPlayer:number, mode:number, canWatch:number, tags:any)
+    public visibility:number;
+    public roomProperty:string
+    constructor(maxPlayer:number, mode:number, canWatch:number, tags:any,visibility ?:number, roomProperty?:string)
 }
 
 /**
@@ -135,7 +307,7 @@ declare class MsRoomUserInfo{
  *
  * @param {number} maxPlayer    最大人数
  * @param {number} mode         房间模式，由cp自己定义
- * @param {number} canWatch     可观战人数 1-可以 2-不可以
+ * @param {number} canWatch     可观战 1-可以 2-不可以
  * @param {string} roomProperty 房间属性，开发者自定义数据，比如地图
  */
 declare class MsRoomFilter{
@@ -192,8 +364,11 @@ declare class MsGetRoomDetailRsp{
     public owner:number;
     public createFlag:number;
     public userInfos:Array<MsRoomUserInfo>;
+    public watchinfo: any;
+    public brigades: Array<any>;
     constructor(status:number, state:number, maxPlayer:number, mode:number, canWatch:number,
-                roomProperty:number, owner:number, createFlag:number, userInfos:Array<MsRoomUserInfo>);
+                roomProperty:number, owner:number, createFlag:number, userInfos:Array<MsRoomUserInfo>,
+        watchinfo?:any, brigades?:Array<any>);
 }
 
 /**
@@ -222,8 +397,9 @@ declare class MsRoomAttribute{
     public owner:number;
     public state:number;
     public createTime:string;
+    public watchSet:MVS.MsWatchSet;
     constructor(roomID:string, roomName:string, maxPlayer:number, gamePlayer:number, watchPlayer:number,
-                mode:number, canWatch:number, roomProperty:string, owner:number, state:number, createTime:string);
+                mode:number, canWatch:number, roomProperty:string, owner:number, state:number, createTime:string, watchSet:MVS.MsWatchSet);
 }
 
 /**
@@ -468,11 +644,11 @@ declare class MsGatewaySpeedResponse{
 
 /**
  * 设置帧同步回调
- * @param {number} mStatus 状态值 200-成功
+ * @param {number} status 状态值 200-成功
  */
 declare class MsSetChannelFrameSyncRsp{
-    public mStatus:number;
-    constructor(mStatus:number)
+    public status:number;
+    constructor(status:number)
 }
 
 
@@ -759,6 +935,12 @@ declare class MatchvsResponse {
     setFrameSyncResponse(rsp:MsSetChannelFrameSyncRsp);
 
     /**
+     * 设置帧同步异步回调
+     * @param notify {MVS.MsSetFrameSyncNotify}
+     */
+    setFrameSyncNotify(notify:MVS.MsSetFrameSyncNotify);
+
+    /**
      * 发送帧同步回调，目前没有是走
      * @param {MsSendFrameEventRsp} rsp
      */
@@ -813,20 +995,168 @@ declare class MatchvsResponse {
      * @param {MsRoomInfo} roomInfo
      */
     reconnectResponse(status:number, roomUserInfoList:Array<MsRoomUserInfo>, roomInfo:MsRoomInfo);
-	
+
 	 /**
      * 允许房间加人的通知
      * @param {MsReopenRoomNotify} data
      */
 	joinOpenNotify(data:MsReopenRoomNotify);
-	
+
 	 /**
      * 设置允许房间加人的结果
      * @param {MsReopenRoomResponse} data
      */
 	joinOpenResponse(data:MsReopenRoomResponse);
-}
 
+    /**
+     * 加入观战服务回调
+     * @param rsp {MVS.MsJoinWatchRoomRsp} 状态值 200 表示成功，其他值请看官网错误码文档
+     */
+    joinWatchRoomResponse(rsp:MVS.MsJoinWatchRoomRsp):void
+
+    /**
+     * 加入观战服务异步回调
+     * @param user
+     */
+    joinWatchRoomNotify(user:MsRoomUserInfo):void
+
+    /**
+     * 离开观战服务回调
+     * @param status 接口调用状态值 200 表示成功
+     */
+    leaveWatchRoomResponse(status:number):void
+
+    /**
+     * 离开观战服务异步回调
+     * @param user
+     */
+    leaveWatchRoomNotify(user:MVS.MsExitLiveRoomNotify):void
+
+    /**
+     *  获取房间列表回调
+     * @param rooms 房间列表信息
+     */
+    getWatchRoomsResponse(rooms:MsGetRoomListExRsp):void
+
+    /**
+     * 设置观战开始位置回调
+     * @param status 接口调用状态
+     */
+    setLiveOffsetResponse(status:number):void
+
+    /**
+     *
+     * @param notify
+     */
+    liveOverNotify(notify:MVS.MsLiveOverNotify):void
+
+    /**
+     *
+     * @param data
+     */
+    liveFrameUpdate(data:MsFrameData):void
+
+    /**
+     * 角色切换回调
+     * @param status 接口调用状态
+     */
+    changeRoleResponse(status:MVS.MsChangeRoleRsp):void
+
+    /**
+     * 超时时间设置回调函数
+     * @param {number} status 回调状态 200成功
+     */
+    setReconnectTimeoutResponse(status:number):void
+
+    /**
+     * 创建组队同步放回信息
+     * @param {*} rps
+     * @param {number} rps.status
+     * @param {string} rps.teamID
+     * @param {number} rps.owner
+     * @memberof MatchvsResponse
+     */
+    createTeamResponse(rps:any):void
+
+    /**
+     * 加入队伍返回信息
+     * @param {*} rsp
+     * @param {*} rsp.team //队伍信息
+     * @param {number} rsp.team.teamID 队伍号
+     * @param {string} rsp.team.password 队伍验证信息
+     * @param {number} rsp.team.capacity 队伍人数容量
+     * @param {number} rsp.team.mode 模式-开发者自定义的值
+     * @param {number} rsp.team.owner 队长
+     * @param {number} rsp.status 加入队伍状态值
+     * @param {Array<any>} rsp.userList [{userID:, userProfile:,}]
+     * @memberof MatchvsResponse
+     */
+    joinTeamResponse(rsp:any):void
+
+    /**
+     * 加入队伍异步返回信息，有人加入队伍的时候，在队伍中的其他人会收到这个接口的通知
+     * @param {*} rsp
+     * @param {*} rsp.user 队伍中的用户
+     * @param {number} rsp.user.userID 用户ID
+     * @param {string} rsp.user.userProfile 加入队伍时，传入的自定义信息
+     * @memberof MatchvsResponse
+     */
+    joinTeamNotify(rsp:any):void
+
+    /**
+     * 离开队伍回调信息
+     * @param {*} rsp
+     * @param {number} rsp.userID 离开者ID
+     * @param {number} rsp.teamID 离开的队伍号
+     * @param {number} rsp.status 状态值 200 成功
+     * @memberof MatchvsResponse
+     */
+    leaveTeamResponse(rsp:any):void
+
+    /**
+     * 有人离开队伍，其他人收到的通知接口
+     * @param {*} rsp
+     * @param {number} rsp.teamID 离开的队伍
+     * @param {number} rsp.userID 离开者
+     * @param {number} rsp.owner 队长
+     * @memberof MatchvsResponse
+     */
+    leaveTeamNotify(rsp:any):void
+
+    /**
+     * 队伍中发起匹配者会收到这个回调，表示正在匹配中
+     * @param {*} rsp
+     * @param {number} rsp.status 匹配状态
+     * @memberof MatchvsResponse
+     */
+    teamMatchResponse(rsp:any):void
+
+    /**
+     * 发起匹配后，队伍中所有人都会收到匹配结果通知
+     * @param {*} rsp
+     * @param {number} rsp.status 配置的状态，200 成功，422 超时
+     * @param {Array<any>} rsp.brigades 配置到队伍，大队伍列表信息
+     * @param {number} rsp.brigades.brigadeID 大队伍ID号
+     * @param {Array<any>} rsp.brigades.teamList 小队伍列表
+     * @param {string} rsp.brigades.teamList.teamID 小队伍ID号
+     * @param {number} rsp.brigades.teamList.capacity 小队伍容量
+     * @param {number} rsp.brigades.teamList.mode 小队伍模式，开发者自定义数据
+     * @param {number} rsp.brigades.teamList.owner 小队伍队长
+     * @param {Array<any>} rsp.brigades.teamList.playerList 小队伍玩家列表
+     * @param {number} rsp.brigades.teamList.playerList.userID 小队伍玩家ID
+     * @param {string} rsp.brigades.teamList.playerList.userProfile 小队伍玩家自定义数据
+     * @memberof MatchvsResponse
+     */
+    teamMatchResultNotify(rsp:any):void
+    /**
+     * 队伍中如果有人发起匹配，其他人会收到这个开启匹配的通知
+     * @param {*} rsp
+     * @param {*} rsp.teamID 队伍号
+     * @param {*} rsp.userID 发起匹配者ID
+     * @memberof MatchvsResponse
+     */
+    teamMatchStartNotify(rsp:any):void
+}
 
 
 /**
@@ -866,13 +1196,11 @@ declare class MatchvsEngine {
      * @param {number} pGameID      游戏ID，由 matchvs 官网生成
      * @param {number} pGameVersion 开发者自定义 默认 1
      * @param {string} pAppkey      游戏key 由 matchvs 官网生成
-     * @param {string} pSecretKey   游戏秘钥 由 matchvs 官网生成
      * @param pDeviceID             用于区分 用户在不同设备登录情况，用户只能在一个设备登录，默认填1，如果允许一个设备登录就要开发者
      *                              自定义唯一值，或者获取 设备ID值
-     * @param pGatewayID            默认填0
      * @returns {number}
      */
-    login(pUserID: number, pToken: string, pGameID: number, pGameVersion: number, pAppkey: string, pSecretKey: string, pDeviceID: string, pGatewayID: number): number
+    login(pUserID: number, pToken: string, pGameID: number, pGameVersion: number, pAppkey: string, pDeviceID: string): number
 
     /**
      * 用户网关速度，暂时不用
@@ -884,15 +1212,11 @@ declare class MatchvsEngine {
      * 开发者调用此接口主动创建房间，房间参数由开发者自己定义。
      * @param {MsCreateRoomInfo} createRoomInfo 房间信息
      * @param {string} userProfile 附带数据，默认指定 ""
+     * @param {MVS.MsWatchSet} watchSet 可选参数，指定房间观战参数
      * @returns {number}
      */
-    createRoom(createRoomInfo:MsCreateRoomInfo, userProfile:string): number
+    createRoom(createRoomInfo:MsCreateRoomInfo, userProfile:string, watchSet?:MVS.MsWatchSet): number
 
-    /**
-     * 获取sdk 版本信息
-     * @returns {string}
-     */
-    getVersion():string
 
     /**
      * 反初始化
@@ -945,9 +1269,10 @@ declare class MatchvsEngine {
      * 同一个房间。matchinfo 类型的 tags 是 {key=value,key1=value2} 类型，可以指定多个属性。
      * @param {MsMatchInfo} matchinfo 匹配属性规则类型
      * @param {string} userProfile 加入房间附带消息，由用户自己定义，比如：头像，分数等
+     * @param {MVS.MsWatchSet} watchSet matchvsinfo 中的 canWatch设置为1(可观战),需要设置这个参数
      * @returns {number}
      */
-    joinRoomWithProperties(matchinfo:MsMatchInfo, userProfile:string):number
+    joinRoomWithProperties(matchinfo:MsMatchInfo, userProfile:string, watchSet?:MVS.MsWatchSet):number
 
     /**
      * 加入指定房间，通过rooID 加入到指定的房间
@@ -990,17 +1315,21 @@ declare class MatchvsEngine {
     /**
      * 发送帧同步消息
      * @param {string} cpProto
+     * @param {MVS.FrameOpt} op  0-只发送客户端 1-只发送GS 2-客户端和GS
      * @returns {number}
      */
-    sendFrameEvent(cpProto:string):number
+    sendFrameEvent(cpProto:string, op?:number):number
 
     /**
      * 设置帧同步接口
      * frameRate ex:10/s . = 0 is off,>0 is on.
      * @param {number} frameRate
+     * @param {number} enableGS 0-gs不参与帧同步 1-gs参与帧同步
+     * @param {number} other 其他数据
      * @returns {number}
      */
-    setFrameSync(frameRate:number):number
+    setFrameSync(frameRate:number, enableGS?:number ):number
+
 
     /**
      * 注册用户
@@ -1049,49 +1378,93 @@ declare class MatchvsEngine {
      * @returns {number}
      */
     logout(cpProto:string):number
-	
+
 	/**
      * 设置允许房间加人，与 joinOver 对应
      * @param {number} cpProto 开发者自定义数据
      * @returns {number}
      */
     joinOpen(cpProto:string):number
-	
-	/**
-	* 存储数据
-	* @param {number} gameID 游戏ID
-	* @param {number} userID 用户ID
-	* @param {string} key    存储键
-	* @param {any} value     存储值
-	*/
-	hashSet (gameID, userID, key, value) :void
-	
-	/**
-	* 存储数据
-	* @param {number} gameID
-	* @param {number} userID
-	* @param {string} key
-	*/
-	hashGet (gameID, userID, key) :void
-	
 
-	
+    /**
+     * 加入观战房间
+     * @param roomID 房间号
+     * @param userProfile 自定义数据
+     */
+    joinWatchRoom(roomID:string, userProfile:string):number
+
+    /**
+     * 离开观战房间
+     * @param cpProto 自定义数据
+     */
+    leaveWatchRoom(cpProto:string):number
+
+    /**
+     * 打开观战，设置从哪个时间段开始接收数据
+     * @param offsetMS {number} -1 表示从头， 0 表示不追 >0 表示最近多少ms
+     */
+    setLiveOffset(offsetMS:number):number
+
+    /**
+     * 获取观战房间列表
+     * @param filter 获取观战列表的过滤条件与 getRoomListEx 接口类似
+     */
+    getWatchRoomList(filter:MsRoomFilterEx):number
+
+    /**
+     * 玩家与观战者的角色转换
+     * @param userProfile 附加信息
+     * @param rType 0-切换到游戏模式，1-切换到观战模式 如果返回 -30 表示你当前模式与切换模式相同
+     */
+    changeRole(userProfile:string, rType:number):number
+
+    /**
+     * 断线后重连超时时间设置
+     * @param {number} timeout 时间以秒为单位
+     */
+    setReconnectTimeout(timeout:number):number
+
+    /**
+     * 创建组队
+     * @param {MVS.MsCreateTeamInfo} teaminfo
+     * @returns {number}
+     * @memberof MatchvsEngine
+     */
+    createTeam(teaminfo: MVS.MsCreateTeamInfo):number
+
+    /**
+     * 加入组队队伍，队伍必须是由 createTeam 接口创建的
+     * @param {MVS.MsJoinTeamInfo} teaminfo
+     * @returns {number}
+     * @memberof MatchvsEngine
+     */
+    joinTeam(teaminfo:MVS.MsJoinTeamInfo):number
+
+    /**
+     * 离开组队队伍
+     * @returns {number}
+     * @memberof MatchvsEngine
+     */
+    leaveTeam():number
+
+    /**
+     * 加入的队伍之后，可以由队伍中的任何一个人发起队伍匹配
+     * @param {MVS.MsTeamMatchInfo} matchInfo
+     * @returns {number}
+     * @memberof MatchvsEngine
+     */
+    teamMatch(matchInfo:MVS.MsTeamMatchInfo):number
 }
+
 declare class md5 {
 	 constructor();//构造函数
-	 
 	/**
 	*
 	*/
 	hex_md5 (s:string) :string
-
 }
 
 declare class MatchvsHttp {
 	constructor(callBack);//构造函数
-	
-	
 	get(url);
-	
- 
 }

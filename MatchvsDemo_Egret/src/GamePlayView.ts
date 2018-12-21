@@ -399,7 +399,18 @@ class GamePlayView extends egret.DisplayObjectContainer{
             }, 200);
 			GameData.intervalList.push(id);
         } else {
+			let first = false;
             let id = setInterval(() => {
+				if(first == false){
+					first = true;
+					console.log("测试帧同步数据：", JSON.stringify({
+                    action: GameData.playerPositionEvent,
+					x: this._egretBird0.x,
+					y: GameData.defaultHeight,
+                    ts: new Date().getTime(),
+					uid: GameData.gameUser.id
+                }));
+				}
 				mvs.MsEngine.getInstance.sendFrameEvent(JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,

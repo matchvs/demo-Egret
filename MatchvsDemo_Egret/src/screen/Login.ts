@@ -40,6 +40,7 @@ class Login extends eui.Component implements  eui.UIComponent {
 		}else if("lab_premise" == partName){
             this.lab_premise = instance;
             this.lab_premise.addEventListener(egret.TouchEvent.TOUCH_END, (event: egret.TouchEvent)=>{
+                this.release();
                 GameSceneView._gameScene.premiseLogin();
             }, this);
         }

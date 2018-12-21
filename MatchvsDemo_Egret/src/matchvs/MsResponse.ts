@@ -256,7 +256,7 @@ module mvs {
 		private setFrameSyncResponse(rsp:MsSetChannelFrameSyncRsp){
 			//console.info("[setFrameSyncResponse] "+JSON.stringify(rsp));
 			let data = {
-				mStatus:rsp.mStatus
+				mStatus:rsp.status
 			};
 			this.dispatchEvent(new egret.Event(MsEvent.EVENT_SETFRAMESYNC_RSP, false, false,data));
 		}
