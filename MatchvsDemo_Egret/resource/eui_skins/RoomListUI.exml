@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <e:Skin class="RoomListUISkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
 	<w:Config id="165c7fbef78" ></w:Config>
-	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat" locked="true"/>
 	<e:Group x="71" y="56">
 		<e:Label id="lab_userID" text="用户ID：" x="957" y="13" size="24" textColor="0x999999" textAlign="left" verticalAlign="middle" width="178"/>
 		<e:Button id="btn_return" label="" x="0" y="9" anchorOffsetY="0" height="32" width="32">

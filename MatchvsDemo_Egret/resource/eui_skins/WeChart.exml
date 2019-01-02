@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e:Skin class="WeChartSkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
+	<w:Config id="1680cd7f0de" ></w:Config>
+	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
+	<e:Rect width="1280" height="720" x="0" y="0" fillAlpha="0"/>
+	<e:Label text="MatchvsDemo-Egret" x="440.12" y="51" size="42" fontFamily="Arial"/>
+</e:Skin>

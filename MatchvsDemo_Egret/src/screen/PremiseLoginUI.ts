@@ -127,7 +127,7 @@ class PremiseLoginUI extends eui.Component implements  eui.UIComponent {
 		/**
 		 * 调用 matchvs 登录接口
 		 */
-		mvs.MsEngine.getInstance.login(userID,token,gameID, appkey, secretkey);
+		mvs.MsEngine.getInstance.login(userID,token,gameID, appkey);
 	}
 
 	/**

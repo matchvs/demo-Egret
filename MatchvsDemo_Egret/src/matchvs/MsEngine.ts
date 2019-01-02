@@ -59,7 +59,7 @@ module mvs {
 		 * @param {string} appkey 		游戏 appkey
 		 * @param {string} secretkey 	游戏 secretkey
 		 */
-		public login(userID:number, token:string, gameID:number, appkey:string, secretkey:string):number{
+		public login(userID:number, token:string, gameID:number, appkey:string):number{
 			let res = this._engine.login(userID,token,gameID,1,appkey,"eglejjddg");
 			console.info("[MsEngine login] resCode:",res);
 			return res;

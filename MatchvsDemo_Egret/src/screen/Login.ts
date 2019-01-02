@@ -107,13 +107,14 @@ class Login extends eui.Component implements  eui.UIComponent {
         GameData.gameUser.token = userInfo.token;
         //登录
         if(userInfo.status == 0){
-            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token, GameData.gameID,GameData.appkey, GameData.secretKey);
+            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token, GameData.gameID,GameData.appkey);
         }
     }
     /**
      * 调用 matchvs login 接口回调处理
      */
     private loginResponse(ev:egret.Event) {
+        MvsHttpApi.TestApi();
         mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
         let login = ev.data;
         console.log("loginResponse, status=" + login.status);
@@ -135,13 +136,15 @@ class Login extends eui.Component implements  eui.UIComponent {
      * 获取微信中的用户信息,这个是支持微信用户绑定的，如果使用微信身份登录，将执行绑定操作，如果是游客身份登录将到 matchvs 生成一个游客身份的userID
      */
     private getUserFromWeChat(success:Function, fa:Function){
+        
         //获取微信信息
         try {
-            getWxUserInfo({
+            let wxm = new Wxmodel();
+            wxm.getWxUserInfo({
                 success:(userInfos)=>{
                     console.log("获取用户信息成功！");
                     //获取OpenID
-                    getUserOpenID({
+                    wxm.getUserOpenID({
                         success:function(openInfos){
                             console.info("openInfos:",openInfos);
                             if(openInfos.status == 0){
@@ -152,13 +155,54 @@ class Login extends eui.Component implements  eui.UIComponent {
                             }
                         },
                         fail:(res)=>{
-                            console.info("获取openID 失败！:",res);
-                            fa(res);
+                                console.info("获取openID 失败！:",res);
+                                fa(res);
                         }
                     });
                 },
                 fail:fa
             });
+            // wxm.UserAuthorButton({
+            //         success:(res)=>{
+            //             wxm.getWxUserInfo({
+            //             success:(userInfos)=>{
+            //                 console.log("获取用户信息成功！");
+            //                 //获取OpenID
+            //                 wxm.getUserOpenID({
+            //                     success:function(openInfos){
+            //                         console.info("openInfos:",openInfos);
+            //                         if(openInfos.status == 0){
+            //                             success({userInfo:userInfos, openInfo:openInfos.data});
+            //                             //console.info("userInfo:",userInfos,"openInfo:",openInfos.data);
+            //                         }else{
+            //                             fa("获取OpenID失败！");
+            //                         }
+            //                     },
+            //                     fail:(res)=>{
+            //                             console.info("获取openID 失败！:",res);
+            //                             fa(res);
+            //                     }
+            //                 });
+            //             },
+            //             fail:fa
+            //             });
+            //         },
+            //         fail:(res)=>{
+            //             console.log("授权失败：", res);
+            //         },
+            //         complete:(res)=>{},
+            //     },
+            //     {
+            //         backgroundColor:"0x000000",
+            //         color:"0xff0000",
+            //         imageUrl:"./resource/assets/wxlogin.png",
+            //         text:"微信授权",
+            //         left:370,
+            //         top:442,
+            //         width:370,
+            //         height:70,
+            //     }
+            // );
         } catch (error) {
             console.log("不是在微信平台，调用不进行绑定！");
             fa(error);
@@ -173,46 +217,24 @@ class Login extends eui.Component implements  eui.UIComponent {
         if(!wxUserInfo){
             return;
         }
-
-        let reqUrl = GameData.getBindOpenIDAddr(GameData.CHANNEL,GameData.DEFAULT_ENV);
-        //sign=md5(appKey&gameID=value1&openID=value2&session=value3&thirdFlag=value4&appSecret)
-        let params = "gameID="+GameData.gameID+"&openID="+wxUserInfo.openInfo.openid+"&session="+wxUserInfo.openInfo.session_key+"&thirdFlag=1";
-
-        //计算签名
-        let signstr = GameData.getSign(params);
-        //重组参数
-        params = "userID=0&"+params+"&sign="+signstr;
-        //用于post请求，不能使用get请求，如果使用get请求可能会出现签名失败，因为微信session_key有需要url编码的字符
-        let jsonParam = {
-            userID:0,
-            gameID:GameData.gameID,
-            openID:wxUserInfo.openInfo.openid,
-            session:wxUserInfo.openInfo.session_key,
-            thirdFlag:1,
-            sign:signstr
-            };
-        var request = new egret.HttpRequest();
-        request.responseType = egret.HttpResponseType.TEXT;
-        request.open(reqUrl,egret.HttpMethod.POST);
-        request.setRequestHeader("Content-Type", "application/json");
-        request.send(jsonParam);
-        request.addEventListener(egret.Event.COMPLETE,(event:egret.Event)=>{
-            var request = <egret.HttpRequest>event.currentTarget;
-            console.log("bindOpenIDWithUserID get data : ",request.response);
-            let repData = JSON.parse(request.response);
-            console.log("bindOpenIDWithUserID repData : ",repData);
-            //绑定成功
-            if( repData.status == 0){
-                GameData.gameUser.id = repData.data.userid;
-                GameData.gameUser.name = wxUserInfo.userInfo.nickName;
-                GameData.gameUser.avatar = wxUserInfo.userInfo.avatarUrl;
-                GameData.gameUser.token = repData.data.token;
-                //绑定成功就登录
-                mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token, GameData.gameID,GameData.appkey, GameData.secretKey);
+        let mvshttp:MvsHttpApi = new MvsHttpApi();
+        mvshttp.thirdBind("123456", "ENGICLMEGIOPTNNMJ", (res, err)=>{
+            if(res !== null){
+                let repData = res;
+                if (repData.status == 0){
+                    console.log("绑定接口调用成功", res);
+                    GameData.gameUser.id = repData.data.userid;
+                    GameData.gameUser.name = wxUserInfo.userInfo.nickName;
+                    GameData.gameUser.avatar = wxUserInfo.userInfo.avatarUrl;
+                    GameData.gameUser.token = repData.data.token;
+                    //绑定成功就登录
+                    mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token, GameData.gameID,GameData.appkey);
+                }else{
+                    console.log("bindOpenIDWithUserID get error : " , err);
+                }
+            }else{
+                console.log("bindOpenIDWithUserID get error : " , err);
             }
-        },this);
-        request.addEventListener(egret.IOErrorEvent.IO_ERROR,(event:egret.IOErrorEvent)=>{
-             console.log("bindOpenIDWithUserID get error : " + event);
-        },this);
+        });
     }
 }

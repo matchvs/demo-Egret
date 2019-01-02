@@ -30,7 +30,7 @@ class GameSceneView extends egret.Sprite
          mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_ERROR_RSP, this.errorResponses, this);
         this.thisContainer = new egret.Sprite();
         this.addChild(this.thisContainer);
-        this.login();
+        this.wechart();
         // this.startModel();
     }
 
@@ -52,6 +52,13 @@ class GameSceneView extends egret.Sprite
         var loginview:Login = new Login();
         this.thisContainer.addChild(loginview);
     }
+
+    public wechart(){
+        this.removeAll();
+        let w:WeChart = new WeChart();
+        this.thisContainer.addChild(w);
+    }
+
     public lobby():void
     {
         this.removeAll();

@@ -24,7 +24,8 @@
 		"MatchRoomID": "resource/eui_skins/MatchRoomID.exml",
 		"GameResult": "resource/eui_skins/GameResult.exml",
 		"ErrorNote": "resource/screen/ErrorNote.exml",
-		"ReconnectUI": "resource/screen/ReconnectUI.exml"
+		"ReconnectUI": "resource/screen/ReconnectUI.exml",
+		"WeChart": "resource/eui_skins/WeChart.exml"
 	},
 	"autoGenerateExmlsList": true,
 	"exmls": [
@@ -50,6 +51,7 @@
 		"resource/eui_skins/ToggleSwitchSkin.exml",
 		"resource/eui_skins/VScrollBarSkin.exml",
 		"resource/eui_skins/VSliderSkin.exml",
+		"resource/eui_skins/WeChart.exml",
 		"resource/screen/ErrorNote.exml",
 		"resource/screen/ReconnectUI.exml",
 		"resource/screen/StartModel.exml"

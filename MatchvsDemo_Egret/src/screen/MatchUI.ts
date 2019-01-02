@@ -746,6 +746,7 @@ class MatchUI extends eui.Component implements  eui.UIComponent {
     }
 
     private sendEventNotify(ev:egret.Event) {
+        console.log("收到消息", ev.data);
         let sdnotify = ev.data;
         if (sdnotify
             && sdnotify.cpProto
