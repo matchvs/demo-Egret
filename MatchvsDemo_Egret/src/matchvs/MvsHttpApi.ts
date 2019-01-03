@@ -389,7 +389,7 @@ class MvsHttpApi {
             if(res){
                 console.log("TestApi success:", res);
             }else if(err){
-                console.log("TestApi fail:", err)
+                console.log("TestApi fail:", err);
             }
         });
     }

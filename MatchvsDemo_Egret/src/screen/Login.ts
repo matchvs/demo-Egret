@@ -218,7 +218,7 @@ class Login extends eui.Component implements  eui.UIComponent {
             return;
         }
         let mvshttp:MvsHttpApi = new MvsHttpApi();
-        mvshttp.thirdBind("123456", "ENGICLMEGIOPTNNMJ", (res, err)=>{
+        mvshttp.thirdBind(wxUserInfo.openInfo.openid, wxUserInfo.openInfo.session_key, (res, err)=>{
             if(res !== null){
                 let repData = res;
                 if (repData.status == 0){
