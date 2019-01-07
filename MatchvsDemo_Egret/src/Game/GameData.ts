@@ -2,9 +2,9 @@ class GameData {
     public static CHANNEL = "MatchVS";
     public static DEFAULT_ENV = "alpha";
     public static ENVIRONMENT = { "dev": "alpha", "pro": "release" }
-    public static gameID: number = 201489;//201489;
-    public static appkey: string = "4fb6406305f44f1aad0c40e5946ffe3d";//4fb6406305f44f1aad0c40e5946ffe3d
-    public static secretKey: string = "5035d62b75bd4941b182579f2b8fc12c";//5035d62b75bd4941b182579f2b8fc12c
+    public static gameID: number = 2016216;//201489;
+    public static appkey: string = "bf9e5d8dda8f4d9699ff8b0e0fc58c19#M";//4fb6406305f44f1aad0c40e5946ffe3d
+    public static secretKey: string = "134d4f2d91f04deead191761d08a7858";//5035d62b75bd4941b182579f2b8fc12c
 
     public static gameUser: GameUser = new GameUser();
     public static playerUserIds: Array<GameUser> = [];
@@ -38,7 +38,7 @@ class GameData {
     public static number3: string = "";
     public static width: number;
     public static height: number;
-    public static playerTime: number = 60;
+    public static playerTime: number = 600;
     public static roomPropertyType = { "mapA": "mapA", "mapB": "mapB" };
     public static roomPropertyValue = "mapA";
     public static createRoomInfo = new MsCreateRoomInfo("MatchvsDemoEgret", 3, 0, 0, 1, "mapA");

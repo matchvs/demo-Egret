@@ -1,7 +1,7 @@
 /**************************************************************************************************
  * 								Matchvs SDK														  *
  *                                                                                     *
- * 								2018-12-21											        	  *
+ * 								2019-01-07											        	  *
  * 								https://www.matchvs.com/home									  *
  **************************************************************************************************/
 /* ================ MVS.js ================= */
@@ -11,7 +11,7 @@ var MVS = (function (_obj) {
         version: "",
         Game: {
             id: 0,
-            appkey: "",
+            appkey: ""
         },
         DEBUG: true,
         IsWss: false,
@@ -45,15 +45,19 @@ var MVS = (function (_obj) {
             MINPLAYER_LIMIT: 2
         },
         Host: {
+            MAIN_URL: "https://matchvssdk.matchvs.com",
             HOST_GATWAY_ADDR: "",
             HOST_HOTEL_ADDR: "",
             HOST_WATCH_ADDR: "",
-            GETHOSTLIST_URL: "http://sdk.matchvs.com",
-            REGISTER_USER_URL: "",
             CMSNS_URL: "",
+            VS_USER_URL: "",
             VS_OPEN_URL: "",
             VS_PAY_URL: "",
             VS_PRODUCT_URL: ""
+        },
+        APIPATH: {
+            HOSTLIST: "/v1/gateway/query",
+            REGISTERUSER: "/wc3/regit.do"
         },
         TgRoomType: {
             NRoom: -1,
@@ -94,8 +98,8 @@ function getNowFormatDate() {
 MatchvsLog.openLog = function () {
     console.log("---- open log ----");
     if (typeof (wx) === "undefined") {
-        MatchvsLog.logI = console.log.bind(console, "[INFO][Matchvs] " + " ");
-        MatchvsLog.logE = console.error.bind(console, "[ERROR][Matchvs] " + " ");
+        MatchvsLog.logI = console.log.bind(console, "[INFO][Matchvs] ");
+        MatchvsLog.logE = console.error.bind(console, "[ERROR][Matchvs] ");
     }
     else {
         MatchvsLog.logI = function () {
@@ -153,6 +157,9 @@ MatchvsLog.openLog(); //default, the log is opening
     mvs.ENGE_STATE = STATE_EM;
     function MvsState() {
         var state = STATE_EM.NONE;
+        this.ReSet = function () {
+            state = STATE_EM.NONE;
+        };
         this.SetState = function (value) {
             state |= value;
         };
@@ -192,73 +199,272 @@ MatchvsLog.openLog(); //default, the log is opening
                 return -10; //正在离开房间
             if (IsState(STATE_EM.LEAVE_WATCHING))
                 return -14; //正在离开匹配
+            return 0;
         };
-        this.JoinRoomIng = function () {
-            this.SetState(STATE_EM.JOIN_ROOMING);
-        };
-        this.DelJoinRoomIng = function () {
-            this.SetState(STATE_EM.JOIN_ROOMING);
-        };
-        /**
-         *  设置为初始化状态
-         * @constructor
-         */
-        this.SetInitState = function () {
+        this.SetInit = function () {
             state = STATE_EM.NONE;
             this.SetState(STATE_EM.HAVE_INIT);
+        };
+        this.SetIniting = function () {
+            state = STATE_EM.NONE;
+            this.SetState(STATE_EM.INITING);
+        };
+        this.SetLogining = function () {
+            this.DelState(STATE_EM.HAVE_LOGIN);
+            this.SetState(STATE_EM.LOGINING);
+        };
+        this.SetLogin = function () {
+            this.DelState(STATE_EM.LOGINING);
+            this.SetState(STATE_EM.HAVE_LOGIN);
         };
         /**
          * 判断是否已经初始化
          * @returns {number}
          * @constructor
          */
-        this.Init = function () {
-            if (IsState(STATE_EM.HAVE_INIT) === false) {
+        this.HaveInit = function () {
+            if (IsState(STATE_EM.HAVE_INIT) === false)
                 return -2;
-            }
+            if (IsState(STATE_EM.INITING))
+                return -3;
             return 0;
         };
         /**
-         * 登录接口状态判断
-         * @returns {number}
+         * 判断是否已经登录 0 代表已经登录
+         * @returns {number} 0 已经登录 -9 没登录
          * @constructor
          */
         this.HaveLogin = function () {
-            var resNo = this.Init();
+            var resNo = this.HaveInit();
+            if (resNo !== 0)
+                return resNo;
+            if (!IsState(STATE_EM.HAVE_LOGIN))
+                return -4; //未登录
+            return 0;
+        };
+        /**
+         * 登录的时候状态监测
+         * @returns {number}
+         * @constructor
+         */
+        this.LoginCheck = function () {
+            var resNo = this.StateDoing();
             if (resNo < 0)
                 return resNo;
-            if ((resNo = this.StateDoing()) < 0)
+            resNo = this.HaveInit();
+            if (resNo < 0)
                 return resNo;
             if (IsState(STATE_EM.HAVE_LOGIN))
-                return -6;
+                return -6; //已登录，未进入房间
+            return 0;
+        };
+        this.SetJoinRooming = function () {
+            this.SetState(STATE_EM.JOIN_ROOMING);
+        };
+        this.SetInRoom = function () {
+            this.SetState(STATE_EM.IN_ROOM);
+        };
+        this.SetCreateRoom = function () {
+            this.DelState(STATE_EM.IN_ROOM);
+            this.SetState(STATE_EM.CREATEROOM);
+        };
+        this.DelCreateRoom = function () {
+            this.DelState(STATE_EM.CREATEROOM);
         };
         /**
-         * 房间内状态判断
+         *
+         * @returns {boolean}
+         * @constructor
+         */
+        this.IsCreateRoom = function () {
+            return IsState(STATE_EM.CREATEROOM);
+        };
+        this.DelJoinRooming = function () {
+            this.DelState(STATE_EM.JOIN_ROOMING);
+        };
+        /**
+         *
+         * @returns {boolean}
+         * @constructor
+         */
+        this.IsJoinRooming = function () {
+            return IsState(STATE_EM.JOIN_ROOMING);
+        };
+        this.DelInRoom = function () {
+            this.DelState(STATE_EM.CREATEROOM);
+            this.DelState(STATE_EM.JOIN_ROOMING);
+            this.DelState(STATE_EM.IN_ROOM);
+            this.DelState(STATE_EM.LEAVE_ROOMING);
+            this.DelState(STATE_EM.LEAVE_WATCHING);
+            this.DelState(STATE_EM.IN_WATCH);
+            this.DelState(STATE_EM.IN_ROOM);
+        };
+        /**
+         * 判断是否已经在房间里面
          * @returns {number}
          * @constructor
          */
-        this.InRoom = function () {
+        this.HaveInRoom = function () {
             var resNo = this.HaveLogin();
             if (resNo < 0)
                 return resNo;
-            if (IsState(STATE_EM.IN_ROOM))
-                return -8; //在房间中
-            if (IsState(STATE_EM.IN_TEAM))
-                return -15; //在队伍中
-        };
-        /**
-         * 判断是否不在房间
-         * @returns {number}
-         * @constructor
-         */
-        this.NoInRoom = function () {
-            var resNo = this.HaveLogin();
+            resNo = this.StateDoing();
             if (resNo < 0)
                 return resNo;
             if (!IsState(STATE_EM.IN_ROOM))
-                return -6; //在房间中
+                return -6; // 已登录，未进入房间
+            return 0;
+        };
+        /**
+         * 或创建加入房间的时候监测
+         * @returns {*}
+         * @constructor
+         */
+        this.InRoomCheck = function () {
+            var resNo = this.HaveLogin();
+            if (resNo < 0)
+                return resNo;
+            resNo = this.StateDoing();
+            if (resNo < 0)
+                return resNo;
+            if (IsState(STATE_EM.IN_ROOM))
+                return -8; //已经在房间
+            if (IsState(STATE_EM.IN_WATCH))
+                return -8;
+            return 0;
+        };
+        /**
+         * 判断是否正在重新连接
+         * @returns {number}
+         * @constructor
+         */
+        this.IsReconnecting = function () {
+            if (IsState(STATE_EM.RECONNECTING))
+                return -9;
+            return 0;
+        };
+        /**
+         *
+         * @returns {number}
+         * @constructor
+         */
+        this.ReconnectCheck = function () {
+            var resNo = this.HaveInit();
+            if (resNo < 0)
+                return resNo;
+            if (IsState(STATE_EM.RECONNECTING))
+                return -9;
+            if (IsState(STATE_EM.IN_ROOM))
+                return -8;
+            return 0;
+        };
+        /**
+         * 设置为正在重连
+         * @constructor
+         */
+        this.SetReconnecting = function () {
+            this.SetState(STATE_EM.RECONNECTING);
+        };
+        /**
+         * 清理正在重连
+         * @constructor
+         */
+        this.DelReconnecting = function () {
+            this.DelState(STATE_EM.RECONNECTING);
+        };
+        /**
+         *
+         * @returns {number}
+         * @constructor
+         */
+        this.LeaveRoomCheck = function () {
+            var resNo = this.HaveLogin();
+            if (resNo < 0)
+                return resNo;
+            resNo = this.StateDoing();
+            if (resNo < 0)
+                return resNo;
+            return 0;
+        };
+        this.SetLeaveRooming = function () {
+            this.SetState(STATE_EM.LEAVE_ROOMING);
+        };
+        /**
+         *
+         * @returns {boolean}
+         * @constructor
+         */
+        this.IsLeaveRooming = function () {
+            return IsState(STATE_EM.LEAVE_ROOMING);
+        };
+        this.SetLoginOuting = function () {
+            this.SetState(STATE_EM.LOGOUTING);
+        };
+        /**
+         *
+         * @returns {boolean}
+         * @constructor
+         */
+        this.IsLoginOuting = function () {
+            return IsState(STATE_EM.LOGOUTING);
+        };
+        this.SetJoinWatching = function () {
+            this.SetState(STATE_EM.IN_WATCHING); //正在加入观战
+        };
+        this.DelJoinWatching = function () {
+            this.DelState(STATE_EM.IN_WATCHING); //正在加入观战
+        };
+        this.SetInWatch = function () {
+            this.SetState(STATE_EM.IN_WATCH);
+        };
+        /**
+         *
+         * @returns {number}
+         * @constructor
+         */
+        this.HaveInWatch = function () {
+            var resNo = this.HaveLogin();
+            if (resNo !== 0)
+                return resNo;
+            resNo = this.StateDoing();
+            if (resNo !== 0)
+                return resNo;
+            if (!IsState(STATE_EM.IN_WATCH))
+                return -6;
+            return 0;
+        };
+        /**
+         *
+         * @returns {number}
+         * @constructor
+         */
+        this.InWatchCheck = function () {
+            var resNo = this.HaveLogin();
+            if (resNo !== 0)
+                return resNo;
+            resNo = this.StateDoing();
+            if (resNo !== 0)
+                return resNo;
+            if (IsState(STATE_EM.IN_WATCH))
+                return -8;
+            return 0;
+        };
+        this.SetTeamMatching = function () {
+            this.SetState(STATE_EM.TEAMMATCHING);
+        };
+        this.DelTeamMatching = function () {
+            this.DelState(STATE_EM.TEAMMATCHING);
+        };
+        /**
+         *
+         * @returns {boolean}
+         * @constructor
+         */
+        this.IsTeamMatching = function () {
+            return IsState(STATE_EM.TEAMMATCHING);
         };
     }
+    mvs.MvsState = MvsState;
 })(MVS || {});
 /* ================ md5.js ================= */
 /*
@@ -671,66 +877,6 @@ function LocalStore_Load(key) {
 }
 function isIE() {
     return !!window.ActiveXObject || "ActiveXObject" in window;
-}
-/**
- * 检测engine状态
- * @param engineState
- * @param roomLoock
- * @param type
- * @returns {number}
- */
-function commEngineStateCheck(engineState, type) {
-    var resNo = 0;
-    if ((engineState & MVS.ENGE_STATE.HAVE_INIT) !== MVS.ENGE_STATE.HAVE_INIT)
-        return resNo = -2; //未初始化
-    if ((engineState & MVS.ENGE_STATE.INITING) === MVS.ENGE_STATE.INITING)
-        return resNo = -3; //正在初始化
-    if ((engineState & MVS.ENGE_STATE.HAVE_LOGIN) !== MVS.ENGE_STATE.HAVE_LOGIN)
-        return resNo = -4; //未登录
-    if ((engineState & MVS.ENGE_STATE.LOGINING) === MVS.ENGE_STATE.LOGINING)
-        return resNo = -5; //正在登录
-    if ((engineState & MVS.ENGE_STATE.CREATEROOM) === MVS.ENGE_STATE.CREATEROOM)
-        return resNo = -7; //在创建房间
-    if ((engineState & MVS.ENGE_STATE.JOIN_ROOMING) === MVS.ENGE_STATE.JOIN_ROOMING)
-        return resNo = -7; //正在加入房间
-    if ((engineState & MVS.ENGE_STATE.LOGOUTING) === MVS.ENGE_STATE.LOGOUTING)
-        return resNo = -11; // 正在登出
-    if ((engineState & MVS.ENGE_STATE.IN_WATCHING) === MVS.ENGE_STATE.IN_WATCHING)
-        return resNo = -12; //正在加入观战
-    if ((engineState & MVS.ENGE_STATE.TEAMMATCHING) === MVS.ENGE_STATE.TEAMMATCHING)
-        return resNo = -13; //在组队匹配中
-    if (type === 1) {
-        if ((engineState & MVS.ENGE_STATE.IN_ROOM) !== MVS.ENGE_STATE.IN_ROOM)
-            resNo = -6; //没有进入房间
-        if ((engineState & MVS.ENGE_STATE.LEAVE_ROOMING) === MVS.ENGE_STATE.LEAVE_ROOMING)
-            resNo = -10; //正在离开房间
-    }
-    else if (type === 2) {
-        if ((engineState & MVS.ENGE_STATE.IN_ROOM) === MVS.ENGE_STATE.IN_ROOM)
-            resNo = -8; //已经在房间
-        if ((engineState & MVS.ENGE_STATE.IN_WATCH) === MVS.ENGE_STATE.IN_WATCH)
-            resNo = -8;
-        if ((engineState & MVS.ENGE_STATE.LEAVE_ROOMING) === MVS.ENGE_STATE.LEAVE_ROOMING)
-            resNo = -10; //正在离开房间
-        if ((engineState & MVS.ENGE_STATE.LEAVE_WATCHING) === MVS.ENGE_STATE.LEAVE_WATCHING)
-            resNo = -14; //正在离开房间
-    }
-    else if (type === 3) {
-        if ((engineState & MVS.ENGE_STATE.LEAVE_ROOMING) === MVS.ENGE_STATE.LEAVE_ROOMING)
-            resNo = -10; //正在离开房间
-        if ((engineState & MVS.ENGE_STATE.LEAVE_WATCHING) === MVS.ENGE_STATE.LEAVE_WATCHING)
-            resNo = -10; //正在离开房间
-    }
-    else if (type === 4) {
-        if ((engineState & MVS.ENGE_STATE.IN_WATCH) !== MVS.ENGE_STATE.IN_WATCH)
-            resNo = -6; //没有进入观战房间
-        if ((engineState & MVS.ENGE_STATE.LEAVE_WATCHING) === MVS.ENGE_STATE.LEAVE_WATCHING)
-            resNo = -10; //正在离开房间
-    }
-    if (resNo !== 0) {
-        MatchvsLog.logI("error code:" + resNo + " see the error documentation : http://www.matchvs.com/service?page=js");
-    }
-    return resNo;
 }
 (function (_obj) {
     var MsUtil = {
@@ -28044,11 +28190,12 @@ var MVS = (function (_super) {
      * @param enableGS {number} 0-GS不参与 1-GS参与
      * @constructor
      */
-    _obj.MsSetFrameSyncNotify = function (frameRate, startIndex, timestamp, enableGS) {
+    _obj.MsSetFrameSyncNotify = function (frameRate, startIndex, timestamp, enableGS, cacheFrameMS) {
         this.frameRate = frameRate;
         this.startIndex = startIndex;
         this.timestamp = timestamp;
         this.enableGS = enableGS;
+        this.cacheFrameMS = cacheFrameMS;
     };
     /**
      * 设置游戏观战的数据
@@ -28295,6 +28442,12 @@ function MsRoomJoin(joinType, userID, roomID, gameID, maxPlayer, mode, canWatch,
     this.roomProperty = roomProperty; //新加2018-10-31
     MatchvsLog.logI(this + " MsRoomJoin:" + JSON.stringify(this));
 }
+/**
+ *
+ * @param {number} status
+ * @param {string} cpProto
+ * @constructor
+ */
 function MsJoinOverRsp(status, cpProto) {
     this.status = status;
     this.cpProto = cpProto;
@@ -28964,15 +29117,19 @@ function MsReopenRoomNotify(roomID, userID, cpProto) {
                 }
                 if (window.WebSocket) {
                     this.socket = new WebSocket(host);
+                    this.socket.binaryType = 'arraybuffer';
                     this.socket.hashcode = new Date().getMilliseconds();
                     MatchvsLog.logI("try to create a socket:" + this.mHost + " socket is " + this.socket.hashcode);
                     this.socket.onmessage = function (event) {
+                        //console.log("websocket onmessage:", Date.now());
                         if (typeof FileReader !== 'undefined' && (event.data instanceof Blob)) {
+                            console.log("websocket onmessage FileReader:", Date.now());
                             var reader = new FileReader();
                             reader.readAsArrayBuffer(event.data);
                             //  当读取操作成功完成时调用.
                             reader.onload = function (evt) {
                                 if (evt.target.readyState === FileReader.DONE) {
+                                    console.log("websocket onmessage readyState:", Date.now());
                                     var dataView = new DataView(reader.result);
                                     this.mCallBack.onMsg(dataView);
                                 }
@@ -28982,8 +29139,6 @@ function MsReopenRoomNotify(roomID, userID, cpProto) {
                             }.bind(this);
                         }
                         else if (event.data instanceof ArrayBuffer) {
-                            //for CC jsb_websocket.cpp.onMessage()
-                            // console.log("[INFO] event "+event +" json:"+JSON.stringify(event));
                             var dataView = new DataView(event.data);
                             this.mCallBack.onMsg(dataView);
                         }
@@ -29483,6 +29638,7 @@ function MatchvsHeader() {
     ptDesc[ProtoCmd.TEAM_MATCH_RSP] = pt_stream.TeamMatchRsp;
     ptDesc[ProtoCmd.TEAM_MATCH_RESULT_NOTIFY] = pt_stream.TeamMatchResultNotify;
     ptDesc[ProtoCmd.TEAM_MATCH_START_NOTIFY] = pt_stream.TeamMatchStartNotify;
+    ptDesc[ProtoCmd.GET_CACHEdATA_RSP] = pt_stream.GetCacheDataAck;
     /**
      * Encoder && Decoder
      * @constructor
@@ -29561,26 +29717,23 @@ function MatchvsHeader() {
         this.init = function () {
         };
         /**
-         * 登录
-         * @userID {uint32} value 用户ID
-         * @userToken {uint64} value 用户的token值
-         * @gameID {uint32} value 游戏ID
-         * @gameVersion {uint16} value  游戏版本
-         * @app_key { !Array.<string> } app_key 游戏key,通过官网注册获得
-         * @app_secret { !Array.<string>  app_secret 游戏secret，通过官网注册获得
-         * @deviceID { !Array.<string> } deviceID 设备ID
-         * @gateway_id gateway_id
+         *
+         * @param {number} userID 用户ID
+         * @param {string} token 用户的token值
+         * @param {number} gameID 游戏ID
+         * @param {string} appkey  游戏key,通过官网注册获得
+         * @param {string} deviceID 设备ID
          * @returns {DataView}
          */
-        this.login = function (userID, userToken, gameID, gameVersion, app_key, deviceID) {
-            var md5Token = hex_md5(userToken);
-            var toMd5 = format("%s&UserID=%s&GameID=%s&VersionSdk=%d&%s", app_key, userID, gameID, 3, md5Token);
+        this.login = function (userID, token, gameID, appkey, deviceID) {
+            var md5Token = hex_md5(token);
+            var toMd5 = format("%s&UserID=%s&GameID=%s&VersionSdk=%d&%s", appkey, userID, gameID, 3, md5Token);
             mUserID = userID;
             var md5 = hex_md5(toMd5);
             MatchvsLog.logI("[Sign]" + toMd5 + "->" + md5);
             var message = new pt_stream.LoginReq();
             message.setGameid(Number(gameID));
-            message.setAppkey(app_key);
+            message.setAppkey(appkey);
             message.setToken(md5Token);
             message.setSdkver("3");
             message.setDeviceid(deviceID);
@@ -29590,36 +29743,6 @@ function MatchvsHeader() {
             MatchvsLog.logI("[REQ]login...userID:" + userID);
             isLogin = true;
             return this.fillHeader(dataArray, MATCHVS_USER_LOGIN_REQ);
-        };
-        /**
-         * 用户网关速度暂时不使用
-         * @userID {uint32} value 用户ID
-         * @gameID {uint32} value 游戏ID
-         * @userToken {uint64} value 用户的token值
-         * @versionSDK {uint16} value sdk版本号
-         * @gameVersion {uint16} value  游戏版本
-         * @returns {DataView}
-         */
-        this.speed = function (userID, gameID, userToken, versionSDK, gameVersion) {
-            var buffer = new ArrayBuffer(48 + 1);
-            var dataView = new DataView(buffer);
-            var _user = Number(userID);
-            var _gameID = Number(gameID);
-            dataView.setUint32(0, _user, true); //userID
-            dataView.setUint32(4, _gameID, true); //gameID
-            for (var i = 0; i < 32; i++) {
-                dataView.setUint8(8 + i, userToken.charCodeAt(i)); //token
-            }
-            dataView.setUint16(8 + 32, versionSDK, true); //version sdk
-            dataView.setUint16(8 + 32 + 2, gameVersion, true); //game version
-            dataView.setUint32(8 + 32 + 2 + 2, 1, true); //echo size
-            dataView.setUint8(8 + 32 + 2 + 2 + 4, 0x01); //echo
-            var array = new Uint8Array(dataView.byteLength);
-            for (var j = 0; j < dataView.byteLength; j++) {
-                array[j] = dataView.getUint8(j);
-            }
-            //append binary head and pt_stream buffer;
-            return this.fillHeader(array, MATCHVS_USER_GATEWAY_SPEED_REQ);
         };
         this.roomCreate = function (gameID, pRoomInfo, pPlayInfo, watchSet) {
             var message = new pt_stream.CreateRoomReq();
@@ -29939,13 +30062,14 @@ function MatchvsHeader() {
          */
         this.setFrameSync = function (info) {
             var reqEx = new pt_stream.SetFrameSyncRate();
+            MVS.DEBUG && console.log("SetFrameSyncRate :" + JSON.stringify(info));
             reqEx.setGameid(info.gameID);
             reqEx.setRoomid(info.roomID);
             reqEx.setPriority(info.priority);
             reqEx.setFramerate(info.frameRate);
             reqEx.setFrameidx(info.frameidx);
             reqEx.setEnablegs(info.enableGS);
-            // reqEx.setCacheframems(info.cacheMs);
+            reqEx.setCacheframems(info.cacheMs);
             var bytes = reqEx.serializeBinary();
             return this.fillHeader(bytes, CMD_SET_FRAME_SYNCRATE_CMDID);
         };
@@ -30081,6 +30205,7 @@ function MatchvsHeader() {
         };
         /** 创建组队
          * @param {number} gameID
+         * @param {object} team
          * @param {string} team.teamID
          * @param {string} team.password
          * @param {number} team.capacity
@@ -30197,6 +30322,22 @@ function MatchvsHeader() {
             var bytes = req.serializeBinary();
             return this.fillHeader(bytes, ProtoCmd.TEAM_MATCH_REQ);
         };
+        /**
+         *
+         * @param {number} info.gameID
+         * @param {string} info.roomID
+         * @param {number} info.cacheFrameMS
+         * @constructor
+         */
+        this.GetOffLineData = function (info) {
+            MVS.DEBUG && console.log("GetOffLineData args:", Date.now());
+            var req = new pt_stream.GetCacheData();
+            req.setCacheframems(info.cacheFrameMS);
+            req.setRoomid(info.roomID);
+            req.setGameid(info.gameID);
+            var bytes = req.serializeBinary();
+            return this.fillHeader(bytes, ProtoCmd.GET_CACHEDATA_REQ);
+        };
     }
     _obj.MatchvsProtocol = MatchvsProtocol;
 })(MVS || {});
@@ -30236,7 +30377,7 @@ var NetWorkCallBackImp = function (engine) {
         };
         var dohandle = this.engineWorkMap[packet.header.cmd];
         MVS.mtaReport && MVS.mtaReport.Report(packet.header.cmd);
-        // console.log("[数据通信协议命令]["+packet.header.cmd+"]");
+        // console.log("[数据通信协议命令]["+packet.header.cmd+"]:"+Date.now());
         if (dohandle) {
             dohandle.doSubHandle(event, engine);
         }
@@ -30275,7 +30416,8 @@ var NetWorkCallBackImp = function (engine) {
         engine.mCntRoomType = MVS.TgRoomType.NRoom;
         engine.mRsp.onDisConnect && engine.mRsp.onDisConnect(host);
         if (host.endsWith(MVS.Host.HOST_GATWAY_ADDR)) {
-            engine.mEngineState = MVS.ENGE_STATE.HAVE_INIT;
+            engine.mState.SetInit();
+            MatchvsLog.logI("gateway disconnect:" + Date.now());
             if (event && event.code && (event.code === MvsCode.CODE_1000 || event.code === MvsCode.CODE_1005)) {
                 MatchvsLog.logI("gateway close is friend");
             }
@@ -30292,22 +30434,21 @@ var NetWorkCallBackImp = function (engine) {
                 MatchvsLog.logI("live close is friend");
             }
             else {
-                engine.mEngineState = MVS.ENGE_STATE.HAVE_INIT;
+                engine.mState.SetInit();
                 this.clearAllBeatTimer();
                 engine.mWatchNetwrok && engine.mWatchNetwrok.close();
                 MVS.ErrorRspWork(engine.mRsp.errorResponse, MvsCode.NetworkErr, "(" + event.code + ") " + "watch network error");
             }
             MVS.ticker.clearInterval(this.watchTimer);
-            engine.mEngineState &= ~MVS.ENGE_STATE.IN_WATCHING;
-            engine.mEngineState &= ~MVS.ENGE_STATE.IN_WATCH;
+            engine.mState.DelInRoom();
         }
         else if (MVS.Host.HOST_HOTEL_ADDR !== "" && host.endsWith(MVS.Host.HOST_HOTEL_ADDR)) {
-            MatchvsLog.logI("hotel disconnect");
+            MatchvsLog.logI("hotel disconnect:" + Date.now());
             if (event && event.code && (event.code === MvsCode.CODE_1000 || event.code === MvsCode.CODE_1005)) {
                 MatchvsLog.logI("hotel close is friend");
             }
             else {
-                engine.mEngineState = MVS.ENGE_STATE.HAVE_INIT;
+                engine.mState.SetInit();
                 this.clearAllBeatTimer();
                 engine.mGTWNetwork && engine.mGTWNetwork.close();
                 MVS.ErrorRspWork(engine.mRsp.errorResponse, MvsCode.NetworkErr, "(" + event.code + ") " + "hotel network error");
@@ -30315,12 +30456,8 @@ var NetWorkCallBackImp = function (engine) {
             //如果房间服务器断开了(包括异常断开情况)就把定时器关掉
             MVS.ticker.clearInterval(this.mHotelTimer);
             //退出房间状态取消,这里只能一个个状态取消，不能使用 = 号，不然出现先断开gateway 再断开 hotel状态码就不对
-            engine.mEngineState &= ~MVS.ENGE_STATE.JOIN_ROOMING;
-            engine.mEngineState &= ~MVS.ENGE_STATE.LEAVE_ROOMING;
-            engine.mEngineState &= ~MVS.ENGE_STATE.IN_ROOM;
-            engine.mEngineState &= ~MVS.ENGE_STATE.CREATEROOM;
+            engine.mState.DelInRoom();
         }
-        MatchvsLog.logI("EngineState", engine.mEngineState);
     };
 };
 (function (_obj) {
@@ -30387,6 +30524,7 @@ var NetWorkCallBackImp = function (engine) {
         this[MVS.ProtoCmd.TEAM_MATCH_RSP] = new TeamMatchRspWork();
         this[MVS.ProtoCmd.TEAM_MATCH_RESULT_NOTIFY] = new TeamMatchResultNotifyWork();
         this[MVS.ProtoCmd.TEAM_MATCH_START_NOTIFY] = new TeamMatchStartNotifyWork();
+        this[MVS.ProtoCmd.GET_CACHEdATA_RSP] = new GetOffLineDataRspWork();
     }
     _obj.EngineNetworkMap = EngineNetworkMap;
     /**
@@ -30414,29 +30552,27 @@ var NetWorkCallBackImp = function (engine) {
             var status = event.payload.getStatus();
             MVS.ccReport && MVS.ccReport.loginRsp(status);
             if (status === 200) {
-                engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
-            }
-            else {
-                engine.mEngineState &= ~MVS.ENGE_STATE.LOGINING;
-                engine.mEngineState &= ~MVS.ENGE_STATE.RECONNECTING;
-                ErrorRspWork(engine.mRsp.errorResponse, status, "login is fail");
-            }
-            engine.mEngineState &= ~MVS.ENGE_STATE.LOGINING;
-            engine.mRecntRoomID = event.payload.getRoomid();
-            if (((engine.mEngineState & MVS.ENGE_STATE.RECONNECTING) === MVS.ENGE_STATE.RECONNECTING)) {
-                if (engine.mRecntRoomID !== "0") {
-                    var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, engine.mMsPubArgs.userID, engine.mRecntRoomID, engine.mMsPubArgs.gameID, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
-                    var reconbuf = engine.mProtocol && engine.mProtocol.joinRoomSpecial(roomJoin);
-                    engine.mGTWNetwork && engine.mGTWNetwork.send(reconbuf);
+                engine.mState.SetLogin();
+                engine.mRecntRoomID = event.payload.getRoomid();
+                if (engine.mState.IsReconnecting() !== 0) {
+                    if (engine.mRecntRoomID !== "0") {
+                        var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, engine.mUserID, engine.mRecntRoomID, MVS.Game.id, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
+                        var reconbuf = engine.mProtocol && engine.mProtocol.joinRoomSpecial(roomJoin);
+                        engine.mGTWNetwork && engine.mGTWNetwork.send(reconbuf);
+                    }
+                    else {
+                        engine.mState.DelReconnecting();
+                        //201 重连成功但是不在房间
+                        engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(MvsCode.CODE_201, [], {});
+                    }
                 }
                 else {
-                    engine.mEngineState &= ~MVS.ENGE_STATE.RECONNECTING;
-                    //201 重连成功但是不在房间
-                    engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(MvsCode.CODE_201, [], {});
+                    engine.mRsp.loginResponse(new MsLoginRsp(status, engine.mRecntRoomID));
                 }
             }
             else {
-                engine.mRsp.loginResponse(new MsLoginRsp(status, engine.mRecntRoomID));
+                engine.mState.SetInit();
+                ErrorRspWork(engine.mRsp.errorResponse, status, "login or reconnect is fail");
             }
         };
     }
@@ -30452,8 +30588,7 @@ var NetWorkCallBackImp = function (engine) {
                 engine.roomCheckIn(event.payload.getBookinfo(), event.payload.getRoominfo());
             }
             else {
-                engine.mEngineState &= ~MVS.ENGE_STATE.JOIN_ROOMING;
-                engine.mEngineState &= ~MVS.ENGE_STATE.RECONNECTING;
+                engine.mState.DelJoinRooming();
                 ErrorRspWork(engine.mRsp.errorResponse, status, "join room failed ");
                 engine.mRsp.joinRoomResponse && engine.mRsp.joinRoomResponse(status, null, null);
             }
@@ -30471,7 +30606,7 @@ var NetWorkCallBackImp = function (engine) {
                 engine.roomCheckIn(event.payload.getBookinfo(), event.roomInfo);
             }
             else {
-                engine.mEngineState &= ~MVS.ENGE_STATE.CREATEROOM;
+                engine.mState.DelCreateRoom();
                 ErrorRspWork(engine.mRsp.errorResponse, event.payload.getStatus(), "");
                 engine.mRsp.createRoomResponse && engine.mRsp.createRoomResponse(new MsCreateRoomRsp(event.payload.getStatus(), "", 0));
             }
@@ -30482,8 +30617,7 @@ var NetWorkCallBackImp = function (engine) {
         this.doSubHandle = function (event, engine) {
             var status = event.payload.getStatus();
             if (status !== 200) {
-                engine.mEngineState = MVS.ENGE_STATE.HAVE_INIT;
-                engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
+                engine.mState.SetLogin();
                 ErrorRspWork(engine.mRsp.errorResponse, status, "check in error");
                 engine.mHotelNetWork && engine.mHotelNetWork.close();
             }
@@ -30498,23 +30632,23 @@ var NetWorkCallBackImp = function (engine) {
                 });
                 //房间信息
                 var roominfo = new MsRoomInfo(engine.mRoomInfo.getRoomid(), utf8ByteArrayToString(engine.mRoomInfo.getRoomproperty()), engine.mRoomInfo.getOwner(), engine.mRoomInfo.getState());
-                engine.mEngineState |= MVS.ENGE_STATE.IN_ROOM;
-                if ((engine.mEngineState & MVS.ENGE_STATE.CREATEROOM) === MVS.ENGE_STATE.CREATEROOM) {
-                    engine.mEngineState &= ~MVS.ENGE_STATE.CREATEROOM;
+                engine.mState.SetInRoom();
+                if (engine.mState.IsCreateRoom()) {
+                    engine.mState.DelCreateRoom();
                     //创建房间
                     engine.mRsp.createRoomResponse && engine.mRsp.createRoomResponse(new MsCreateRoomRsp(status, engine.mRoomInfo.getRoomid(), engine.mRoomInfo.getOwner()));
                 }
-                else if ((engine.mEngineState & MVS.ENGE_STATE.JOIN_ROOMING) === MVS.ENGE_STATE.JOIN_ROOMING) {
-                    engine.mEngineState &= ~MVS.ENGE_STATE.JOIN_ROOMING;
+                else if (engine.mState.IsJoinRooming()) {
+                    engine.mState.DelJoinRooming();
                     //加入房间
                     engine.mRsp.joinRoomResponse && engine.mRsp.joinRoomResponse(status, roomUserList, roominfo);
                 }
-                else if ((engine.mEngineState & MVS.ENGE_STATE.RECONNECTING) === MVS.ENGE_STATE.RECONNECTING) {
-                    engine.mEngineState &= ~MVS.ENGE_STATE.RECONNECTING;
+                else if (engine.mState.IsReconnecting() !== 0) {
+                    engine.mState.DelReconnecting();
                     engine.mRsp.reconnectResponse && engine.mRsp.reconnectResponse(status, roomUserList, roominfo);
                 }
-                else if ((engine.mEngineState & MVS.ENGE_STATE.TEAMMATCHING) === MVS.ENGE_STATE.TEAMMATCHING) {
-                    engine.mEngineState &= ~MVS.ENGE_STATE.TEAMMATCHING;
+                else if (engine.mState.IsTeamMatching()) {
+                    engine.mState.DelTeamMatching();
                     engine.teamNotifyInfo.roomInfo = roominfo;
                     engine.mRsp.teamMatchResultNotify(engine.teamNotifyInfo);
                 }
@@ -30524,23 +30658,17 @@ var NetWorkCallBackImp = function (engine) {
     ;
     function CheckInRoomNtfyWork() {
         this.doSubHandle = function (event, engine) {
+            engine.mAllPlayers = event.payload.getCheckinsList();
             if (engine.joinRoomNotifyInfo) {
                 engine.mRsp.joinRoomNotify && engine.mRsp.joinRoomNotify(engine.joinRoomNotifyInfo);
             }
-            engine.mAllPlayers = event.payload.getCheckinsList();
-            // engine.mRsp.roomCheckInNotify && engine.mRsp.roomCheckInNotify(new MsCheckInNotify(
-            //     event.payload.getUserid(),
-            //     event.payload.getCheckinsList(),
-            //     event.payload.getPlayersList(),
-            //     event.payload.getMaxplayers())
-            // );
             engine.joinRoomNotifyInfo = null;
         };
     }
     ;
     function LeaveRoomRspWork() {
         this.doSubHandle = function (event, engine) {
-            engine.mEngineState &= ~MVS.ENGE_STATE.LEAVE_ROOMING;
+            engine.mState.DelInRoom();
             if (event.payload.getStatus() !== 200) {
                 ErrorRspWork(engine.mRsp.errorResponse, event.payload.getStatus(), "leave room fail");
             }
@@ -30548,7 +30676,6 @@ var NetWorkCallBackImp = function (engine) {
             engine.mRoomInfo = event.roomInfo;
             var leaveRoomRsp = new MsLeaveRoomRsp(event.payload.getStatus(), event.payload.getRoomid(), event.payload.getUserid(), event.payload.getCpproto());
             engine.mRsp.leaveRoomResponse && engine.mRsp.leaveRoomResponse(leaveRoomRsp);
-            engine.mEngineState &= ~MVS.ENGE_STATE.IN_ROOM;
         };
     }
     ;
@@ -30585,7 +30712,7 @@ var NetWorkCallBackImp = function (engine) {
         this.doSubHandle = function (event, engine) {
             //房间的心跳返回
             engine.mRsp.hotelHeartBeatRsp && engine.mRsp.hotelHeartBeatRsp(event.payload.getStatus());
-            MatchvsLog.logI("hotelHeartBeatRsp");
+            MatchvsLog.logI("hotelHeartBeatRsp:" + Date.now());
         };
     }
     ;
@@ -30640,10 +30767,10 @@ var NetWorkCallBackImp = function (engine) {
         this.doSubHandle = function (event, engine) {
             var gameid = event.payload.getGameid();
             var gsExist = event.payload.getGsexist();
-            //如果心跳存在视为已登录状态
-            engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
+            // //如果心跳存在视为已登录状态
+            // engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
             engine.mRsp.heartBeatResponse && engine.mRsp.heartBeatResponse(new MsHeartBeatResponse(gameid, gsExist));
-            MatchvsLog.logI("gatewayHeartBeatResponse");
+            MatchvsLog.logI("gatewayHeartBeatResponse:" + Date.now());
         };
     }
     ;
@@ -30690,8 +30817,7 @@ var NetWorkCallBackImp = function (engine) {
         this.doSubHandle = function (event, engine) {
             if (event.payload.getUserid().toString() === ("" + engine.mUserID) && event.hotelTimer != null) {
                 MVS.ticker.clearInterval(event.hotelTimer);
-                engine.mEngineState &= ~MVS.ENGE_STATE.IN_ROOM;
-                engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
+                engine.mState.SetLogin();
                 engine.mHotelNetWork.close();
             }
             engine.mRsp.kickPlayerNotify && engine.mRsp.kickPlayerNotify(new MsKickPlayerNotify(event.payload.getUserid(), event.payload.getSrcuserid(), utf8ByteArrayToString(event.payload.getCpproto()), event.payload.getOwner()));
@@ -30707,26 +30833,37 @@ var NetWorkCallBackImp = function (engine) {
     ;
     function SetFrameSyncNotifyWork() {
         this.doSubHandle = function (event, engine) {
-            var notify = new MVS.MsSetFrameSyncNotify(event.payload.getFramerate(), event.payload.getFrameidx(), event.payload.getTimestamp(), event.payload.getEnablegs());
+            var notify = new MVS.MsSetFrameSyncNotify(event.payload.getFramerate(), event.payload.getFrameidx(), event.payload.getTimestamp(), event.payload.getEnablegs(), event.payload.getCacheframems());
             engine.mRsp.setFrameSyncNotify && engine.mRsp.setFrameSyncNotify(notify);
         };
     }
     ;
     function SendFrameEventRspWork() {
         this.doSubHandle = function (event, engine) {
-            //MatchvsLog.logI("FrameBroadcastAck:"+event.payload);
             engine.mRsp.sendFrameEventResponse && engine.mRsp.sendFrameEventResponse(new MsSendFrameEventRsp(event.payload.getStatus()));
         };
     }
     ;
     function FrameDataNotifyWork() {
+        var counter = 0;
         this.doSubHandle = function (event, engine) {
             event.frameCache.unshift(new MsFrameItem(event.payload.getSrcuid(), utf8ByteArrayToString(event.payload.getCpproto()), event.payload.getTimestamp()));
         };
     }
     ;
     function FrameSyncNotifyWork() {
+        var flagtest = true;
+        var countUpdate = 0;
+        var startTime = Date.now();
+        var endTime = Date.now();
         this.doSubHandle = function (event, engine) {
+            countUpdate++;
+            endTime = Date.now();
+            if ((endTime - startTime) > 1000) {
+                startTime = endTime;
+                console.log("收到消息数：", countUpdate);
+                countUpdate = 0;
+            }
             var frameData = [];
             while (event.frameCache.length > 0) {
                 frameData.push(event.frameCache.pop());
@@ -30848,14 +30985,14 @@ var NetWorkCallBackImp = function (engine) {
             var res = event.payload;
             var status = res.getStatus();
             if (status !== 200) {
-                engine.mEngineState &= ~MVS.ENGE_STATE.IN_WATCHING;
+                engine.mState.DelJoinWatching();
                 ErrorRspWork(engine.mRsp.errorResponse, status, "join watch room error ");
                 engine.mRsp.joinWatchRoom && engine.mRsp.joinWatchRoom(status);
                 return;
             }
             var mBookInfo = res.getBookinfo();
             MVS.DEBUG && console.log("JoinWatchRoomRspWork bookInfo", mBookInfo);
-            MVS.Host.HOST_WATCH_ADDR = MVS.MsUtil.getLiveUrl(mBookInfo, engine.mGameID, res.getRoomid(), res.getSetid());
+            MVS.Host.HOST_WATCH_ADDR = MVS.MsUtil.getLiveUrl(mBookInfo, MVS.Game.id, res.getRoomid(), res.getSetid());
             engine.enterLiveRoom(res.getBookinfo(), res.getRoomid());
         };
     }
@@ -30898,7 +31035,7 @@ var NetWorkCallBackImp = function (engine) {
     ;
     function EnterLiveRoomRspWork() {
         this.doSubHandle = function (event, engine) {
-            engine.mEngineState &= ~MVS.ENGE_STATE.IN_WATCHING;
+            engine.mState.DelJoinWatching();
             var res = event.payload;
             var liveRsp = {};
             if (res.getStatus() !== 200) {
@@ -30906,7 +31043,7 @@ var NetWorkCallBackImp = function (engine) {
                 liveRsp = new MVS.MsJoinWatchRoomRsp(res.getStatus(), 0, "", {});
             }
             else {
-                engine.mEngineState |= MVS.ENGE_STATE.IN_WATCH;
+                engine.mState.SetInWatch();
                 var winfo = res.getWathchinfo();
                 var users = [];
                 engine.mCntRoomType = MVS.TgRoomType.WRoom;
@@ -31021,11 +31158,10 @@ var NetWorkCallBackImp = function (engine) {
                 else if (rsp.getTargetroomtype() == MVS.TgRoomType.WRoom) {
                     //断开hotel连接
                     MVS.ticker.clearInterval(event.hotelTimer);
-                    engine.mEngineState &= ~MVS.ENGE_STATE.IN_ROOM;
-                    engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
+                    engine.mState.SetLogin();
                     engine.mHotelNetWork && engine.mHotelNetWork.close();
                     //连接 live
-                    MVS.Host.HOST_WATCH_ADDR = MVS.MsUtil.getLiveUrl(mBookInfo, engine.mGameID, rsp.getRoomid(), rsp.getSetid());
+                    MVS.Host.HOST_WATCH_ADDR = MVS.MsUtil.getLiveUrl(mBookInfo, MVS.Game.id, rsp.getRoomid(), rsp.getSetid());
                     engine.enterLiveRoom(rsp.getBookinfo(), rsp.getRoomid());
                 }
             }
@@ -31073,16 +31209,19 @@ var NetWorkCallBackImp = function (engine) {
                 userlist.push({ userID: u.getUserid(), userProfile: utf8ByteArrayToString(u.getUserprofile()) });
             });
             var rsp = {
-                team: {
+                team: {},
+                status: status,
+                userList: userlist
+            };
+            if (teaminfo) {
+                rsp.team = {
                     teamID: teaminfo.getTeamid() || "0",
                     password: teaminfo.getPassword() || "",
                     capacity: teaminfo.getCapacity() || 0,
                     mode: teaminfo.getMode() || 0,
                     owner: teaminfo.getOwner() || 0
-                },
-                status: status,
-                userList: userlist
-            };
+                };
+            }
             engine.mRsp.joinTeamResponse && engine.mRsp.joinTeamResponse(rsp);
         };
     }
@@ -31127,7 +31266,9 @@ var NetWorkCallBackImp = function (engine) {
     ;
     function TeamMatchRspWork() {
         this.doSubHandle = function (event, engine) {
+            engine.mState.DelTeamMatching();
             var status = event.payload.getStatus();
+            engine.mState.DelTeamMatching();
             if (status !== 200) {
                 ErrorRspWork(engine.mRsp.errorResponse, status, "team match response error");
             }
@@ -31143,7 +31284,7 @@ var NetWorkCallBackImp = function (engine) {
             var status = event.payload.getStatus();
             if (status !== 200) {
                 ErrorRspWork(engine.mRsp.errorResponse, status, "team match error");
-                engine.mEngineState &= ~MVS.ENGE_STATE.TEAMMATCHING;
+                engine.mState.DelTeamMatching();
                 engine.mRsp.teamMatchResultNotify && engine.mRsp.teamMatchResultNotify({ status: status, brigades: {}, roomInfo: {} });
                 return 0;
             }
@@ -31187,7 +31328,7 @@ var NetWorkCallBackImp = function (engine) {
                 };
                 MVS.DEBUG && console.log(MVS.LgFormat("TeamMatchResultNotifyWork"), engine.teamNotifyInfo);
                 MVS.Host.HOST_HOTEL_ADDR = MVS.MsUtil.getHotelUrl(mBookInfo);
-                engine.mEngineState |= MVS.ENGE_STATE.TEAMMATCHING;
+                engine.mState.SetTeamMatching();
                 engine.roomCheckIn(event.payload.getBookinfo(), event.payload.getRoominfo());
             }
             return 0;
@@ -31196,7 +31337,7 @@ var NetWorkCallBackImp = function (engine) {
     ;
     function TeamMatchStartNotifyWork() {
         this.doSubHandle = function (event, engine) {
-            engine.mEngineState |= MVS.ENGE_STATE.TEAMMATCHING;
+            engine.mState.SetTeamMatching();
             var notify = {
                 teamID: event.payload.getTeamid(),
                 userID: event.payload.getUserid()
@@ -31205,6 +31346,21 @@ var NetWorkCallBackImp = function (engine) {
         };
     }
     ;
+    function GetOffLineDataRspWork() {
+        this.doSubHandle = function (event, engine) {
+            MVS.DEBUG && console.log(MVS.LgFormat("GetOffLineDataRspWork"), Date.now());
+            var status = event.payload.getStatus();
+            if (status !== 200) {
+                ErrorRspWork(engine.mRsp.errorResponse, status, "get off line data response error");
+            }
+            var notify = {
+                status: status,
+                frameCount: event.payload.getFramecount() || 0,
+                msgCount: event.payload.getMsgcount() || 0
+            };
+            engine.mRsp.getOffLineDataResponse && engine.mRsp.getOffLineDataResponse(notify);
+        };
+    }
 })(MVS || {});
 /* ================ MatchvsResponse.js ================= */
 function MatchvsResponse() {
@@ -31262,13 +31418,8 @@ function MatchvsResponse() {
     this.joinRoomNotify = function (roomUserInfo) {
     };
     /**
-     * message NoticeLeave
-     *{
-     *    uint32 userID = 1;
-     *    uint64 roomID = 2;
-     *    uint32 owner = 3;
-     *}
-     * @type rsp {NoticeLeave}
+     *
+     * @param {MsJoinOverRsp} rsp
      */
     this.joinOverResponse = function (rsp) {
     };
@@ -31415,12 +31566,6 @@ function MatchvsResponse() {
      * @param rsp
      */
     this.heartBeatResponse = function (rsp) {
-    };
-    /**
-     *
-     * @param rsp
-     */
-    this.roomCheckInNotify = function (rsp) {
     };
     /**
      * 主动断开网络接口回调
@@ -31585,25 +31730,27 @@ function MatchvsResponse() {
     };
     this.teamMatchStartNotify = function (notify) {
     };
+    this.getOffLineDataResponse = function (rsp) {
+    };
 }
 /* ================ MatchvsEngine.js ================= */
 (function (_obj) {
     var M_ENGINE;
-    function MsPublicMemberArgs() {
-        this.userID = 0;
-        this.token = "";
-        this.gameID = 0;
-        this.gameVersion = "";
-        this.appKey = "";
-        this.deviceID = "";
-        this.platform = "";
-    }
+    var M_User = {
+        ID: 0,
+        token: ""
+    };
+    var M_EVN = {
+        gameID: 0,
+        appkey: "",
+        channel: "",
+        platform: "",
+        deviceID: "",
+        gVersion: ""
+    };
     function MatchvsEngine() {
         M_ENGINE = this;
-        this.mChannel = "MatchVS";
-        this.mPlatform = "release";
-        this.mMsPubArgs = new MsPublicMemberArgs();
-        this.mEngineState = MVS.ENGE_STATE.NONE;
+        this.mState = new MVS.MvsState();
         this.mAllPlayers = [];
         this.mRecntRoomID = 0;
         this.mWatchRoomID = 0;
@@ -31617,14 +31764,26 @@ function MatchvsResponse() {
         this.mHotelNetWork = null; //hotel net
         this.mWatchNetwrok = null; //watch net flag
         this.mProtocol = new _obj.MatchvsProtocol();
-        this.init = function (response, channel, platform, gameID) {
+        /**
+         *
+         * @param {MatchvsResponse} response
+         * @param {string} channel
+         * @param {string} platform
+         * @param {number} gameID
+         * @param {string} appkey
+         * @param {number} gameVersion
+         * @returns {number}
+         */
+        this.init = function (response, channel, platform, gameID, appkey, gameVersion) {
             MVS.Game.id = gameID;
             MVS.mtaReport && MVS.mtaReport.Report("init");
             this.mRsp = response;
-            this.mChannel = channel;
-            this.mPlatform = platform;
-            this.mGameID = gameID;
-            this.mEngineState = MVS.ENGE_STATE.INITING;
+            M_EVN.channel = channel;
+            M_EVN.platform = platform;
+            M_EVN.gVersion = gameVersion;
+            M_EVN.appkey = appkey;
+            M_EVN.gameID = gameID;
+            this.mState.SetIniting();
             this.mProtocol.init();
             this.getHostList();
             return 0;
@@ -31634,48 +31793,43 @@ function MatchvsResponse() {
          * @param {MatchvsResponse} response
          * @param {string} endPoint
          * @param {number} gameID
+         * @param {string} appkey
+         * @returns {number}
          */
-        this.premiseInit = function (response, endPoint, gameID) {
+        this.premiseInit = function (response, endPoint, gameID, appkey) {
             if (undefined === endPoint || endPoint === "") {
                 return -1;
             }
             this.mRsp = response;
-            this.mGameID = gameID;
+            MVS.Game.id = gameID;
+            M_EVN.gameID = gameID;
+            M_EVN.appkey = appkey;
             MVS.Host.HOST_GATWAY_ADDR = "ws://" + endPoint;
-            this.mEngineState = MVS.ENGE_STATE.HAVE_INIT;
+            this.mState.SetInit();
             this.mRsp.initResponse(200);
             return 0;
         };
         this.reconnect = function () {
-            if ((this.mEngineState & MVS.ENGE_STATE.HAVE_INIT) !== MVS.ENGE_STATE.HAVE_INIT)
-                return -2;
-            if ((this.mEngineState & MVS.ENGE_STATE.RECONNECTING) === MVS.ENGE_STATE.RECONNECTING)
-                return -9;
-            if (this.mRecntRoomID !== "0" && (this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) === MVS.ENGE_STATE.HAVE_LOGIN) {
-                this.mEngineState |= MVS.ENGE_STATE.RECONNECTING;
-                var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, this.mMsPubArgs.userID, this.mRecntRoomID, this.mMsPubArgs.gameID, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
+            var resNo = this.mState.ReconnectCheck();
+            if (resNo !== 0)
+                return resNo;
+            if (this.mRecntRoomID !== "0" && (this.mState.HaveLogin() === 0)) {
+                this.mState.SetReconnecting();
+                var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.reconnect, M_User.ID, this.mRecntRoomID, M_EVN.gameID, 0, 0, 0, "reconnect", [{ name: "MatchVS" }]);
                 var buf = this.mProtocol.joinRoomSpecial(roomJoin);
                 this.mGTWNetwork.send(buf);
                 this.mRecntRoomID = "0";
                 return 0;
             }
-            if (undefined === this.mMsPubArgs.gameID || undefined === this.mMsPubArgs.appKey) {
+            if (0 === M_EVN.gameID || "" === M_EVN.appkey) {
                 return -1;
             }
-            if ((this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) === MVS.ENGE_STATE.HAVE_LOGIN)
-                return -6;
             if (!(undefined === this.mGTWNetwork || null === this.mGTWNetwork)) {
                 this.mGTWNetwork.close();
             }
-            //登录状态
-            this.mEngineState |= MVS.ENGE_STATE.LOGINING;
             //重连状态
-            this.mEngineState |= MVS.ENGE_STATE.RECONNECTING;
-            this.mNetWorkCallBackImp = new NetWorkCallBackImp(this);
-            this.mGTWNetwork = new MVS.MatchvsNetWork(MVS.Host.HOST_GATWAY_ADDR, this.mNetWorkCallBackImp);
-            var loginbuf = this.mProtocol.login(this.mMsPubArgs.userID, this.mMsPubArgs.token, this.mMsPubArgs.gameID, this.mMsPubArgs.gameVersion, this.mMsPubArgs.appKey, this.mMsPubArgs.deviceID);
-            this.mGTWNetwork.send(loginbuf);
-            return 0;
+            this.mState.SetReconnecting();
+            return this.login(M_User.ID, M_User.token, M_EVN.deviceID);
         };
         /**
          * 登录
@@ -31687,67 +31841,43 @@ function MatchvsResponse() {
          * @pDeviceID { !Array.<string> } deviceID 设备ID
          * @pGatewayID pGatewayID
          */
-        this.login = function (userID, token, pGameID, pGameVersion, pAppKey, deviceID) {
-            if ((this.mEngineState & MVS.ENGE_STATE.HAVE_INIT) !== MVS.ENGE_STATE.HAVE_INIT)
-                return -2; //未初始化
-            if ((this.mEngineState & MVS.ENGE_STATE.INITING) === MVS.ENGE_STATE.INITING)
-                return -3; //正在初始化
-            if ((this.mEngineState & MVS.ENGE_STATE.LOGINING) === MVS.ENGE_STATE.LOGINING)
-                return -5; //正在登录
-            if ((this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) === MVS.ENGE_STATE.HAVE_LOGIN)
-                return -6; // 已经登录，请勿重复登录
-            if ((this.mEngineState & MVS.ENGE_STATE.LOGOUTING) === MVS.ENGE_STATE.LOGOUTING)
-                return -11; // 正在登出
+        this.login = function (userID, token, deviceID) {
+            var resNo = this.mState.LoginCheck();
+            if (resNo !== 0) {
+                return resNo;
+            }
             var ak = new MVS.AppKeyCheck();
-            MVS.Game.id = pGameID;
-            if (!ak.isInvailed(pAppKey)) {
+            if (!ak.isInvailed(M_EVN.appkey)) {
                 return -26;
             }
             MVS.ccReport && MVS.ccReport.init();
-            MVS.ccReport && MVS.ccReport.login(pGameID);
+            MVS.ccReport && MVS.ccReport.login(M_EVN.gameID);
             if (!(undefined === this.mGTWNetwork || null === this.mGTWNetwork)) {
                 this.mGTWNetwork.close();
             }
             this.mNetWorkCallBackImp = new NetWorkCallBackImp(this);
             this.mGTWNetwork = new MVS.MatchvsNetWork(MVS.Host.HOST_GATWAY_ADDR, this.mNetWorkCallBackImp);
+            M_User.ID = userID;
             this.mUserID = userID;
-            this.mToken = token;
-            this.mGameID = pGameID;
-            this.mGameVersion = pGameVersion;
-            this.mAppKey = pAppKey;
-            this.mMsPubArgs.userID = userID;
-            this.mMsPubArgs.token = token;
-            this.mMsPubArgs.gameID = pGameID;
-            this.mMsPubArgs.gameVersion = pGameVersion;
-            this.mMsPubArgs.appKey = pAppKey;
-            this.mMsPubArgs.deviceID = deviceID;
-            var buf = this.mProtocol.login(userID, token, pGameID, pGameVersion, pAppKey, deviceID);
-            this.mEngineState |= MVS.ENGE_STATE.LOGINING;
+            M_User.token = token;
+            M_EVN.deviceID = deviceID;
+            var buf = this.mProtocol.login(userID, token, M_EVN.gameID, M_EVN.appkey, deviceID);
+            this.mState.SetLogining();
             this.mGTWNetwork.send(buf);
             MatchvsLog.logI("login,userID" + userID + ", token:" + token);
             return 0;
         };
         /**
-         * 用户网关速度，暂时先不使用
-         */
-        this.speed = function () {
-            if ((this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) !== MVS.ENGE_STATE.HAVE_LOGIN) {
-                return -4; //未登录
-            }
-            var buf = this.mProtocol.speed(this.mUserID, this.mGameID, this.mToken, VERSION, this.mGameVersion);
-            this.mGTWNetwork.send(buf);
-            return 0;
-        };
-        /**
          *
-         * @param cinfo {MsCreateRoomInfo}
-         * @param userProfile
-         * @returns {number}
+         * @param {MsCreateRoomInfo} cinfo
+         * @param {string} userProfile
+         * @param {MVS.MsWatchSet} watchSet
+         * @returns {*}
          */
         this.createRoom = function (cinfo, userProfile, watchSet) {
-            var ret = commEngineStateCheck(this.mEngineState, 2);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.InRoomCheck();
+            if (resNo < 0)
+                return resNo;
             if (userProfile.length > 512)
                 return -21;
             if (cinfo.maxPlayer > MVS.Config.MAXPLAYER_LIMIT || cinfo.maxPlayer < MVS.Config.MINPLAYER_LIMIT)
@@ -31762,17 +31892,18 @@ function MatchvsResponse() {
                 roomProperty: cinfo.roomProperty,
                 owner: 0,
             };
-            var playInfo = { userID: this.mUserID, userProfile: userProfile };
-            var buf = this.mProtocol.roomCreate(this.mGameID, roominfo, playInfo, watchSet);
+            var playInfo = { userID: M_User.ID, userProfile: userProfile };
+            var buf = this.mProtocol.roomCreate(M_EVN.gameID, roominfo, playInfo, watchSet);
             if (buf.byteLength > 1024 || userProfile.length > 512)
                 return -21;
-            this.mEngineState |= MVS.ENGE_STATE.CREATEROOM; //设置用户正在创建房间
+            //设置用户正在创建房间
+            this.mState.SetCreateRoom();
             this.mGTWNetwork.send(buf);
             MatchvsLog.logI("create room");
             return 0;
         };
         this.uninit = function () {
-            this.mEngineState = MVS.ENGE_STATE.NONE;
+            this.mState.ReSet();
             this.mRsp = null;
             MatchvsLog.logI("unInit ");
             return 0;
@@ -31782,10 +31913,10 @@ function MatchvsResponse() {
          * @param filter {MsRoomFilter}
          */
         this.getRoomList = function (filter) {
-            var ret = commEngineStateCheck(this.mEngineState, 2);
+            var ret = this.mState.InRoomCheck();
             if (ret !== 0)
                 return ret;
-            var buf = this.mProtocol.getRoomList(this.mGameID, filter);
+            var buf = this.mProtocol.getRoomList(M_EVN.gameID, filter);
             if (buf.byteLength > 1024)
                 return -21;
             this.mGTWNetwork.send(buf);
@@ -31801,24 +31932,27 @@ function MatchvsResponse() {
             //建立hotel网络
             this.mNetWorkCallBackImp.frameCache = [];
             this.mHotelNetWork = new MVS.MatchvsNetWork(MVS.Host.HOST_HOTEL_ADDR, this.mNetWorkCallBackImp);
-            var buf = this.mProtocol.roomCheckIn(bookInfo, roomInfo, this.mUserID, this.mGameID);
+            var buf = this.mProtocol.roomCheckIn(bookInfo, roomInfo, M_User.ID, M_EVN.gameID);
             this.mHotelNetWork.send(buf);
             return 0;
         };
         /**
-         * int joinRandomRoom(int iMaxPlayer, const MsString userProfile);
+         * 随机匹配
+         * @param {number} maxPlayer
+         * @param {string} userProfile
+         * @returns {number} 0 成功
          */
         this.joinRandomRoom = function (maxPlayer, userProfile) {
-            var ret = commEngineStateCheck(this.mEngineState, 2);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.InRoomCheck();
+            if (resNo < 0)
+                return resNo;
             if (maxPlayer > MVS.Config.MAXPLAYER_LIMIT || maxPlayer < MVS.Config.MINPLAYER_LIMIT)
                 return -20;
             if (userProfile.length > 512)
                 return -21;
-            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinRandomRoom, this.mUserID, 0, this.mGameID, maxPlayer, 0, 0, userProfile, [{ name: "matchvs" }]);
+            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinRandomRoom, M_User.ID, 0, M_EVN.gameID, maxPlayer, 0, 0, userProfile, [{ name: "matchvs" }]);
             var buf = this.mProtocol.joinRandomRoom(roomJoin);
-            this.mEngineState |= MVS.ENGE_STATE.JOIN_ROOMING;
+            this.mState.SetJoinRooming();
             this.mGTWNetwork.send(buf);
             return 0;
         };
@@ -31830,9 +31964,9 @@ function MatchvsResponse() {
          * @returns {number}
          */
         this.joinRoomWithProperties = function (matchinfo, userProfile, watchSet) {
-            var ret = commEngineStateCheck(this.mEngineState, 2);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.InRoomCheck();
+            if (resNo < 0)
+                return resNo;
             if (userProfile.length > 512)
                 return -21;
             if (typeof matchinfo !== "object")
@@ -31841,9 +31975,9 @@ function MatchvsResponse() {
                 return -1;
             if (matchinfo.maxPlayer > MVS.Config.MAXPLAYER_LIMIT || matchinfo.maxPlayer < MVS.Config.MINPLAYER_LIMIT)
                 return -20;
-            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinRoomWithProperty, this.mUserID, 1, this.mGameID, matchinfo.maxPlayer, matchinfo.mode, matchinfo.canWatch, userProfile, matchinfo.tags, matchinfo.visibility, matchinfo.roomProperty);
+            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinRoomWithProperty, M_User.ID, 1, M_EVN.gameID, matchinfo.maxPlayer, matchinfo.mode, matchinfo.canWatch, userProfile, matchinfo.tags, matchinfo.visibility, matchinfo.roomProperty);
             var buf = this.mProtocol.joinRoomWithProperties(roomJoin, watchSet);
-            this.mEngineState |= MVS.ENGE_STATE.JOIN_ROOMING;
+            this.mState.SetJoinRooming();
             this.mGTWNetwork.send(buf);
             return 0;
         };
@@ -31854,17 +31988,17 @@ function MatchvsResponse() {
          * @returns {number}
          */
         this.joinRoom = function (roomID, userProfile) {
-            var ret = commEngineStateCheck(this.mEngineState, 2);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.InRoomCheck();
+            if (resNo < 0)
+                return resNo;
             if (!(/^[0-9]+$/.test(roomID)))
                 return -1; //判断必须是全为数字
             var roomId = String(roomID).trim();
             if (0 === roomId || roomId === "")
                 return -1;
-            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinSpecialRoom, this.mUserID, roomID, this.mGameID, 0, 0, 0, userProfile, [{ name: "MatchVS" }]);
+            var roomJoin = new MsRoomJoin(MsEnum.JoinRoomType.joinSpecialRoom, M_User.ID, roomID, M_EVN.gameID, 0, 0, 0, userProfile, [{ name: "MatchVS" }]);
             var buf = this.mProtocol.joinRoomSpecial(roomJoin);
-            this.mEngineState |= MVS.ENGE_STATE.JOIN_ROOMING;
+            this.mState.SetJoinRooming();
             this.mGTWNetwork.send(buf);
             MatchvsLog.logI("join room");
             return 0;
@@ -31875,12 +32009,12 @@ function MatchvsResponse() {
          * @returns {number}
          */
         this.joinOver = function (cpProto) {
-            var ret = commEngineStateCheck(this.mEngineState, 1);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.HaveInRoom();
+            if (resNo < 0)
+                return resNo;
             if (cpProto.length > 1024)
                 return -21;
-            var buf = this.mProtocol.joinOver(this.mGameID, this.mRoomInfo.getRoomid(), stringToUtf8ByteArray(cpProto), this.mUserID);
+            var buf = this.mProtocol.joinOver(M_EVN.gameID, this.mRoomInfo.getRoomid(), stringToUtf8ByteArray(cpProto), M_User.ID);
             this.mGTWNetwork.send(buf);
             return 0;
         };
@@ -31890,7 +32024,7 @@ function MatchvsResponse() {
          * @returns {number}
          */
         this.leaveRoom = function (cpProto) {
-            var ret = commEngineStateCheck(this.mEngineState, 3);
+            var ret = this.mState.LeaveRoomCheck();
             if (ret !== 0)
                 return ret;
             var roomid = this.mRecntRoomID;
@@ -31900,10 +32034,10 @@ function MatchvsResponse() {
             if (cpProto.length > 1024) {
                 return -21;
             }
-            var buf = this.mProtocol.leaveRoom(this.mGameID, this.mUserID, roomid, cpProto);
+            var buf = this.mProtocol.leaveRoom(M_EVN.gameID, M_User.ID, roomid, cpProto);
             this.mGTWNetwork.send(buf);
             //设置为正在退出房间
-            this.mEngineState |= MVS.ENGE_STATE.LEAVE_ROOMING;
+            this.mState.SetLeaveRooming();
             if (this.mHotelNetWork) {
                 this.mHotelNetWork.close();
             }
@@ -31917,12 +32051,12 @@ function MatchvsResponse() {
          * @returns {number} 0 成功，1失败
          */
         this.kickPlayer = function (userID, cpProto) {
-            var ret = commEngineStateCheck(this.mEngineState, 1);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.HaveInRoom();
+            if (resNo < 0)
+                return resNo;
             if (cpProto.length > 1024)
                 return -21;
-            var buf = this.mProtocol.kickPlayer(userID, this.mUserID, this.mRoomInfo.getRoomid(), cpProto);
+            var buf = this.mProtocol.kickPlayer(userID, M_User.ID, this.mRoomInfo.getRoomid(), cpProto);
             this.mGTWNetwork.send(buf);
             return 0;
         };
@@ -31930,21 +32064,26 @@ function MatchvsResponse() {
          *
          * @param frameRate ex:10/s . = 0 is off,>0 is on
          * @param {number} enableGS 0-gs不参与帧同步 1-gs参与帧同步
+         * @param {object} other
+         * @param {number} other.cacheFrameMS 缓存帧的毫秒数 0 为不开启缓存功能；-1 为缓存所有数据
          * @returns {number}
          */
-        this.setFrameSync = function (frameRate, enableGS) {
-            var ret = commEngineStateCheck(this.mEngineState, 1);
-            if (ret !== 0)
-                return ret;
+        this.setFrameSync = function (frameRate, enableGS, other) {
+            var resNo = this.mState.HaveInRoom();
+            if (resNo < 0)
+                return resNo;
             if (frameRate > 20 || frameRate < 0)
                 return -20;
+            if (other.cacheFrameMS > 600000)
+                return -25;
             var info = {
-                gameID: this.mGameID,
+                gameID: M_EVN.gameID,
                 roomID: this.mRoomInfo.getRoomid(),
                 priority: 0,
                 frameRate: frameRate,
                 frameidx: 1,
-                enableGS: enableGS
+                enableGS: enableGS,
+                cacheMs: other.cacheFrameMS
             };
             var buf = this.mProtocol.setFrameSync(info);
             this.mHotelNetWork.send(buf);
@@ -31957,9 +32096,9 @@ function MatchvsResponse() {
          * @returns {number}
          */
         this.sendFrameEvent = function (cpProto, op) {
-            var ret = commEngineStateCheck(this.mEngineState, 1);
-            if (ret !== 0)
-                return ret;
+            var resNo = this.mState.HaveInRoom();
+            if (resNo < 0)
+                return resNo;
             if (cpProto.length > 1024)
                 return -21;
             var buf = this.mProtocol.sendFrameEvent(this.mRoomInfo.getRoomid(), 0, cpProto, op);
@@ -31967,10 +32106,10 @@ function MatchvsResponse() {
             return 0;
         };
         this.joinOpen = function (cpProto) {
-            var ret = commEngineStateCheck(this.mEngineState, 1);
-            if (ret !== 0)
-                return ret;
-            var buf = this.mProtocol.joinOpen(this.mGameID, this.mUserID, this.mRoomInfo.getRoomid(), cpProto);
+            var resNo = this.mState.HaveInRoom();
+            if (resNo < 0)
+                return resNo;
+            var buf = this.mProtocol.joinOpen(M_EVN.gameID, M_User.ID, this.mRoomInfo.getRoomid(), cpProto);
             this.mGTWNetwork.send(buf);
             return 0;
         };
@@ -31981,16 +32120,17 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.logout = function (cpProto) {
-        if ((this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) !== MVS.ENGE_STATE.HAVE_LOGIN)
-            return -4;
-        if ((this.mEngineState & MVS.ENGE_STATE.IN_ROOM) === MVS.ENGE_STATE.IN_ROOM) {
-            this.mEngineState |= MVS.ENGE_STATE.LEAVE_ROOMING;
+        var resNo = this.mState.HaveLogin();
+        if (resNo !== 0)
+            return resNo;
+        if (this.mState.HaveInRoom() === 0) {
+            this.mState.SetLeaveRooming();
             this.leaveRoom("user logout");
             this.mHotelNetWork && this.mHotelNetWork.close();
         }
         MVS.ccReport && MVS.ccReport.logout();
         var buf = this.mProtocol.logout(cpProto);
-        this.mEngineState |= MVS.ENGE_STATE.LOGOUTING;
+        this.mState.SetLoginOuting();
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -31998,23 +32138,22 @@ function MatchvsResponse() {
      * 心跳
      */
     MatchvsEngine.prototype.heartBeat = function () {
-        var Instance = M_ENGINE;
-        if (Instance.mGameID === undefined || Instance.mGameID === "" || Instance.mGameID === 0) {
+        if (M_EVN.gameID === undefined || M_EVN.gameID === "" || M_EVN.gameID === 0) {
             return;
         }
         var roomID;
-        if (Instance.mRoomInfo === undefined) {
+        if (M_ENGINE.mRoomInfo === undefined) {
             roomID = 0;
         }
         else {
-            roomID = Instance.mRoomInfo.getRoomid();
+            roomID = M_ENGINE.mRoomInfo.getRoomid();
         }
-        if ((Instance.mEngineState & MVS.ENGE_STATE.LOGOUTING) === MVS.ENGE_STATE.LOGOUTING) {
+        if (M_ENGINE.mState.IsLoginOuting()) {
             return;
         }
-        var buf = Instance.mProtocol.heartBeat(Instance.mGameID, roomID);
-        Instance.mGTWNetwork.send(buf);
-        MatchvsLog.logI("gateway heartBeat");
+        var buf = M_ENGINE.mProtocol.heartBeat(M_EVN.gameID, roomID);
+        M_ENGINE.mGTWNetwork.send(buf);
+        MatchvsLog.logI("gateway heartBeat:" + Date.now());
     };
     /**
      * 发送数据
@@ -32025,95 +32164,30 @@ function MatchvsResponse() {
      * @data        : cp 数据
      */
     MatchvsEngine.prototype.sendEvent = function (data) {
-        if ((this.mEngineState & MVS.ENGE_STATE.HAVE_INIT) !== MVS.ENGE_STATE.HAVE_INIT)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -2
-            }; //未初始化
-        if ((this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) !== MVS.ENGE_STATE.HAVE_LOGIN)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -4
-            }; //未登录
-        if ((this.mEngineState & MVS.ENGE_STATE.IN_ROOM) !== MVS.ENGE_STATE.IN_ROOM)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -6
-            }; //没有进入房间
-        if ((this.mEngineState & MVS.ENGE_STATE.INITING) === MVS.ENGE_STATE.INITING)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -3
-            }; //正在初始化
-        if ((this.mEngineState & MVS.ENGE_STATE.CREATEROOM) === MVS.ENGE_STATE.CREATEROOM)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -7
-            }; //在创建房间
-        if ((this.mEngineState & MVS.ENGE_STATE.JOIN_ROOMING) === MVS.ENGE_STATE.JOIN_ROOMING)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -7
-            }; //正在加入房间
-        if (typeof data !== "string")
-            return { sequence: this.mProtocol.seq - 1, result: -1 };
-        var destType = 0;
+        var resNo = this.mState.HaveInRoom();
+        if (resNo !== 0)
+            return { sequence: this.mProtocol.seq - 1, result: resNo };
+        var destType = 1;
         var msgType = 0;
-        var userids = [];
-        var num = 0;
-        for (var i = 0; i < this.mAllPlayers.length; i++) {
-            if (this.mAllPlayers[i] !== parseInt(this.mUserID)) {
-                userids[num++] = this.mAllPlayers[i];
-            }
-        }
-        if (userids.length > MVS.Config.MAXPLAYER_LIMIT)
-            return -20;
         if (data.length > 1024)
             return -21;
-        var buf = this.mProtocol.broadCast(this.mRoomInfo.getRoomid(), userids, destType, msgType, stringToUtf8ByteArray(data));
+        var buf = this.mProtocol.broadCast(this.mRoomInfo.getRoomid(), [this.mUserID], destType, msgType, stringToUtf8ByteArray(data));
         this.mHotelNetWork.send(buf);
         // this.mProtocol.seq-1 因为发送后会加1所以需要减1
         return { sequence: this.mProtocol.seq - 1, result: 0 };
     };
     /**
      * 扩展消息发送
-     * @param msgType
+     * @param msgType 0-只发client 1-只发gs 2-client&gs
      * @param data
      * @param desttype
      * @param userIDs
      * @returns {*}
      */
     MatchvsEngine.prototype.sendEventEx = function (msgType, data, desttype, userIDs) {
-        if ((this.mEngineState & MVS.ENGE_STATE.HAVE_INIT) !== MVS.ENGE_STATE.HAVE_INIT)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -2
-            }; //未初始化
-        if ((this.mEngineState & MVS.ENGE_STATE.HAVE_LOGIN) !== MVS.ENGE_STATE.HAVE_LOGIN)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -4
-            }; //未登录
-        if ((this.mEngineState & MVS.ENGE_STATE.IN_ROOM) !== MVS.ENGE_STATE.IN_ROOM)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -6
-            }; //没有进入房间
-        if ((this.mEngineState & MVS.ENGE_STATE.INITING) === MVS.ENGE_STATE.INITING)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -3
-            }; //正在初始化
-        if ((this.mEngineState & MVS.ENGE_STATE.CREATEROOM) === MVS.ENGE_STATE.CREATEROOM)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -7
-            }; //在创建房间
-        if ((this.mEngineState & MVS.ENGE_STATE.JOIN_ROOMING) === MVS.ENGE_STATE.JOIN_ROOMING)
-            return {
-                sequence: this.mProtocol.seq - 1,
-                result: -7
-            }; //正在加入房间
+        var resNo = this.mState.HaveInRoom();
+        if (resNo !== 0)
+            return { sequence: this.mProtocol.seq - 1, result: resNo };
         if (typeof data !== "string")
             return { sequence: this.mProtocol.seq - 1, result: -1 };
         if (!(msgType === 0 || msgType === 1 || msgType === 2))
@@ -32134,12 +32208,12 @@ function MatchvsResponse() {
      * @param cancels {!Array.<string>} value  要取消的分组集合
      */
     MatchvsEngine.prototype.subscribeEventGroup = function (confirms, cancels) {
-        var ret = commEngineStateCheck(this.mEngineState, 1);
-        if (ret !== 0)
-            return ret;
+        var resNo = this.mState.HaveInRoom();
+        if (resNo !== 0)
+            return resNo;
         if (confirms.length === 0 && cancels.length === 0)
             return -20;
-        var buf = this.mProtocol.subscribeEventGroup(this.mGameID, this.mRoomInfo.getRoomid(), confirms, cancels);
+        var buf = this.mProtocol.subscribeEventGroup(M_EVN.gameID, this.mRoomInfo.getRoomid(), confirms, cancels);
         this.mHotelNetWork.send(buf);
         return 0;
     };
@@ -32148,15 +32222,15 @@ function MatchvsResponse() {
      * @cpproto { !Array.<string> } value 发送的信息
      */
     MatchvsEngine.prototype.sendEventGroup = function (data, groups) {
-        var ret = commEngineStateCheck(this.mEngineState, 1);
-        if (ret !== 0)
-            return ret;
+        var resNo = this.mState.HaveInRoom();
+        if (resNo !== 0)
+            return resNo;
         if (groups.length <= 0)
             return -20;
         if (data.length > 1024)
             return -21;
         var priority = 1; // 要设置的消息通道优先级
-        var buf = this.mProtocol.sendEventGroup(this.mGameID, this.mRoomInfo.getRoomid(), priority, groups, data);
+        var buf = this.mProtocol.sendEventGroup(M_EVN.gameID, this.mRoomInfo.getRoomid(), priority, groups, data);
         this.mHotelNetWork.send(buf);
         return 0;
     };
@@ -32166,15 +32240,14 @@ function MatchvsResponse() {
      * @userID { number } value  要订阅的分组集合
      */
     MatchvsEngine.prototype.hotelHeartBeat = function () {
-        var _engine = M_ENGINE;
-        if ((_engine.mEngineState & MVS.ENGE_STATE.LEAVE_ROOMING) === MVS.ENGE_STATE.LEAVE_ROOMING) {
+        if (M_ENGINE.mState.IsLeaveRooming()) {
             return 0;
         }
-        _engine.mEngineState |= MVS.ENGE_STATE.IN_ROOM;
-        _engine.mEngineState |= MVS.ENGE_STATE.HAVE_LOGIN;
-        var buf = _engine.mProtocol.hotelHeartBeat(_engine.mGameID, _engine.mRoomInfo.getRoomid(), _engine.mUserID);
-        _engine.mHotelNetWork.send(buf);
-        MatchvsLog.logI("hotel heartBeat");
+        M_ENGINE.mState.SetLogin();
+        M_ENGINE.mState.SetInRoom();
+        var buf = M_ENGINE.mProtocol.hotelHeartBeat(M_EVN.gameID, M_ENGINE.mRoomInfo.getRoomid(), M_User.ID);
+        M_ENGINE.mHotelNetWork.send(buf);
+        MatchvsLog.logI("hotel heartBeat:" + Date.now());
     };
     /**
      * 注册用户
@@ -32182,12 +32255,13 @@ function MatchvsResponse() {
      */
     MatchvsEngine.prototype.registerUser = function () {
         MVS.mtaReport && MVS.mtaReport.Report("registerUser");
-        if ((this.mEngineState & MVS.ENGE_STATE.HAVE_INIT) !== MVS.ENGE_STATE.HAVE_INIT)
-            return -2; //未初始化
+        var resNo = this.mState.HaveInit();
+        if (resNo !== 0)
+            return resNo;
         var deviceid = "javascript";
-        var channel = this.mChannel;
-        var cacheKey = "regUserInfo" + channel + this.mPlatform;
-        var gameVersion = this.mGameVersion;
+        var channel = M_EVN.channel;
+        var cacheKey = "regUserInfo" + channel + M_EVN.platform;
+        var gameVersion = M_EVN.gVersion;
         var cacheUserInfo = LocalStore_Load(cacheKey);
         if (cacheUserInfo) {
             var obj = JSON.parse(cacheUserInfo);
@@ -32195,8 +32269,8 @@ function MatchvsResponse() {
             MatchvsLog.logI("load user info from cache:" + obj);
             return 0;
         }
-        var uri = "/wc3/regit.do";
-        var url = MVS.Host.REGISTER_USER_URL + uri + "?mac=0" + "&deviceid=" + deviceid + "&channel=" + channel + "&pid=13" + "&version=" + gameVersion;
+        var uri = _obj.APIPATH.REGISTERUSER;
+        var url = MVS.Host.VS_USER_URL + uri + "?mac=0" + "&deviceid=" + deviceid + "&channel=" + channel + "&pid=13" + "&version=" + gameVersion;
         var rep = new MVS.MatchvsNetWorkCallBack();
         rep.rsp = this.mRsp.registerUserResponse;
         rep.onMsg = function (buf) {
@@ -32222,22 +32296,21 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.getHostList = function () {
-        var gameId = this.mGameID;
-        var channel = this.mChannel;
-        var platform = this.mPlatform;
-        var uri = "/v1/gateway/query";
+        var gameId = M_EVN.gameID;
+        var channel = M_EVN.channel;
+        var platform = M_EVN.platform;
+        var uri = _obj.APIPATH.HOSTLIST;
         var isUseWSS = MVS.MsUtil.isNeedUseWSS();
-        var url = "https://sdk.matchvs.com" + uri + "?mac=0" + "&gameid=" + gameId + "&channel=" + channel + "&platform=" + platform + (isUseWSS ? "&useWSSProxy=1" : "");
+        var url = MVS.Host.MAIN_URL + uri + "?mac=0" + "&gameid=" + gameId + "&channel=" + channel + "&platform=" + platform + (isUseWSS ? "&useWSSProxy=1" : "");
         var rep = new MVS.MatchvsNetWorkCallBack();
         var engine = this;
         rep.onMsg = function (buf) {
             var obj = JSON.parse(buf);
             if (obj.status === 200) {
-                engine.mEngineState |= MVS.ENGE_STATE.HAVE_INIT;
-                engine.mEngineState &= ~MVS.ENGE_STATE.INITING;
+                engine.mState.SetInit();
                 var http = "https://";
                 var port = "";
-                MVS.Host.REGISTER_USER_URL = http + obj.data.vsuser;
+                MVS.Host.VS_USER_URL = http + obj.data.vsuser;
                 MVS.Host.HOST_GATWAY_ADDR = (isUseWSS ? "wss://" : "ws://") + (isUseWSS ? obj.data.wssProxy : (obj.data.engine + ":7001"));
                 MVS.Host.CMSNS_URL = http + obj.data.cmsns;
                 MVS.Host.VS_OPEN_URL = http + obj.data.vsopen;
@@ -32259,10 +32332,10 @@ function MatchvsResponse() {
      * @param filter {MsRoomFilterEx}
      */
     MatchvsEngine.prototype.getRoomListEx = function (filter) {
-        var ret = commEngineStateCheck(this.mEngineState, 0);
-        if (ret !== 0)
-            return ret;
-        var buf = this.mProtocol.getRoomListEx(this.mGameID, filter);
+        var resNo = this.mState.HaveLogin();
+        if (resNo !== 0)
+            return resNo;
+        var buf = this.mProtocol.getRoomListEx(M_EVN.gameID, filter);
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -32272,10 +32345,10 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.getRoomDetail = function (roomID) {
-        var ret = commEngineStateCheck(this.mEngineState, 0);
-        if (ret !== 0)
-            return ret;
-        var buf = this.mProtocol.getRoomDetail(this.mGameID, roomID);
+        var resNo = this.mState.HaveLogin();
+        if (resNo !== 0)
+            return resNo;
+        var buf = this.mProtocol.getRoomDetail(M_EVN.gameID, roomID);
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -32290,20 +32363,12 @@ function MatchvsResponse() {
             return -1;
         if (roomProperty.length > 1024)
             return -21;
-        var ret = commEngineStateCheck(this.mEngineState, 1);
-        if (ret !== 0)
-            return ret;
-        var buf = this.mProtocol.setRoomProperty(this.mGameID, this.mUserID, roomID, roomProperty);
+        var resNo = this.mState.HaveInRoom();
+        if (resNo !== 0)
+            return resNo;
+        var buf = this.mProtocol.setRoomProperty(M_EVN.gameID, M_User.ID, roomID, roomProperty);
         this.mGTWNetwork.send(buf);
         return 0;
-    };
-    /**
-     * 断开网络连接
-     * @param roomID 房间号
-     */
-    MatchvsEngine.prototype.disConnect = function (roomID) {
-        var buf = engine.mProtocol.disConnect(this.mUserID, this.mGameID, roomID);
-        this.mGTWNetwork.send(buf);
     };
     /**
      * 加入观战房间
@@ -32312,14 +32377,14 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.joinWatchRoom = function (roomID, userProfile) {
-        var ret = commEngineStateCheck(this.mEngineState, 2);
+        var ret = this.mState.InRoomCheck();
         if (ret !== 0)
             return ret;
         if (userProfile.length > 512)
             return -21;
         this.mWatchRoomID = roomID;
-        var buf = this.mProtocol.joinWatchRoom(this.mGameID, this.mUserID, this.mWatchRoomID, userProfile);
-        this.mEngineState |= MVS.ENGE_STATE.IN_WATCHING;
+        var buf = this.mProtocol.joinWatchRoom(M_EVN.gameID, M_User.ID, this.mWatchRoomID, userProfile);
+        this.mState.SetJoinWatching();
         this.mGTWNetwork.send(buf);
         return ret;
     };
@@ -32333,7 +32398,7 @@ function MatchvsResponse() {
         }
         //build connect watch network server
         this.mWatchNetwrok = new MVS.MatchvsNetWork(MVS.Host.HOST_WATCH_ADDR, this.mNetWorkCallBackImp);
-        var buf = this.mProtocol.enterLiveRoom(bookInfo, this.mGameID, this.mUserID, this.mWatchRoomID, 0);
+        var buf = this.mProtocol.enterLiveRoom(bookInfo, M_EVN.gameID, M_User.ID, this.mWatchRoomID, 0);
         this.mWatchNetwrok.send(buf);
         return 0;
     };
@@ -32344,7 +32409,7 @@ function MatchvsResponse() {
     MatchvsEngine.prototype.liveHeartBeat = function () {
         var hb = M_ENGINE;
         var roomid = hb.mRecntRoomID;
-        var buf = hb.mProtocol.liveHeartBeat(hb.mGameID, roomid, hb.mUserID);
+        var buf = hb.mProtocol.liveHeartBeat(M_EVN.gameID, roomid, M_User.ID);
         hb.mWatchNetwrok.send(buf);
         MatchvsLog.logI("live heartBeat");
         return 0;
@@ -32353,11 +32418,11 @@ function MatchvsResponse() {
      * 离开观战房间
      */
     MatchvsEngine.prototype.leaveWatchRoom = function (cpProto) {
-        var ret = commEngineStateCheck(this.mEngineState, 0);
-        if (ret !== 0)
-            return ret;
+        var resNo = this.mState.HaveLogin();
+        if (resNo !== 0)
+            return resNo;
         var roomid = this.mWatchRoomID;
-        var buf = this.mProtocol.leaveWatchRoom(this.mGameID, this.mUserID, roomid, cpProto);
+        var buf = this.mProtocol.leaveWatchRoom(M_EVN.gameID, M_User.ID, roomid, cpProto);
         this.mGTWNetwork.send(buf);
         MatchvsLog.logI("leaveWatchRoom");
         return 0;
@@ -32382,11 +32447,11 @@ function MatchvsResponse() {
      * @param offsetMS {number} -1 表示从头， 0 表示不追 >0 表示最近多少ms
      */
     MatchvsEngine.prototype.setLiveOffset = function (offsetMS) {
-        var ret = commEngineStateCheck(this.mEngineState, 4);
+        var ret = this.mState.HaveInWatch();
         if (ret !== 0)
             return ret;
         var roomid = this.mWatchRoomID;
-        var buf = this.mProtocol.setLiveOffset(this.mGameID, roomid, this.mUserID, offsetMS);
+        var buf = this.mProtocol.setLiveOffset(M_EVN.gameID, roomid, M_User.ID, offsetMS);
         this.mWatchNetwrok.send(buf);
         return 0;
     };
@@ -32396,10 +32461,10 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.getWatchRoomList = function (filter) {
-        var ret = commEngineStateCheck(this.mEngineState, 0);
-        if (ret !== 0)
-            return ret;
-        var buf = this.mProtocol.getWatchRooms(this.mGameID, filter);
+        var resNo = this.mState.HaveLogin();
+        if (resNo !== 0)
+            return resNo;
+        var buf = this.mProtocol.getWatchRooms(M_EVN.gameID, filter);
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -32412,20 +32477,20 @@ function MatchvsResponse() {
     MatchvsEngine.prototype.changeRole = function (userProfile, rType) {
         var roomid = this.mWatchRoomID;
         var roomtype = 0;
-        var ret = commEngineStateCheck(this.mEngineState, 0);
+        var ret = this.mState.HaveLogin();
         if (ret !== 0)
             return ret;
         MatchvsLog.logI("targetRoomType:" + rType + " mCntRoomType:" + this.mCntRoomType + " roomID:" + this.mRecntRoomID);
-        if (this.mCntRoomType == MVS.TgRoomType.PRoom) {
-            ret = commEngineStateCheck(this.mEngineState, 1);
-            if (this.mCntRoomType == rType)
+        if (this.mCntRoomType === MVS.TgRoomType.PRoom) {
+            ret = this.mState.HaveInRoom();
+            if (this.mCntRoomType === rType)
                 return -30;
             roomid = this.mRecntRoomID;
             roomtype = MVS.TgRoomType.WRoom;
         }
-        else if (this.mCntRoomType == MVS.TgRoomType.WRoom) {
-            ret = commEngineStateCheck(this.mEngineState, 4);
-            if (this.mCntRoomType == rType)
+        else if (this.mCntRoomType === MVS.TgRoomType.WRoom) {
+            ret = this.mState.HaveInWatch();
+            if (this.mCntRoomType === rType)
                 return -30;
             roomid = this.mWatchRoomID;
             roomtype = MVS.TgRoomType.PRoom;
@@ -32435,7 +32500,7 @@ function MatchvsResponse() {
         }
         if (ret !== 0)
             return ret;
-        var buf = this.mProtocol.changeRoleProto(this.mUserID, this.mGameID, roomid, roomtype, userProfile);
+        var buf = this.mProtocol.changeRoleProto(M_User.ID, M_EVN.gameID, roomid, roomtype, userProfile);
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -32446,13 +32511,13 @@ function MatchvsResponse() {
      */
     MatchvsEngine.prototype.setReconnectTimeout = function (timeout) {
         var timeNo = Number(timeout);
-        var ret = commEngineStateCheck(this.mEngineState, 0);
+        var ret = this.mState.HaveLogin();
         if (ret !== 0)
             return ret;
         if (timeNo < 0 || timeNo > 600) {
             return -27;
         }
-        var buf = this.mProtocol.setReconnectTimeout(this.mUserID, timeout);
+        var buf = this.mProtocol.setReconnectTimeout(M_User.ID, timeout);
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -32466,13 +32531,13 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.createTeam = function (teaminfo) {
-        var ret = commEngineStateCheck(this.mEngineState, 2);
+        var ret = this.mState.InRoomCheck();
         if (ret !== 0)
             return ret;
         if (teaminfo.userProfile.length > 512) {
             return -21;
         }
-        if (Number(teaminfo.capacity) > 50) {
+        if (Number(teaminfo.capacity) > 50 || Number(teaminfo.capacity) < 1) {
             return -20;
         }
         var team = {
@@ -32484,10 +32549,10 @@ function MatchvsResponse() {
             visibility: teaminfo.visibility
         };
         var player = {
-            userID: this.mUserID,
+            userID: M_User.ID,
             userProfile: teaminfo.userProfile
         };
-        var buf = this.mProtocol.CreateTeam(this.mGameID, team, player);
+        var buf = this.mProtocol.CreateTeam(M_EVN.gameID, team, player);
         this.mGTWNetwork.send(buf);
         return 0;
     };
@@ -32499,7 +32564,7 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.joinTeam = function (teaminfo) {
-        var ret = commEngineStateCheck(this.mEngineState, 2);
+        var ret = this.mState.InRoomCheck();
         if (ret !== 0)
             return ret;
         if (teaminfo.userProfile.length > 512) {
@@ -32507,11 +32572,11 @@ function MatchvsResponse() {
         }
         this.mTeamID = teaminfo.teamID;
         var info = {
-            gameID: this.mGameID,
+            gameID: M_EVN.gameID,
             teamID: teaminfo.teamID,
             password: teaminfo.password,
             player: {
-                userID: this.mUserID,
+                userID: M_User.ID,
                 userProfile: teaminfo.userProfile
             }
         };
@@ -32524,12 +32589,12 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.leaveTeam = function () {
-        var ret = commEngineStateCheck(this.mEngineState, 0);
+        var ret = this.mState.HaveLogin();
         if (ret !== 0)
             return ret;
         var args = {
-            gameID: this.mGameID,
-            userID: this.mUserID,
+            gameID: M_EVN.gameID,
+            userID: M_User.ID,
             teamID: this.mTeamID
         };
         var buf = this.mProtocol.LeaveTeam(args);
@@ -32550,7 +32615,7 @@ function MatchvsResponse() {
      * @returns {number}
      */
     MatchvsEngine.prototype.teamMatch = function (info) {
-        var ret = commEngineStateCheck(this.mEngineState, 2);
+        var ret = this.mState.InRoomCheck();
         if (ret !== 0)
             return ret;
         if (info.roomProperty.length > 512) {
@@ -32560,9 +32625,9 @@ function MatchvsResponse() {
             return -20;
         }
         var args = {
-            gameID: this.mGameID,
+            gameID: M_EVN.gameID,
             teamID: this.mTeamID,
-            userID: this.mUserID,
+            userID: M_User.ID,
             cond: info.cond,
             watchSet: info.watchSet,
             roomInfo: {
@@ -32575,8 +32640,25 @@ function MatchvsResponse() {
             }
         };
         var buf = this.mProtocol.TeamMatch(args);
-        this.mEngineState |= MVS.ENGE_STATE.TEAMMATCHING;
+        this.mState.SetTeamMatching();
         this.mGTWNetwork.send(buf);
+        return 0;
+    };
+    /**
+     * 断线后，重新回到房间，获取掉线这段时间的数据
+     * @param {number} cacheFrameMS 缓存数据的毫秒数
+     */
+    MatchvsEngine.prototype.getOffLineData = function (cacheFrameMS) {
+        var ret = this.mState.HaveInRoom();
+        if (ret !== 0)
+            return ret;
+        var args = {
+            gameID: M_EVN.gameID,
+            roomID: this.mRecntRoomID + "",
+            cacheFrameMS: cacheFrameMS
+        };
+        var buf = this.mProtocol.GetOffLineData(args);
+        this.mHotelNetWork.send(buf);
         return 0;
     };
     window.MatchvsEngine = MatchvsEngine;

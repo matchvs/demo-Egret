@@ -13,6 +13,8 @@ module mvs {
 		private re200 = 0;
 		private re60 = 0;
 		private re40 = 0;
+		private frameQuence = []
+		private setIntervalFrame = 0;
 		//
 		private static _instance:MsResponse = null;
 		private _response:MatchvsResponse = null; //Matchvs 引擎
@@ -42,6 +44,12 @@ module mvs {
 			if(this._response == null){
 				this.registResponseCall();
 			}
+			this.setIntervalFrame = setInterval(()=>{
+				if(this.frameQuence.length > 0){
+					let frame = this.frameQuence.shift();
+					this.dispatchEvent(new egret.Event(MsEvent.EVENT_FRAMEUPDATE, false, false, frame));
+				}
+			},100);
 			return this._response;
 		}
 
@@ -84,6 +92,8 @@ module mvs {
 			this._response.getRoomListResponse = this.getRoomListResponse.bind(this);
 
 			this._response.reconnectResponse = this.reconnectResponse.bind(this);
+
+			this._response.getOffLineDataResponse = this.getOffLineDataResponse.bind(this);
 
 		}
 
@@ -211,6 +221,7 @@ module mvs {
 		 * 自己离开房间回调
 		 */
 		private leaveRoomResponse(rsp:MsLeaveRoomRsp){
+			clearTimeout(this.setIntervalFrame);
 			console.info("[leaveRoomResponse] status: "+rsp.status);
 			let data = {
 				roomID:rsp.roomID,
@@ -270,7 +281,10 @@ module mvs {
 				frameItems:fd.frameItems,
 				frameWaitCount:fd.frameWaitCount,
 			};
-			this.dispatchEvent(new egret.Event(MsEvent.EVENT_FRAMEUPDATE, false, false, data));
+			if(this.frameQuence.length < 1000){
+				this.frameQuence.push(data);
+			}
+			//this.dispatchEvent(new egret.Event(MsEvent.EVENT_FRAMEUPDATE, false, false, data));
 		}
 
 		/**
@@ -289,6 +303,7 @@ module mvs {
 		 * 登出回调
 		 */
 		private logOutResponse(status:number){
+			clearTimeout(this.setIntervalFrame);
 			console.info("[logOutResponse] status:", status);
 			let data = {
 				status:status
@@ -431,6 +446,16 @@ module mvs {
 			this.dispatchEvent(new egret.Event(MsEvent.EVENT_RECONNECT_RSP, false, false, data));
 		}
 
+		private getOffLineDataResponse(rsp){
+			console.info("[getOffLineDataResponse] info:", status);
+			let data = {
+				"status": rsp.status,
+				"frameCount":rsp.frameCount,
+				"msgCount":rsp.msgCount,
+			}
+			this.dispatchEvent(new egret.Event(MsEvent.EVENT_OFFLINEDATE_RSP, false, false, data));
+		}
+
 		/**
 		 * 帧同步质量检查函数，与 matchvs 接口无关，自定义用来查看 帧同步稳定性的。
 		 */
@@ -478,6 +503,8 @@ module mvs {
 			}
 			this.frist = timestamp;
 		}
+
+
 
 	}
 }

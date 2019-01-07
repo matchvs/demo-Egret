@@ -77,6 +77,9 @@ module mvs {
         //断线重新连接
         public static EVENT_RECONNECT_RSP = "MATCHVS_RECONNECT_RSP_EVENT";
 
+        // 获取断线期间帧数据
+        public static EVENT_OFFLINEDATE_RSP = "MATCHVS_OFFLINEDATE_RSP_EVENT";
+
         constructor(){
         }
     }

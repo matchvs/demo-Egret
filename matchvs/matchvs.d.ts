@@ -18,7 +18,8 @@ declare namespace MVS{
         public startIndex:number;
         public timestamp:string;
         public enableGS:number;
-        constructor(frameRate:number, startIndex:number, timestamp:string,enableGS:number);
+        public cacheFrameMS:number;
+        constructor(frameRate:number, startIndex:number, timestamp:string,enableGS:number, cacheFrameMS:number);
     }
 
     /**
@@ -157,7 +158,7 @@ declare namespace MVS{
          * @param {MsTeamMatchCond} cond 队伍匹配参数设置
          * @memberof MsTeamMatchInfo
          */
-        constructor(roomName: string, maxPlayer: number, canWatch: number, mode: number, visibility: number, roomProperty: string, watchSet: MsWatchSet, cond: MsTeamMatchCond);
+        constructor(roomName: string, maxPlayer: number, canWatch: number, mode: number, visibility: number, roomProperty: string, cond: MsTeamMatchCond, watchSet: MsWatchSet);
     }
 
     class MsJoinTeamInfo{
@@ -1156,6 +1157,14 @@ declare class MatchvsResponse {
      * @memberof MatchvsResponse
      */
     teamMatchStartNotify(rsp:any):void
+
+    /**
+     *
+     * @param {number} rsp.status 状态值
+     * @param {number} rsp.frameCount 帧数量
+     * @param {number} rsp.msgCount 消息数量
+     */
+    getOffLineDataResponse(rsp:any);
 }
 
 
@@ -1178,7 +1187,7 @@ declare class MatchvsEngine {
      * @param {number} gameID       游戏ID，官网生成
      * @returns {number}
      */
-    init(pResponse: MatchvsResponse, pChannel: string, pPlatform: string, gameID: number): number
+    init(pResponse: MatchvsResponse, pChannel: string, pPlatform: string, gameID: number, pAppkey: string, pGameVersion: number): number
 
     /**
      * 用于独立部署的初始化接口，初始化，后续收到的回调是都是由该对象初始化的pResponse对象控制。
@@ -1187,7 +1196,7 @@ declare class MatchvsEngine {
      * @param {number} gameID   独立部署配置的 游戏ID
      * @returns {number} 0-成功
      */
-    premiseInit(pResponse: MatchvsResponse, endPoint:string, gameID:number): number
+    premiseInit(pResponse: MatchvsResponse, endPoint:string, gameID:number, pAppkey: string): number
 
     /**
      * 登录
@@ -1200,7 +1209,7 @@ declare class MatchvsEngine {
      *                              自定义唯一值，或者获取 设备ID值
      * @returns {number}
      */
-    login(pUserID: number, pToken: string, pGameID: number, pGameVersion: number, pAppkey: string, pDeviceID: string): number
+    login(pUserID: number, pToken: string, pDeviceID: string): number
 
     /**
      * 用户网关速度，暂时不用
@@ -1325,10 +1334,11 @@ declare class MatchvsEngine {
      * frameRate ex:10/s . = 0 is off,>0 is on.
      * @param {number} frameRate
      * @param {number} enableGS 0-gs不参与帧同步 1-gs参与帧同步
-     * @param {number} other 其他数据
+     * @param {any} other 其他数据
+     * @param {any} other.cacheFrameMS 掉线缓存帧数据时间 -1指全部数据
      * @returns {number}
      */
-    setFrameSync(frameRate:number, enableGS?:number ):number
+    setFrameSync(frameRate:number, enableGS?:number , other?:any):number
 
 
     /**
@@ -1356,9 +1366,9 @@ declare class MatchvsEngine {
 
     /**
      * 发送消息的扩展，sequence 的用途和 sendEvent 返回的 sequence 相同
-     * @param {number} msgType          0-包含destUids  1-排除destUids
+     * @param {number} msgType          0-客户端+not CPS  1-not客户端+ CPS   2-客户端 + CPS
      * @param {string} data             要发送的数据
-     * @param {number} desttype         0-客户端+not CPS  1-not客户端+ CPS   2-客户端 + CPS
+     * @param {number} desttype         0-包含destUids  1-排除destUids
      * @param {Array<number>} userIDs   玩家ID集合 [1,2,3,4,5]
      * @returns {{sequence: number, result: number}}
      */
@@ -1454,6 +1464,12 @@ declare class MatchvsEngine {
      * @memberof MatchvsEngine
      */
     teamMatch(matchInfo:MVS.MsTeamMatchInfo):number
+
+    /**
+     * 获取断线期间的帧数据，只有开启的帧同步功能才能有效
+     * @param cacheFrameMS
+     */
+    getOffLineData(cacheFrameMS:number):number
 }
 
 declare class md5 {

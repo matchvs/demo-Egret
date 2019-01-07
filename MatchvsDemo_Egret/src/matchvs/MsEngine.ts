@@ -26,9 +26,9 @@ module mvs {
 		 * @param {string} platform
 		 * @param {number} gameID
 		 */
-		public init(channel:string, platform:string, gameID:number):number{
+		public init(channel:string, platform:string, gameID:number, appkey:string):number{
 			this._response = MsResponse.getInstance.getResponse();
-			let res = this._engine.init(MsResponse.getInstance.getResponse(),channel,platform,gameID);
+			let res = this._engine.init(MsResponse.getInstance.getResponse(),channel,platform,gameID, appkey, 1);
 			if (res !== 200){
 				console.info("[MsEngine init failed] resCode:",res);
 				return res;
@@ -40,9 +40,9 @@ module mvs {
 		/**
 		 * 独立部署的初始化
 		 */
-		public premiseInit(endPoint:string, gameID:number):number{
+		public premiseInit(endPoint:string, gameID:number, appkey:string):number{
 			this._response = MsResponse.getInstance.getResponse();
-			let res = this._engine.premiseInit( MsResponse.getInstance.getResponse(),endPoint, gameID);
+			let res = this._engine.premiseInit( MsResponse.getInstance.getResponse(),endPoint, gameID, appkey);
 			if (res !== 0){
 				console.info("[MsEngine premiseInit failed] resCode:",res);
 				return res;
@@ -59,8 +59,8 @@ module mvs {
 		 * @param {string} appkey 		游戏 appkey
 		 * @param {string} secretkey 	游戏 secretkey
 		 */
-		public login(userID:number, token:string, gameID:number, appkey:string):number{
-			let res = this._engine.login(userID,token,gameID,1,appkey,"eglejjddg");
+		public login(userID:number, token:string):number{
+			let res = this._engine.login(userID, token, "eglejjddg");
 			console.info("[MsEngine login] resCode:",res);
 			return res;
 		}
@@ -188,8 +188,10 @@ module mvs {
 		 * @returns {number}
 		 */
 		public sendFrameEvent(cpProto:string):number{
-			let res = this._engine.sendFrameEvent(cpProto,0);
-			console.info("[MsEngine sendFrameEvent ] resCode:",res);
+			let res = this._engine.sendFrameEvent(cpProto, 0);
+			if(res != 0){
+				console.info("[MsEngine sendFrameEvent ] resCode:", res);
+			}
 			return res;
 		}
 
@@ -199,7 +201,7 @@ module mvs {
 		 * @returns {number}
 		 */
 		public setFrameSync(frameRate:number):number{
-			let res = this._engine.setFrameSync(frameRate);
+			let res = this._engine.setFrameSync(frameRate, 0, {cacheFrameMS:-1});
 			console.info("[MsEngine setFrameSync ] resCode:",res);
 			return res;
 		}
@@ -280,6 +282,15 @@ module mvs {
 		public reconnect():number{
 			let res = this._engine.reconnect();
 			console.info("[MsEngine reconnect ]", res);
+			return res;
+		}
+
+		/**
+		 * 获取断线数据
+		 */
+		public getOffLineData(cacheMs:number){
+			let res = this._engine.getOffLineData(cacheMs);
+			console.info("[MsEngine getOffLineData ]", res);
 			return res;
 		}
 

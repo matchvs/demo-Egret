@@ -31,10 +31,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 		this.startLoad();
 	}
 	private startLoad():void {
-		
-
 		GameData.starPositionX = 0;
-
         if (GameData.syncFrame === true && GameData.isRoomOwner === true) {
 			let result = mvs.MsEngine.getInstance.setFrameSync(GameData.frameRate);
             if (result !== 0){
@@ -216,6 +213,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 
 		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_SETFRAMESYNC_RSP, this.setFrameSyncResponse,this);
 		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_FRAMEUPDATE, this.frameUpdate,this);
+		mvs.MsResponse.getInstance.addEventListener(mvs.MsEvent.EVENT_OFFLINEDATE_RSP, this.getOffLineDataResponse, this);
     }
 
     public release(){
@@ -228,6 +226,7 @@ class GamePlayView extends egret.DisplayObjectContainer{
 
 		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_SETFRAMESYNC_RSP, this.setFrameSyncResponse,this);
 		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_FRAMEUPDATE, this.frameUpdate,this);
+		mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_OFFLINEDATE_RSP, this.getOffLineDataResponse, this);
     }
 
 	private initUserScore() {
@@ -357,6 +356,16 @@ class GamePlayView extends egret.DisplayObjectContainer{
         this.addChild(buttonLeave);
 		buttonLeave.addEventListener(egret.TouchEvent.TOUCH_TAP, this.onButtonLeaveRoom, this);
 
+		if(GameData.syncFrame === true ){
+			let buttonGetData = new eui.Button();
+			buttonGetData.label = "断线帧数据";
+			buttonGetData.x = this.stage.stageWidth - 120;
+			buttonGetData.y = this.stage.stageHeight - 100;
+			this.addChild(buttonGetData);
+			buttonGetData.addEventListener(egret.TouchEvent.TOUCH_TAP, this.getOffLineData, this);
+		}
+		
+
 		//计时
 		let idCountDown = setInterval(() => {
 			this._countDownLabel.text = (this._gameTime--).toString();
@@ -382,10 +391,8 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				 userids.push(user.id);
 			 });
 
-			
-
             let id = setInterval(() => {
-				console.log("当前位置：", this._egretBird0.x);
+				//console.log("当前位置：", this._egretBird0.x);
 				mvs.MsEngine.getInstance.sendEventEx(0, JSON.stringify({
                     action: GameData.playerPositionEvent,
 					x: this._egretBird0.x,
@@ -689,8 +696,6 @@ class GamePlayView extends egret.DisplayObjectContainer{
 				}
 			}else if(sdnotify.cpProto.indexOf(GameData.reconnectReadyEvent) >= 0){
 				console.log("重新连接收到消息 this._countDownLabel.text",this._gameTime);
-
-				
 				setTimeout(()=>{
 						let eventTemp = {
 						action: GameData.reconnectStartEvent,
@@ -770,5 +775,17 @@ class GamePlayView extends egret.DisplayObjectContainer{
 			GameData.syncFrame = false;
 		}
 
+	}
+
+	private getOffLineDataResponse(ev:egret.Event){
+		let netnotify = ev.data;
+		console.log("获取断线帧数据：",netnotify);
+	}
+
+	/**
+	 * 获取断线数据
+	 */
+	private getOffLineData(e: egret.TouchEvent){
+		mvs.MsEngine.getInstance.getOffLineData(-1);
 	}
 }

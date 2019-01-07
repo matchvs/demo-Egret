@@ -29,7 +29,7 @@ class Login extends eui.Component implements  eui.UIComponent {
 			this.btn_enter = instance;
 			this.btn_enter.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
 				console.log(" environment=" + GameData.DEFAULT_ENV + " gameid=" + GameData.gameID);
-				let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
+				let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID, GameData.appkey);
 			}, this);
 		}else if("rect_clear" == partName){
 			this.rect_clear = instance;
@@ -107,7 +107,7 @@ class Login extends eui.Component implements  eui.UIComponent {
         GameData.gameUser.token = userInfo.token;
         //登录
         if(userInfo.status == 0){
-            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token, GameData.gameID,GameData.appkey);
+            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token);
         }
     }
     /**
@@ -121,6 +121,7 @@ class Login extends eui.Component implements  eui.UIComponent {
         if (login.status != 200) {
             console.log("登陆失败");
         } else {
+            this.release();
             console.log("登陆成功 roomID=" + login.roomID);
             if (login.roomID !== "0") {
                 GameData.roomID = login.roomID;
@@ -228,7 +229,7 @@ class Login extends eui.Component implements  eui.UIComponent {
                     GameData.gameUser.avatar = wxUserInfo.userInfo.avatarUrl;
                     GameData.gameUser.token = repData.data.token;
                     //绑定成功就登录
-                    mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token, GameData.gameID,GameData.appkey);
+                    mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token);
                 }else{
                     console.log("bindOpenIDWithUserID get error : " , err);
                 }
