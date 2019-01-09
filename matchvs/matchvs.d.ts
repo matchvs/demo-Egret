@@ -1335,7 +1335,7 @@ declare class MatchvsEngine {
      * @param {number} frameRate
      * @param {number} enableGS 0-gs不参与帧同步 1-gs参与帧同步
      * @param {any} other 其他数据
-     * @param {any} other.cacheFrameMS 掉线缓存帧数据时间 -1指全部数据
+     * @param {any} other.cacheFrameMS 其他数据
      * @returns {number}
      */
     setFrameSync(frameRate:number, enableGS?:number , other?:any):number
