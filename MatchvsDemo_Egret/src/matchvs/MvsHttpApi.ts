@@ -1,7 +1,7 @@
 class MvsHttpApi {
 	
-	public open_host:string = GameData.DEFAULT_ENV == "release"? "https://vsopen.matchvs.com":"https://alphavsopen.matchvs.com";
-    public user_host:string = GameData.DEFAULT_ENV == "release"? "https://vsuser.matchvs.com":"https://alphavsuser.matchvs.com";
+	public open_host:string = GameData.DEFAULT_ENV == "release"? "https://vsopen-ge.matrix.jdcloud.com":"https://alphavsopen-ge.matrix.jdcloud.com";
+    public user_host:string = GameData.DEFAULT_ENV == "release"? "https://vsuser-ge.matrix.jdcloud.com":"https://alphavsuser-ge.matrix.jdcloud.com";
 	private rank_list:string = "/rank/ranking_list?";
     private rank_user:string = "/rank/grades?";
 
