@@ -91,7 +91,7 @@ class PremiseLoginUI extends eui.Component implements  eui.UIComponent {
 		this.txt_userID.text = "123456";
 		this.txt_appKey.text = "appkey01";
 		this.txt_gameID.text = "1";
-		this.txt_endport.text = "aligateway.matchvs.com";
+		this.txt_endport.text = "jingdonggateway.matchvs.com";
 	}
 
 	private addMsResponseListen(){
