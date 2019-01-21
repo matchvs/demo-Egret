@@ -1,10 +1,10 @@
 class GameData {
-    public static CHANNEL = "MatchVS";
+    public static CHANNEL = "jdge";
     public static DEFAULT_ENV = "alpha";
     public static ENVIRONMENT = { "dev": "alpha", "pro": "release" }
-    public static gameID: number = 201489;//201489;
-    public static appkey: string = "4fb6406305f44f1aad0c40e5946ffe3d";//4fb6406305f44f1aad0c40e5946ffe3d
-    public static secretKey: string = "5035d62b75bd4941b182579f2b8fc12c";//5035d62b75bd4941b182579f2b8fc12c
+    public static gameID: number = 5;//201489;
+    public static appkey: string = "b85d3ac0cc0541c59d391e3e56734352";//4fb6406305f44f1aad0c40e5946ffe3d
+    public static secretKey: string = "6f6ac46e192c48ef9d265810a9d70685";//5035d62b75bd4941b182579f2b8fc12c
 
     public static gameUser: GameUser = new GameUser();
     public static playerUserIds: Array<GameUser> = [];

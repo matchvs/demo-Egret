@@ -38,7 +38,7 @@
     },
     {
       "name": "matchvs",
-      "path": "../matchvs"
+      "path": "./libs/matchvs"
     },
     {
       "name":"wxshare",

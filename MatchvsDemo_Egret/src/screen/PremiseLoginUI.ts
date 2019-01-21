@@ -109,8 +109,9 @@ class PremiseLoginUI extends eui.Component implements  eui.UIComponent {
 	 */
 	private premiseInit(event:egret.TouchEvent){
 		let endPoint:string = this.txt_endport.text;
+		let appkey:string = this.txt_appKey.text;
 		let gameID:number = Number(this.txt_gameID.text);
-		mvs.MsEngine.getInstance.premiseInit(endPoint,gameID);
+		mvs.MsEngine.getInstance.premiseInit(endPoint,gameID, appkey);
 	}
 
 	/**
@@ -127,7 +128,7 @@ class PremiseLoginUI extends eui.Component implements  eui.UIComponent {
 		/**
 		 * 调用 matchvs 登录接口
 		 */
-		mvs.MsEngine.getInstance.login(userID,token,gameID, appkey);
+		mvs.MsEngine.getInstance.login(userID,token);
 	}
 
 	/**
