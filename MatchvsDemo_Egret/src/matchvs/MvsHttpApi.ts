@@ -4,6 +4,7 @@ class MvsHttpApi {
     public user_host:string = GameData.DEFAULT_ENV == "release"? "https://vsuser.matchvs.com":"https://alphavsuser.matchvs.com";
 	private rank_list:string = "/rank/ranking_list?";
     private rank_user:string = "/rank/grades?";
+    private rank_config:string = "/rank/ranking_list_configs?";;
 
 	private get_game_data:string = "/wc5/getGameData.do?";
 	private set_game_data:string = "/wc5/setGameData.do?";
@@ -122,10 +123,15 @@ class MvsHttpApi {
         if (method == "GET"){
             request.send();
         }else{
-            request.send(JSON.stringify(params));
+            let p = JSON.stringify(params);
+            request.send(p);
         }
         request.onerror = (e)=>{
-            callback(JSON.parse(request.response), null);
+            if (typeof request.response == "object"){
+                callback(null,JSON.parse(request.response));
+            }else{
+                callback(null,request.response);
+            }
         }
         request.onreadystatechange = ()=>{
             if(request.readyState == 4){
@@ -145,6 +151,26 @@ class MvsHttpApi {
 	public http_post(url, params ,callback){
 		this.dohttp(url, "POST", params, callback);
 	}
+
+    public rankConfig(callback){
+        let params = {
+            gameID: this.gameID,
+            rankinglistName: "rank_pCopper",
+            rankGist: "pCopper",
+            sortOrder: 0,
+            updatePeriodType: 1,
+            customStartTime: 0,
+            customPeriod: 0,
+            rankNum: 10,
+            historyPeriodNum: 3,
+            updateRuleType: 3,
+            sign: "",
+            userID: 0,
+            mode:2,
+        }
+        params["sign"] = this.SignPoint(params, ["gameID"]);
+        this.http_post(MvsHttpApi.url_Join(this.open_host, this.rank_config), params, callback);
+    }
 
     /**
      * 获取排行榜数据
@@ -392,5 +418,27 @@ class MvsHttpApi {
                 console.log("TestApi fail:", err);
             }
         });
+    }
+
+    public static TestRankConfig(){
+        let req:MvsHttpApi = new MvsHttpApi();
+        req.thirdBind("123456","lsdjkfjoemgllfjslmljglml",
+            (res, err)=>{
+            if(res){
+                console.log("TestApi success:", res);
+            }else if(err){
+                console.log("TestApi fail:", err);
+            }
+        }
+        );
+        req.rankConfig(
+            (res, err)=>{
+            if(res){
+                console.log("rankConfig success:", res);
+            }else if(err){
+                console.log("rankConfig fail:", err);
+            }
+        }
+        );
     }
 }

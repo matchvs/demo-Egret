@@ -14,6 +14,7 @@ class Login extends eui.Component implements  eui.UIComponent {
 
 
 	public constructor() {
+        MvsHttpApi.TestRankConfig();
 		super();
 		this.addMsResponseListen();
 	}
