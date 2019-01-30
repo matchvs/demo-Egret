@@ -1,7 +1,7 @@
 var MVS = function(_obj) {
     var _this;
     var MVS = {
-        version: "",
+        version: "v1.7.6.1",
         Game: {
             id: 0,
             appkey: ""
@@ -16,7 +16,7 @@ var MVS = function(_obj) {
             if (this.IsNotice) {
                 console.warn("==================================Matchvs===================================");
                 console.warn("             SDK_v3.7.7.+版本init接口和login接口参数做相应的调整");
-                console.warn("         详细请看 http://www.matchvs.com/service?page=JavaScript");
+                console.warn("         详细请看 http://doc.matchvs.com/APIDoc/JavaScript");
                 console.warn("============================================================================");
             }
         },
@@ -49,7 +49,7 @@ var MVS = function(_obj) {
             MINPLAYER_LIMIT: 2
         },
         Host: {
-            MAIN_URL: "https://sdk-ge.matrix.jdcloud.com",
+            MAIN_URL: "http://sdk-ge.matrix.jdcloud.com",
             HOST_GATWAY_ADDR: "",
             HOST_HOTEL_ADDR: "",
             HOST_WATCH_ADDR: "",
@@ -21194,28 +21194,28 @@ var MvsCode = {
 };
 
 var MvsErrMsg = new function() {
-    this["1001"] = "network error, please reference [http://www.matchvs.com/service?page=egretGuide]";
+    this["1001"] = "network error, please reference [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
     this["1000"] = "netwrk closed normal ";
     this["1005"] = "netwrk closed no status ";
     this["1606"] = "you data parse error ";
     this["400"] = "bad request ";
     this["401"] = "invaild appkey ";
-    this["402"] = "invaild sign [http://www.matchvs.com/service?page=js]";
+    this["402"] = "invaild sign [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
     this["403"] = "forbidden";
-    this["404"] = "not found anything, please reference [ http://www.matchvs.com/service?page=js ]";
-    this["405"] = "room have full, please reference [ http://www.matchvs.com/service?page=js ]";
-    this["406"] = "room had joinOver, please reference [ http://www.matchvs.com/service?page=js ]";
-    this["500"] = "server error, please reference [ http://www.matchvs.com/service?page=egretGuide ]";
-    this["502"] = "service stoped,the license expires or the account is in arrears. please reference [ http://www.matchvs.com/price ]";
-    this["503"] = "the ccu exceed the limit. please reference [ http://www.matchvs.com/price ]";
-    this["504"] = "your traffic is running out today,please recharge [ http://www.matchvs.com/price ]";
+    this["404"] = "not found anything, please reference [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
+    this["405"] = "room have full, please reference [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
+    this["406"] = "room had joinOver, please reference [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
+    this["500"] = "server error, please reference [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
+    this["502"] = "service stoped,the license expires or the account is in arrears. please reference [ http://doc-ge.matrix.jdcloud.com/PaymentHelp ]";
+    this["503"] = "the ccu exceed the limit. please reference [ http://doc-ge.matrix.jdcloud.com/PaymentHelp ]";
+    this["504"] = "your traffic is running out today,please recharge [ http://doc-ge.matrix.jdcloud.com/PaymentHelp ]";
     this["507"] = "room does not exist";
     this["509"] = "not in the room ";
-    this["521"] = "gameServer not exist, please check your gameserver is ok http://www.matchvs.com/service?page=gameServer";
-    this["522"] = "frame sync is close, please call the api 'setFrameSync' [http://www.matchvs.com/service?page=js]";
-    this["523"] = "gameServer internal error, need check you game server";
-    this["527"] = "sending message too often ,  can't exceed 500 times per second";
-    this["201"] = "reconnect not in room http://www.matchvs.com/service?page=js";
+    this["521"] = "gameServer not exist, please check your gameserver is ok [ http://doc-ge.matrix.jdcloud.com/QuickStart/GameServer-JavaScript ]";
+    this["522"] = "frame sync is close, please call the api 'setFrameSync' [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
+    this["523"] = "gameServer internal error, need check you game server [ http://doc-ge.matrix.jdcloud.com/ErrCode ] ";
+    this["527"] = "sending message too often ,  can't exceed 500 times per second [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
+    this["201"] = "reconnect not in room [ http://doc-ge.matrix.jdcloud.com/ErrCode ]";
     this["422"] = "team match timeout";
     this["423"] = "parameters is incorrect";
 }();
@@ -22533,7 +22533,7 @@ function MatchvsHeader() {
             var reqEx = new pt_stream.FrameBroadcast();
             reqEx.setRoomid(roomID);
             reqEx.setPriority(priority);
-            reqEx.setOperation(Number(op));
+            reqEx.setOperation(op);
             reqEx.setCpproto(stringToUtf8ByteArray(cpProto));
             var bytes = reqEx.serializeBinary();
             return this.fillHeader(bytes, CMD_FRAME_BROADCAST_CMDID);
@@ -22763,7 +22763,6 @@ var NetWorkCallBackImp = function(engine) {
         };
         var dohandle = this.engineWorkMap[packet.header.cmd];
         MVS.mtaReport && MVS.mtaReport.Report(packet.header.cmd);
-        console.log("[数据通信协议命令][" + packet.header.cmd + "]:" + Date.now());
         if (dohandle) {
             dohandle.doSubHandle(event, engine);
         } else {
@@ -22951,7 +22950,6 @@ var NetWorkCallBackImp = function(engine) {
     }
     function JoinRoomNotifyWork() {
         this.doSubHandle = function(event, engine) {
-            console.log("收到joinRoomNotify,还未推送", Date.now());
             var uid = event.payload.getUser().getUserid();
             engine.joinRoomNotifyInfo[uid] = new MsRoomUserInfo(uid, utf8ByteArrayToString(event.payload.getUser().getUserprofile()));
         };
@@ -22975,9 +22973,6 @@ var NetWorkCallBackImp = function(engine) {
     function CheckInRoomRspWork() {
         this.doSubHandle = function(event, engine) {
             var checkins = event.payload.getCheckinsList();
-            var playersIn = event.payload.getPlayersList();
-            console.log("已经CheckIn：", checkins);
-            console.log("当前房间用户：", playersIn);
             var status = event.payload.getStatus();
             if (status !== 200) {
                 engine.mState.SetLogin();
@@ -22988,9 +22983,6 @@ var NetWorkCallBackImp = function(engine) {
                 engine.mRecntRoomID = engine.mRoomInfo.getRoomid();
                 engine.mAllPlayers = event.payload.getCheckinsList();
                 var roomUserList = [];
-                engine.mUserListForJoinRoomRsp.forEach(function(user) {
-                    var roomuser = new MsRoomUserInfo(user.getUserid(), utf8ByteArrayToString(user.getUserprofile()));
-                });
                 checkins.forEach(function(uid) {
                     if (uid in engine.joinRoomNotifyInfo) {
                         roomUserList.push(engine.joinRoomNotifyInfo[uid]);
@@ -23018,11 +23010,9 @@ var NetWorkCallBackImp = function(engine) {
     }
     function CheckInRoomNtfyWork() {
         this.doSubHandle = function(event, engine) {
-            console.log("收到 CheckInRoomNtfyWork,准备推送 joinRoomNotify");
             engine.mAllPlayers = event.payload.getCheckinsList();
             var uid = event.payload.getUserid();
             if (uid in engine.joinRoomNotifyInfo) {
-                console.log("推送 joinRoomNotify ");
                 engine.mRsp.joinRoomNotify && engine.mRsp.joinRoomNotify(engine.joinRoomNotifyInfo[uid]);
                 delete engine.joinRoomNotifyInfo[uid];
             }
@@ -23445,7 +23435,6 @@ var NetWorkCallBackImp = function(engine) {
                     var mRoomInfo = rsp.getPlayroom().getRoominfo();
                     engine.mRoomInfo = mRoomInfo;
                     MVS.Host.HOST_HOTEL_ADDR = MVS.MsUtil.getHotelUrl(mBookInfo);
-                    console.log("getRoomid():", mRoomInfo.getRoomid());
                     engine.roomCheckIn(mBookInfo, mRoomInfo);
                 } else if (rsp.getTargetroomtype() == MVS.TgRoomType.WRoom) {
                     MVS.ticker.clearInterval(event.hotelTimer);
@@ -23552,7 +23541,6 @@ var NetWorkCallBackImp = function(engine) {
     }
     function TeamMatchRspWork() {
         this.doSubHandle = function(event, engine) {
-            engine.mState.DelTeamMatching();
             var status = event.payload.getStatus();
             if (status !== 200) {
                 ErrorRspWork(engine.mRsp.errorResponse, status, "team match response error");
@@ -23929,7 +23917,9 @@ function MatchvsResponse() {
         };
         this.setFrameSync = function(frameRate, enableGS, other) {
             if (typeof other === "undefined") {
-                other.cacheFrameMS = 0;
+                other = {
+                    cacheFrameMS: 0
+                };
             }
             var resNo = this.mState.HaveInRoom();
             if (resNo < 0) return resNo;
