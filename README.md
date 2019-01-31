@@ -1,10 +1,8 @@
 ## Demo简介
 
-为了便于开发者使用和理解，用 Matchvs 的实时联网 SDK 和 白鹭 `Egret` 开发的多人抢足球，提供了简洁的Demo来展示多人实时联网游戏的开发过程和效果，用于演示多人匹配、数据传输、帧同步、创建房间、获取房间列表、消息订阅、断线重连、修改房间属性等功能。Matchvs。
+为了便于开发者使用和理解，用 jdge 的实时联网 SDK 和 白鹭 `Egret` 开发的多人抢足球，提供了简洁的Demo来展示多人实时联网游戏的开发过程和效果，用于演示多人匹配、数据传输、帧同步、创建房间、获取房间列表、消息订阅、断线重连、修改房间属性等功能。jdge。
 
 ## 目录
-
-v3.2.7.0 去除之前的 matchvs_wx 目录。现在目录如下：
 
 ````
 ┌─── matchvs 支持 Egret SDK库文件
@@ -16,29 +14,28 @@ v3.2.7.0 去除之前的 matchvs_wx 目录。现在目录如下：
 
 ## Demo下载和体验
 
-Demo 支持使用 Matchvs云和独立部署两种配置模式。
+Demo 支持使用 jdge云和独立部署两种配置模式。
 
-- [官网](http://www.matchvs.com/serviceDownload)
-- [GitHub](https://github.com/matchvs/demo-Egret)
-- [直接体验连接](http://demo.matchvs.com/Egret/)
+- [官网](http://home-ge.matrix.jdcloud.com/serviceDownload)
+- [直接体验连接](http://demo-ge.matrix.jdcloud.com/Egret/)
 
 > **注意**：下载Demo源码后，需要使用Egret的Wing打开工程(Wing建议使用4.1.0以上的版本，Egret引擎建议使用5.1.5以上版本)。满三人才可以开始游戏，使用三个不同的浏览器运行。Demo支持三人同时游戏，匹配成功后，玩家通过按住按钮左右滑动来推动小鸭子向左向右移动抢足球。
 
-## Demo 使用Matchvs云配置
+## Demo 使用jdge云配置
 
-Demo运行之前需要去 [Matchvs 官网](http://www.matchvs.com/) 配置游戏相关信息，以获取Demo运行所需要的GameID、AppKey、SecretID。如图：
+Demo运行之前需要去 [jdge 官网](http://home-ge.matrix.jdcloud.com/) 配置游戏相关信息，以获取Demo运行所需要的GameID、AppKey、SecretID。如图：
 
-![img](http://imgs.matchvs.com/static/2_1.png)
+![img](./img.Assets/home_jdge_game.png)
 
 创建成功
 
-![img](http://imgs.matchvs.com/static/2_2.png)
+![img](./img.Assets/home_jdge_gamecreate.png)
 
-修改 Demo 里  GameData.ts 的游戏配置信息为你自己的游戏信息，并确保 CHANNEL 为 Matchvs 或者 MatchVS , 如果出现MatchVS-Test 的配置或者其他配置请修正。ENVIRONMENT 是在Demo登录界面环境选择的配置 确保配置信息为 `{ "dev": "alpha", "pro": "release" }` ，其中alpha 一般用于测试环境，release 用于生产环境。修改参数可参考下图：
+修改 Demo 里  GameData.ts 的游戏配置信息为你自己的游戏信息，并确保 CHANNEL 为 jdge 或者 jdge , ENVIRONMENT 是在Demo登录界面环境选择的配置 确保配置信息为 `{ "dev": "alpha", "pro": "release" }` ，其中alpha 一般用于测试环境，release 用于生产环境。修改参数可参考下图：
 
 ![img](http://imgs.matchvs.com/static/egret/MatchvsDemo_Egret_3.png)
 
-如果不了解Login这个函数的参数请到官网查看相关的 [API接口说明](http://www.matchvs.com/service?page=APIUnity) 文档。
+如果不了解Login这个函数的参数请到官网查看相关的 [API接口说明](http://home-ge.matrix.jdcloud.com/service?page=APIUnity) 文档。
 
 > 注意： 如果运行不成功请查看 egretProperties.json 文件是否配置了加了如下配置：
 >
@@ -48,22 +45,16 @@ Demo运行之前需要去 [Matchvs 官网](http://www.matchvs.com/) 配置游戏
 >     "path": "../matchvs"
 > }
 > ```
-> 注意：在 v3.7.2.0 及后发布微信小游戏不需要配置 matchvs_wx 。 v3.7.2.0 之前的版本 如果是要发布成微信小游戏应该吧 path 下面的 ../matchvs  改为 ../matchvs_wx, 如下：
->
-> ```
-> { 
->     "name": "matchvs",
->     "path": "../matchvs_wx"
-> }
-> ```
+
+
 
 把游戏信息配置好就可以运行试玩，Demo运行界面如下，可以点击随机匹配开始：
 
 ![img](http://imgs.matchvs.com/static/egret/MatchvsDemo_Egret_4.png)
 
-## Matchvs SDK 引入
+## jdge SDK 引入
 
-为了使demo游戏逻辑处理和 matchvs sdk 模块划分更加明显，我们把 Matchvs SDK 使用封装在 /src/matchvs 目录下。通过事件触发的机制重新转发 MatchvsSDK 联网数据。/src/matchvs 目录下结构：
+为了使demo游戏逻辑处理和 jdge sdk 模块划分更加明显，我们把 jdge SDK 使用封装在 /src/matchvs 目录下。通过事件触发的机制重新转发 jdge SDK 联网数据。/src/matchvs 目录下结构：
 
 ```
 MsEngine.ts	: MatchvsEngine 实例对象的单例类型
@@ -71,12 +62,12 @@ MsEvent.ts 	：事件定义
 MsResponse.ts ：MatchvsResponse 实例对象的单例类型
 ```
 
-MsEngine.ts 文件构建了 MatchvsEngine 的实例，对Matchvs的接口调用全部在这个类型中，示例代码如下：
+MsEngine.ts 文件构建了 jdgeEngine 的实例，对 jdge 的接口调用全部在这个类型中，示例代码如下：
 
 ```typescript
 module mvs {
 	/**
-	 * 这个是 matchvs 引擎 接口封装模块，对引擎的所有请求接口进行了二次封装，一些接口调用的参数可以在这里组合，所有对mathvs接口请求都在这里
+	 * 这个是 jdge 引擎 接口封装模块，对引擎的所有请求接口进行了二次封装，一些接口调用的参数可以在这里组合，所有对mathvs接口请求都在这里
 	 */
 	export class MsEngine {
 		private static _instance = null;
@@ -105,7 +96,7 @@ MsResponse.ts 对 MatchvsResponse 回调接口 进行封装，使用 事件触�
 module mvs {
 	export class MsResponse extends egret.EventDispatcher{
 		private static _instance:MsResponse = null;
-		private _response:MatchvsResponse = null; //Matchvs 引擎
+		private _response:MatchvsResponse = null; //jdge 引擎
 		public constructor() {
 			super();
 			this.registResponseCall();
@@ -191,7 +182,7 @@ private initResponse(ev:egret.Event) {
 
 ## 注册用户
 
-接下来，我们就可以从Matchvs获取一个合法的用户ID，通过该ID连接至Matchvs服务端。这个用户ID每次获取的都是不同的，如果需要固定的用户ID参考 [第三方绑定](http://www.matchvs.com/service?page=third)
+接下来，我们就可以从jdge获取一个合法的用户ID，通过该ID连接至jdge服务端。这个用户ID每次获取的都是不同的，如果需要固定的用户ID参考 [第三方绑定](http://doc-ge.matrix.jdcloud.com/Advanced/ThirdAccount)
 
 #### MsEngine.ts 和 MsResponse.ts 文件定义
 
@@ -242,7 +233,7 @@ private registerUserResponse(ev:egret.Event) {
 
 ## 登录
 
-获取到有效用户ID就可以登录到 matchvs 联网服务
+获取到有效用户ID就可以登录到 jdge 联网服务
 
 #### MsEngine.ts 和 MsResponse.ts 文件定义
 
@@ -273,7 +264,7 @@ private registerUserResponse(ev:egret.Event) {
 }
 
 /**
-* 调用 matchvs login 接口回调处理
+* 调用 jdge login 接口回调处理
 */
 private loginResponse(ev:egret.Event) {
     mvs.MsResponse.getInstance.removeEventListener(mvs.MsEvent.EVENT_LOGIN_RSP, this.loginResponse,this);
@@ -292,7 +283,7 @@ private loginResponse(ev:egret.Event) {
 
 ## 加入房间
 
-成功连接至Matchvs后，就会进入到Demo的游戏大厅界面，如上面游戏配置中的游戏大厅图。点击随机匹配可以开始加入随机房间啦。
+成功连接至 jdge 后，就会进入到Demo的游戏大厅界面，如上面游戏配置中的游戏大厅图。点击随机匹配可以开始加入随机房间啦。
 
 #### MsEngine.ts 和 MsResponse.ts 文件定义
 
@@ -358,7 +349,7 @@ private joinRoomNotify(ev:egret.Event) {
 
 ## 停止加入
 
-我们设定如果有3个玩家匹配成功则满足开始条件且游戏设计中不提供中途加入，此时需告诉Matchvs不要再向房间里加人。
+我们设定如果有3个玩家匹配成功则满足开始条件且游戏设计中不提供中途加入，此时需告诉jdge不要再向房间里加人。
 
 #### MsEngine.ts 和 MsResponse.ts 文件定义
 
@@ -880,7 +871,7 @@ private reconnectResponse(status:number, roomUserInfoList:Array<MsRoomUserInfo>,
 
 ## Demo 独立部署配置
 
-上面介绍的是在Matchvs官网控制台创建游戏账号使用Demo，下面我们来介绍在Demo中配置独立部署参数。在使用Demo之前需要先独立部署Matchvs服务到你自己的服务器，并配置好游戏信息。在Demo的login页面右下角有一个独立部署按钮，如下图：
+上面介绍的是在jdge官网控制台创建游戏账号使用Demo，下面我们来介绍在Demo中配置独立部署参数。在使用Demo之前需要先独立部署jdge服务到你自己的服务器，并配置好游戏信息。在Demo的login页面右下角有一个独立部署按钮，如下图：
 
 ![img](http://imgs.matchvs.com/static/egret/MatchvsDemo_Egret_7.png)
 
@@ -888,9 +879,9 @@ private reconnectResponse(status:number, roomUserInfoList:Array<MsRoomUserInfo>,
 
 ![img](http://imgs.matchvs.com/static/egret/MatchvsDemo_Egret_8.png)
 
-这些参数来自你部署Matchvs服务的时候配置的信息。
+这些参数来自你部署jdge服务的时候配置的信息。
 
-服务地址：部署Matchvs 服务 (可以执行 ./matchvs_tool deploy info，可查看部署结果及运行服务) wss_proxy 中的value。
+服务地址：部署jdge 服务 (可以执行 ./matchvs_tool deploy info，可查看部署结果及运行服务) wss_proxy 中的value。
 
 ![](http://imgs.matchvs.com/static/deploy/3.png)
 
@@ -904,13 +895,13 @@ gameID，appKey，secretKey 在独立部署中执行 `./matchvs_tool game add ` 
 
 ![](http://imgs.matchvs.com/static/deploy/6.png)
 
->  **注意**：userID 和 token 不是使用 MatchvsSDK 中的 registerUser 接口获取的，而是你自己设置的用户。如果你没有设置 userID 和 token 你可以暂时 随便填写一个。具体的请阅读独立部署服务端配置文档。
+>  **注意**：userID 和 token 不是使用 jdgeSDK 中的 registerUser 接口获取的，而是你自己设置的用户。如果你没有设置 userID 和 token 你可以暂时 随便填写一个。具体的请阅读独立部署服务端配置文档。
 
 填写好服务信息和用户信息就可以登录到Demo的大厅界面了。
 
-## Matchvs SDK 独立部署接入指引
+## jdge SDK 独立部署接入指引
 
-独立部署与使用Matchvs云游戏接入SDK不同之处就是调用初始化接口不一样，还有不需要调用registerUser接口，userID 和 token是由开发者自己定义。独立部署使用的初始化接口是premiseInit 。初始化回调接口还是与之前一样使用 initResponse 接口
+独立部署与使用jdge云游戏接入SDK不同之处就是调用初始化接口不一样，还有不需要调用registerUser接口，userID 和 token是由开发者自己定义。独立部署使用的初始化接口是premiseInit 。初始化回调接口还是与之前一样使用 initResponse 接口
 
 ### 独立部署SDK初始化
 
@@ -968,4 +959,4 @@ private initResponse(ev:egret.Event) {
 
 ### 登录
 
-登录以及其他操作都是使用与MatchvsSDK云游戏是一样的。
+登录以及其他操作都是使用与jdgeSDK云游戏是一样的。
