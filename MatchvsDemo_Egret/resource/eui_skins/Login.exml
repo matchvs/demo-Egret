@@ -2,7 +2,7 @@
 <e:Skin class="LoginSkin" width="1280" height="720" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" >
 	<w:Config id="165c1cb0a79" ></w:Config>
 	<e:Image width="1280" height="720" x="0" y="0" source="bg_jpg" anchorOffsetX="0" anchorOffsetY="0" fillMode="repeat"/>
-	<e:Label text="MatchvsDemo-Egret" x="431" y="51" size="42" fontFamily="Arial"/>
+	<e:Label text="Demo-Egret" x="501" y="52" size="42" fontFamily="Arial"/>
 	<e:Button id="btn_enter" label="进入Demo" y="442" anchorOffsetX="0" width="315" anchorOffsetY="0" height="70" x="370"/>
 	<e:TextInput id="txt_gameID" width="540" height="70" x="370" y="156"/>
 	<e:TextInput id="txt_appKey" width="540" height="70" x="370" y="250"/>
