@@ -29,7 +29,7 @@ class Login extends eui.Component implements  eui.UIComponent {
 			this.btn_enter = instance;
 			this.btn_enter.addEventListener(egret.TouchEvent.TOUCH_TAP, ()=>{
 				console.log(" environment=" + GameData.DEFAULT_ENV + " gameid=" + GameData.gameID);
-				let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID);
+				let result = mvs.MsEngine.getInstance.init(GameData.CHANNEL, GameData.DEFAULT_ENV, GameData.gameID, GameData.appkey);
 			}, this);
 		}else if("rect_clear" == partName){
 			this.rect_clear = instance;
@@ -84,7 +84,11 @@ class Login extends eui.Component implements  eui.UIComponent {
     }
 
     private initResponse(ev:egret.Event) {
-        console.log("initResponse,status:" + ev.data.status);
+        // console.log("initResponse,status:" + ev.data.status);
+        if( ev.data.status !== 200){
+            console.log("init failed", ev.data.status);
+            return;
+        }
         //获取微信信息
         this.getUserFromWeChat((userInfos)=>{
             //绑定 微信 openID 成功 生成一个 专用 userID 登录
@@ -107,7 +111,7 @@ class Login extends eui.Component implements  eui.UIComponent {
         GameData.gameUser.token = userInfo.token;
         //登录
         if(userInfo.status == 0){
-            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token, GameData.gameID,GameData.appkey);
+            mvs.MsEngine.getInstance.login(userInfo.id, userInfo.token);
         }
     }
     /**
@@ -228,7 +232,7 @@ class Login extends eui.Component implements  eui.UIComponent {
                     GameData.gameUser.avatar = wxUserInfo.userInfo.avatarUrl;
                     GameData.gameUser.token = repData.data.token;
                     //绑定成功就登录
-                    mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token, GameData.gameID,GameData.appkey);
+                    mvs.MsEngine.getInstance.login(GameData.gameUser.id, GameData.gameUser.token);
                 }else{
                     console.log("bindOpenIDWithUserID get error : " , err);
                 }
