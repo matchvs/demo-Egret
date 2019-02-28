@@ -3,7 +3,7 @@
  * @Author: Ville
  * @Date: 2018-04-17 17:46:35
  * @LastEditors: Ville
- * @LastEditTime: 2019-01-30 14:25:25
+ * @LastEditTime: 2019-02-27 15:38:32
  * @Version: Develop v3.7.5.+
  * @Description: Matchvs skd .d.ts define files for typescrip
  */
@@ -1236,9 +1236,11 @@ declare class MatchvsEngine {
      * @param {number} gameID       游戏ID，官网生成
      * @param {number} appKey       游戏 App key 官网生成
      * @param {number} gameVersion       游戏版本，自定义，用于隔离匹配空间
+     * @param {number} threshold       用于多节点获取，设置节点的延迟容忍值。
      * @returns {number}
      */
-    init(pResponse: MatchvsResponse, pChannel: string, pPlatform: string, gameID: number, appKey: string, gameVersion: number): number
+    init(pResponse: MatchvsResponse, pChannel: string, pPlatform: string, gameID: number, appKey: string, gameVersion: number, threshold ?:number): number
+
 
     /**
      * 用于独立部署的初始化接口，初始化，后续收到的回调是都是由该对象初始化的pResponse对象控制。
@@ -1251,14 +1253,29 @@ declare class MatchvsEngine {
     premiseInit(pResponse: MatchvsResponse, endPoint:string, gameID:number, appKey: string): number
 
     /**
+     * 获取节点，只有init 的时候传入了 threshold 参数才可使用
+     * @returns {number} nodeID 节点ID
+     * @returns {number} latency 当前节点延迟
+     * @returns {number} area 节点位置
+     */
+    getNodeList():Array<any>
+
+    /**
+     * init 如果有传入 threshold 参数就可以使用这个接口，切换到指定节点，但处在登录，或者非登录模式都可以
+     * @param {number} args.nodeID 要切换的节点ID
+     */
+    changeNode(args:object):number
+
+    /**
      * 登录
      * @param {number} pUserID 用户ID，该值必须使用 registerUser接口回调的用户ID
      * @param {string} pToken  用户验证字段，用于验证 userID
      * @param pDeviceID             用于区分 用户在不同设备登录情况，用户只能在一个设备登录，默认填1，如果允许一个设备登录就要开发者
      *                              自定义唯一值，或者获取 设备ID值
+     * @param {number} nodeID 节点ID，如果不传就使用默认节点，如果传了的话需要同时，init的时候设置threshold参数
      * @returns {number}
      */
-    login(pUserID: number, pToken: string, pDeviceID: string): number
+    login(pUserID: number, pToken: string, pDeviceID: string, nodeID?:number): number
 
     /**
      * 用户网关速度，暂时不用
