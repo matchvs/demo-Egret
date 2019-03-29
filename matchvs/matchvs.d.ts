@@ -1116,13 +1116,49 @@ declare class MatchvsResponse {
 
     /**
      * 有人离开队伍，其他人收到的通知接口
-     * @param {*} rsp
-     * @param {number} rsp.teamID 离开的队伍
-     * @param {number} rsp.userID 离开者
-     * @param {number} rsp.owner 队长
+     * @param {*} notify
+     * @param {number} notify.teamID 离开的队伍
+     * @param {number} notify.userID 离开者
+     * @param {number} notify.owner 队长
+     * @param {String} notify.teamProperty 队伍属性
      * @memberof MatchvsResponse
      */
-    leaveTeamNotify(rsp:any):void
+    leaveTeamNotify(notify:any):void
+
+
+    /**
+     * @see setTeamProperty
+     * @param {number} rsp.status
+     * @param {string} rsp.teamID
+     * @param {number} rsp.userID
+     * @param {String} rsp.teamProperty
+     */
+    setTeamPropertyResponse(rsp): void
+
+    /**
+     * @see setTeamProperty
+     * @param {string} notify.teamID
+     * @param {number} notify.userID
+     * @param {String} notify.teamUserProfile
+     */
+    setTeamUserProfileNotify(notify): void
+
+    /**
+     * @see setTeamUserProfile
+     * @param {number} rsp.status
+     * @param {string} rsp.teamID
+     * @param {number} rsp.userID
+     * @param {String} rsp.teamProperty
+     */
+    setTeamUserProfileResponse(rsp):void
+
+    /**
+     * @see setTeamUserProfile
+     * @param {string} notify.teamID
+     * @param {number} notify.userID
+     * @param {String} notify.teamProperty
+     */
+    setTeamPropertyNotify(notify): void
 
     /**
      * 队伍中发起匹配者会收到这个回调，表示正在匹配中
@@ -1214,6 +1250,22 @@ declare class MatchvsResponse {
      * @param {string} notify.cpProto 踢人时携带的消息
      */
     kickTeamMemberNotify(notify:any);
+
+    /**
+     * 当队伍中有成员与服务器断开连接时,回调
+     * @param notify
+     * @param {number} notify.userID 掉线ID
+     */
+    teamNetworkStateNotify(notify:any);
+
+    /**
+     * @see setTeamReconnectTimeout
+     * @param {number} status 200表示成功
+     */
+    setTeamReconnectTimeoutResponse(status:number);
+
+
+
 }
 
 
@@ -1264,7 +1316,7 @@ declare class MatchvsEngine {
      * init 如果有传入 threshold 参数就可以使用这个接口，切换到指定节点，但处在登录，或者非登录模式都可以
      * @param {number} args.nodeID 要切换的节点ID
      */
-    changeNode(args:object):number
+    changeNode(args:Object):number
 
     /**
      * 登录
@@ -1389,11 +1441,12 @@ declare class MatchvsEngine {
 
     /**
      * 发送帧同步消息
-     * @param {string} cpProto
+     * @param {string|Uint8Array} cpProto
      * @param {MVS.FrameOpt} op  0-只发送客户端 1-只发送GS 2-客户端和GS
+     * @param {boolean} isBinary 是否以二进制发送,如果是,cpProto必须是Uint8Array类型
      * @returns {number}
      */
-    sendFrameEvent(cpProto:string, op?:number):number
+    sendFrameEvent(cpProto:string|Uint8Array, op?:number, isBinray?:boolean):number
 
     /**
      * 设置帧同步接口
@@ -1433,20 +1486,22 @@ declare class MatchvsEngine {
     /**
      * 发送消息的扩展，sequence 的用途和 sendEvent 返回的 sequence 相同
      * @param {number} msgType          0-客户端+not GameServer  1-not客户端 + GameServer   2-客户端 + GameServer
-     * @param {string} data             要发送的数据
+     * @param {string|Uint8Array} data             要发送的数据
      * @param {number} desttype         0-包含destUids  1-排除destUids
      * @param {Array<number>} userIDs   玩家ID集合 [1,2,3,4,5]
+     * @param {boolean} isBinary 是否以二进制发送,如果是,data必须是Uint8Array类型
      * @returns {{sequence: number, result: number}}
      */
-    sendEventEx(msgType:number, data:string, desttype:number, userIDs:Array<number>):any
+    sendEventEx(msgType:number, data:string|Uint8Array, desttype:number, userIDs:Array<number>,isBinary?:boolean):any
 
     /**
      * 发送消息，retuen 值 sequence 与接口回调 sendEventResponse 收到的 sequence 对应
      * 网络消息传递存在延时，不确定 sendEventResponse 是再哪一次 sendEvent 发送的，通过 sequence 确定。
-     * @param {string} data 要发送的数据
+     * @param {string|Uint8Array} data 要发送的数据
+     * @param {boolean} isBinary 是否以二进制发送,如果是,data必须是Uint8Array类型
      * @returns {{sequence: number, result: number}}
      */
-    sendEvent(data:string):any
+    sendEvent(data:string|Uint8Array,isBinary?:boolean):any
 
     /**
      * 退出登录
@@ -1561,5 +1616,32 @@ declare class MatchvsEngine {
      * @param {number} args.cpProto 剔除玩家时携带的信息，长度不能超过 1024/B
      */
     kickTeamMember(args:object):number
+
+    /**
+     * 关闭所有网络连接
+     */
+    close():void;
+
+    /**
+     * 设置组队匹配断线后允许的重连进入小队的时间, 单位秒,范围(1~60)
+     * @param {number} timeout 单位秒
+     */
+    setTeamReconnectTimeout (timeout:number):number;
+
+    /**
+     * 设置队伍属性,对全员可见,主体是小队
+     * @see {string} setTeamUserProfile
+     * @param teamProperty
+     * @returns {number}
+     */
+    setTeamProperty(teamProperty:string):number;
+
+    /**
+     * 设置小队中自己的私有属性,主体是队伍成员,对其他成员可见
+     * @see {string} setTeamProperty
+     * @param userProfile
+     * @returns {number}
+     */
+    setTeamUserProfile (userProfile:string):number;
 }
 
